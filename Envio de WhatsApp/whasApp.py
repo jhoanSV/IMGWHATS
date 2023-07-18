@@ -51,7 +51,8 @@ options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging']) 
 
 # Initialize Chrome driver with options
-driver = webdriver.Chrome(executable_path=chromedriver_path, options=options)
+#driver = webdriver.Chrome(executable_path = chromedriver_path, options=options)
+driver = webdriver.Chrome(options=options)
 
 # Open WhatsApp Web and wait for QR code scan
 driver.get(whatsapp_web_url)
@@ -89,7 +90,7 @@ for contacto in excel_data:
         time.sleep(5)
     except Exception as e:
         print("An error occurred:", str(e));
-        print('Ocurrio un error con '+ contacto['Ferreteria'])
+        print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num1')
         # Click on the button to errace the 
         chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
         chat_element.click()
@@ -106,7 +107,8 @@ for contacto in excel_data:
             random_number = random.randint(2, 8)
             time.sleep(random_number)
         except Exception as e:
-            print('Ocurrio un error con '+ contacto['Ferreteria'])
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num2')
+            print(Exception)
             # Click on the button to errace the 
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
@@ -135,7 +137,7 @@ for contacto in excel_data:
             time.sleep(random_number)
         except Exception as e:
             print("An error occurred:", str(e))
-            print('Ocurrio un error con '+ contacto['Ferreteria'])
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num3')
             # Click on the button to errace the 
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
@@ -167,7 +169,7 @@ for contacto in excel_data:
             time.sleep(random_number)
         except Exception as e:
             print("An error occurred:", str(e))
-            print('Ocurrio un error con '+ contacto['Ferreteria'])
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num4')
             # Click on the button to errace the 
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
