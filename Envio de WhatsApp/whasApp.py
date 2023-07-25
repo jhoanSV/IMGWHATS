@@ -48,7 +48,7 @@ whatsapp_web_url = "https://web.whatsapp.com/"
 
 # Configure Chrome driver options
 options = webdriver.ChromeOptions()
-#options.binary_location = "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe"
+
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
 # Initialize Chrome driver with options
@@ -77,29 +77,41 @@ image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de 
 print(image_path)
 
 for contacto in excel_data:
+    #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
+    chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
+
     try:
         #Here we change the text with the name of the store
-        text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
+        text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])        
         # Search for the chat by phone number
-        search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
-        search_input.clear()
+        #search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
+        search_btn = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[3]')))
+        search_btn.click()
+        search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/div[2]/div/div[1]')))        
+                                                                            
+        #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
+        #search_input.clear()
         search_input.send_keys('+57'+contacto['whatsapp'])
         time.sleep(3)
 
         # Click on the chat to open it
-        chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="pane-side"]/div[1]/div/div')))
+        #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="pane-side"]/div[1]/div/div')))
+        #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div')))
+        chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
         chat_element.click()
         time.sleep(5)
     except Exception as e:
         print("An error occurred:", str(e));
-        print('Ocurrio un error con '+ contacto['Ferreteria'] + ' num1')
-        # Click on the button to errace the 
-        chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
+        print('Ocurrio un error con '+ contacto['Ferreteria'] + ' al buscar contacto')
+        print(e)
+        # Click on the button to errace the //*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/span/button
+        #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
+        chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div')))
         chat_element.click()
         continue
     if image_path == '':
         try:
-            # Send the message with the number of the contact that we want to contact
+            # Send the message with the number of the contact that we want to contact ///Este es para wapp business
             message_input = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]/p')
             message_input.send_keys(text)
             message_input.send_keys(Keys.ENTER)
@@ -108,12 +120,15 @@ for contacto in excel_data:
             #Give a random number from 2 and 8 to send the next message.
             random_number = random.randint(2, 8)
             time.sleep(random_number)
-        except Exception as e:
-            print('Ocurrio un error con '+ contacto['Ferreteria'] + ' num2')
+        except Exception as e:            
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + ' En envio 1')
             print(e)
+            '''
             # Click on the button to errace the 
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
+            #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="pane-side"]/div[1]/div/div/div[3]')))
             chat_element.click()
+            '''
             continue
     elif image_path.endswith('.jpg') or image_path.endswith('.png'):
         try:
@@ -139,10 +154,12 @@ for contacto in excel_data:
             time.sleep(random_number)
         except Exception as e:
             print("An error occurred:", str(e))
-            print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num3')
-            # Click on the button to errace the 
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + ' En envio 2')
+            # Click on the button to errace the
+            '''
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
+            '''
             continue
     else:
         try:
@@ -171,22 +188,28 @@ for contacto in excel_data:
             time.sleep(random_number)
         except Exception as e:
             print("An error occurred:", str(e))
-            print('Ocurrio un error con '+ contacto['Ferreteria'] + 'num4')
+            print('Ocurrio un error con '+ contacto['Ferreteria'] + ' En envio 3')
             # Click on the button to errace the 
+            '''
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
+            '''
             continue
+
 #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
 send_button.click()
 
-send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[8]')))#'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[7]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+#send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[8]')))#'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[7]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[last()]')))
 send_button.click()
 time.sleep(1)
 
 send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
 send_button.click()
 time.sleep(7)
+
 #click to send the message
 
 # Close the browser
