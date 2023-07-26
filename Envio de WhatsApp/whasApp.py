@@ -9,6 +9,7 @@ import openpyxl
 import random
 import os
 
+
 def read_excel_file(file_path):
     wb = openpyxl.load_workbook(file_path)
     sheet = wb.active
@@ -26,6 +27,15 @@ def read_excel_file(file_path):
             data.append({'Cod': cod, 'Ferreteria': company, 'Encargado': in_charge, 'whatsapp': number, 'ValorFactura': value, 'Nfactura': Nfactura})
     return data
 
+'''
+def read_excel_file(file_path):
+    wb = openpyxl.load_workbook(file_path)
+    sheet = wb.active
+
+    primera_fila = sheet[1]
+    print(primera_fila)
+'''
+
 def search_file(folder, filename):
     for f in os.listdir(folder):
         if f.startswith(filename):
@@ -39,6 +49,7 @@ excel_file_path = './Numero_mensaje_whatsapp.xlsx'
 # Read the Excel file and get the data as a dictionary
 excel_data = read_excel_file(excel_file_path)
 #print(excel_data)
+#input("oprimir ctrl + c ")
 
 # Path to your Chrome driver executable
 #chromedriver_path = "C:\Program Files\Google\Chrome\Application\chromedriver.exe"
