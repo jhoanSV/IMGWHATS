@@ -9,11 +9,18 @@ import openpyxl
 import random
 import os
 
-def read_excel_file(sheet, cols):
+def read_excel_file(sheet):
     
     data = []
-    
+
     for row in sheet.iter_rows(min_row=2, values_only=True):
+        '''for col in row:
+            if col is not None:
+                data.
+            print(col)'''
+        data.append(row)
+    
+    '''for row in sheet.iter_rows(min_row=2, values_only=True):
         cod = row[0]
         company = row[1]
         in_charge = row[2]
@@ -22,6 +29,7 @@ def read_excel_file(sheet, cols):
         Nfactura = row[5]
         if cod is not None and company is not None and in_charge is not None and number is not None and value is not None and Nfactura is not None:
             data.append({'Cod': cod, 'Ferreteria': company, 'Encargado': in_charge, 'whatsapp': number, 'ValorFactura': value, 'Nfactura': Nfactura})
+    return data'''
     return data
 
 
@@ -65,10 +73,11 @@ wb = openpyxl.load_workbook(excel_file_path)
 sheet = wb.active
 
 # Read the Excel file and get the data as a dictionary
+excel_data = read_excel_file(sheet)
 cols = funcionjsjs2(first_row(sheet))
-excel_data = read_excel_file(sheet, cols)
+pepe = list(cols.keys())#estas son solo llaves
+#excel_data = read_excel_file(sheet)
 #print(excel_data)
-input("oprimir ctrl + c ")
 
 # Path to your Chrome driver executable
 #chromedriver_path = "C:\Program Files\Google\Chrome\Application\chromedriver.exe"
@@ -99,7 +108,7 @@ wait.until(EC.title_contains("WhatsApp"))
 #for properties in message_properties:
 # "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 # "¡Hola @NOMBRE! Queríamos informarles que hemos realizado cambios en nuestro equipo de asesores comerciales. Les presentamos a Derwin Valencia un profesional altamente capacitado y amplia experiencia en el campo de Ferretería. En los próximos días, Derwin los visitará para conocer sus necesidades y ofrecer soluciones personalizadas. También pueden revisar nuestras promociones y productos en nuestra página web www.ferresierra.com Tus aliados estratégicos."
-message = "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
+message = "¡Hola @Nombre !¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 
 #image_path = r'C:\Users\pc\Documents\proyectos empresa\Envio de WhatsApp\pikachu.png'
 image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
@@ -109,10 +118,16 @@ print(image_path)
 for contacto in excel_data:
     #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
     chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
-
+    text = message
     try:
         #Here we change the text with the name of the store
-        text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])        
+        #text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
+        # The next loop begins selecting each key/var,
+        for i, var in enumerate(pepe):
+            text = text.replace(var, contacto[i])
+        print("Vista previa del mensaje: ")
+        print(text)
+                        
         # Search for the chat by phone number
         #search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
         search_btn = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[3]')))
@@ -121,7 +136,7 @@ for contacto in excel_data:
                                                                             
         #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
         #search_input.clear()
-        search_input.send_keys('+57'+contacto['whatsapp'])
+        search_input.send_keys('+57'+contacto[3])
         time.sleep(3)
 
         # Click on the chat to open it
