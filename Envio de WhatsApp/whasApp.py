@@ -9,10 +9,7 @@ import openpyxl
 import random
 import os
 
-
-def read_excel_file(file_path):
-    wb = openpyxl.load_workbook(file_path)
-    sheet = wb.active
+def read_excel_file(sheet, cols):
     
     data = []
     
@@ -27,14 +24,33 @@ def read_excel_file(file_path):
             data.append({'Cod': cod, 'Ferreteria': company, 'Encargado': in_charge, 'whatsapp': number, 'ValorFactura': value, 'Nfactura': Nfactura})
     return data
 
-'''
-def read_excel_file(file_path):
-    wb = openpyxl.load_workbook(file_path)
-    sheet = wb.active
+
+def first_row(sheet):
 
     primera_fila = sheet[1]
-    print(primera_fila)
-'''
+    data = []
+    
+    for item in primera_fila:
+        if item.value is not None:
+            data.append(item.value)
+
+    print("Excel leído, sus columnas son: ")    
+    for item in data:
+        print(item)
+    return data
+
+def funcionjsjs2(data):
+    dicc = {}
+    print("A continuación asigne el nombre a las variables: ")
+
+    for i, item in enumerate(data):
+        col_var = input('Variable de la columna "' + item + '": ')
+        dicc['@' + col_var] = [i]
+    print(dicc)
+    return dicc
+
+#def 
+
 
 def search_file(folder, filename):
     for f in os.listdir(folder):
@@ -42,14 +58,17 @@ def search_file(folder, filename):
             return os.path.join(folder, f)
     return None
 
-
 # Specify the path to your Excel file
 excel_file_path = './Numero_mensaje_whatsapp.xlsx'
+# Specify la hoja de excel
+wb = openpyxl.load_workbook(excel_file_path)
+sheet = wb.active
 
 # Read the Excel file and get the data as a dictionary
-excel_data = read_excel_file(excel_file_path)
+cols = funcionjsjs2(first_row(sheet))
+excel_data = read_excel_file(sheet, cols)
 #print(excel_data)
-#input("oprimir ctrl + c ")
+input("oprimir ctrl + c ")
 
 # Path to your Chrome driver executable
 #chromedriver_path = "C:\Program Files\Google\Chrome\Application\chromedriver.exe"
