@@ -1,0 +1,43 @@
+{
+    "proyecto1": [
+        {
+            "Type": "image",
+            "name": "caminar.jpg",
+            "width": 300,
+            "high": 300,
+            "rotate": 90,
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": true,
+            "yCenter": true
+        },
+        {
+            "Type": "image",
+            "name": "LOGOS FERRETERIAS",
+            "width": 300,
+            "high": 300,
+            "rotate": 60,
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": false,
+            "yCenter": false
+        },
+        {
+            "Type": "text",
+            "text": "Prueba del texto\nque vamos a poner",
+            "fontType": "Arial.ttf",
+            "color": "(0, 0, 0, 1)",
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": true,
+            "yCenter": true,
+            "align" : "center",
+            "bold" : true,
+            "italic" : true,
+            "fontSize" : 60,
+            "boxWidth": 1500,
+            "boxHeight": 800
+
+        }
+    ]
+}
