@@ -3,7 +3,7 @@
         {
             "rutaXl":"./Numero_mensaje_whatsapp.xlsx",
             "msj":"hola @Nombre, informo que tu codigo es @cod, con responsable @Responsable y queremos llamarte al @Cel, para cobrar @ValorFactura del @NFactura",
-            "recurso":"E:/PROGRAMACION/pythonxD/IMGWHATS/Envio de WhatsApp/imagen.jpg",
+            "recurso":"E:/PROGRAMACION/pythonxD/IMGWHATS/Envio de WhatsApp/SMLogo.png",
             "variables":{
                 "@cod":0,
                 "@Nombre":1,
@@ -12,7 +12,7 @@
                 "@ValorFactura":4,
                 "@NFactura":5
             },
-            "colNum":3,
+            "colCelular":3,
             "NomCli":2
         }
 }

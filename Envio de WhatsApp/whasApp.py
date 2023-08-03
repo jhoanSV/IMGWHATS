@@ -32,7 +32,7 @@ variables = {
                 "@ValorFactura":4,
                 "@NFactura":5
             }
-colNum = 3
+colCelular = 3
 nomCli = 2
 
 #* Funciones
@@ -86,7 +86,7 @@ def llenarVars(proyecto):
     global message
     global image_path
     global variables
-    global colNum
+    global colCelular
     global nomCli
     with open("proyectos.json") as archi_json:
         el_json = json.load(archi_json)
@@ -95,7 +95,7 @@ def llenarVars(proyecto):
     message = Jvariables['msj']
     image_path = r''+Jvariables['recurso']
     variables = Jvariables['variables']
-    colNum = Jvariables['colNum']
+    colCelular = Jvariables['colCelular']
     nomCli = Jvariables['NomCli']
 
 # Todo: Specify la hoja de excel
@@ -147,7 +147,7 @@ def envio_msj():
                                                                                 
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             #search_input.clear()
-            search_input.send_keys('+57'+contacto[colNum])
+            search_input.send_keys('+57'+contacto[colCelular])
             time.sleep(3)
 
             # Click on the chat to open it
