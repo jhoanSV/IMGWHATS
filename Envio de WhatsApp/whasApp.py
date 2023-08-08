@@ -14,6 +14,10 @@ import os
 # Todo: URL of WhatsApp Web
 whatsapp_web_url = "https://web.whatsapp.com/"
 options = webdriver.ChromeOptions()
+# Todo: Configure Chrome driver option
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
+# Todo: Initialize Chrome driver with options
+driver = webdriver.Chrome(options=options)
 
 #* Lista de variables
 nombre_proyecto = 'pedidos en ruta'
@@ -108,22 +112,19 @@ excel_data = read_excel_file(sheet)
 #pepe = list(cols.keys())# Todo: estas son solo llaves
 #excel_data = read_excel_file(sheet)
 #print(excel_data)
-# Todo: Configure Chrome driver option
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
-# Todo: Initialize Chrome driver with options
-driver = webdriver.Chrome(options=options)
-# Open WhatsApp Web and wait for QR code scan
-driver.get(whatsapp_web_url)
-print("Scan the QR code and press enter")
-input()
-# Todo: Wait for the WhatsApp Web interface to load
-wait = WebDriverWait(driver, 10)
-wait.until(EC.title_contains("WhatsApp"))
-
-print(image_path)
 
 # Todo: Iterate over the message properties and send messages
 def envio_msj():
+    # Open WhatsApp Web and wait for QR code scan
+    driver.get(whatsapp_web_url)
+    print("Scan the QR code and press enter")
+    input()
+    # Todo: Wait for the WhatsApp Web interface to load
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.title_contains("WhatsApp"))
+
+    print(image_path)
+    
     if nombre_proyecto != '':
        llenarVars(nombre_proyecto)
     for contacto in excel_data:
