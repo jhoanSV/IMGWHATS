@@ -1,40 +1,53 @@
 import customtkinter as ctk
+import tkinter
 #from whasApp import envio_msj
 
 class view(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.geometry("1152x819")
+        self.geometry("1024x728+200+5")
+        self.minsize(900,640)
 
         #Colores
         self.CGreen = "#1C9F80"
 
         self.title("Wapp Sender")
-        self.configure(fg_color = self.CGreen, padx=80, pady=80)
-        self.rowconfigure(0, weight=1)  # configure grid system
-        self.columnconfigure(0, weight=1)
-        #view.create_frame(self)
-        Frame1 = ctk.CTkFrame(self, fg_color="white", corner_radius = 0, width = 1018, height = 688)
-        Frame1.grid(row = 0, column = 0, sticky= 'nsew')
-        Frame1.grid_rowconfigure(0, weight=1)  # configure grid system
-        Frame1.grid_columnconfigure(0, weight=1)
-        Frame1.grid_columnconfigure(1, weight=1)
-
-        frame_left = ctk.CTkFrame(Frame1, fg_color = 'transparent', border_width=1, border_color='black')#394
-        frame_left.grid(row = 0, column = 0, sticky='nsew')
+        self.configure(fg_color = self.CGreen)
         
-        unTexto = ctk.CTkLabel(frame_left,text="Proyectos",text_color="black",font=('', 24))
-        unTexto.grid(row = 0, column = 0, padx = 46, pady = 90)
+        #root - contenedor verde principal
+        main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)
+        main_container.pack(fill=tkinter.BOTH, expand=True)
 
-        frame_rigth = ctk.CTkFrame(Frame1, fg_color = 'transparent', border_width=1, border_color='black')
-        frame_rigth.grid(row = 0, column = 1, sticky='nsew')
+        #frame1 - frame1 del program
+        self.Frame1 = ctk.CTkFrame(main_container, fg_color="white", corner_radius = 0, width = 1018)
+        self.Frame1.pack(fill=tkinter.BOTH, expand=True, padx=55, pady=55)
 
-        unTexto2 = ctk.CTkLabel(frame_rigth,text="Nuevo Proyecto",text_color="black",font=('', 24))
-        unTexto2.grid(row = 0, column = 0, padx = 46, pady = 97)
-        '''el_entry = ctk.CTkEntry(frame_rigth, placeholder_text="Seleccionar Excel", fg_color="#D9D9D9")
-        el_entry.grid(row=1,column=0)
-        el_btn = ctk.CTkButton(frame_rigth, text="Envio mensaje", command=view.button_event)
-        el_btn.grid(row=2,column=0)'''
+        #panel izquierdo
+        self.frame_iz = ctk.CTkFrame(self.Frame1, fg_color = 'transparent', border_width=0, 
+            border_color='black')#394
+        self.frame_iz.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=True)
+
+        self.unTexto = ctk.CTkLabel(self.frame_iz, text="Proyectos", text_color="black", font=('', 24))
+        self.unTexto.place(relx=0.1, rely=0.1, anchor='nw')
+
+        #panel derecho
+        self.frame_der = ctk.CTkFrame(self.Frame1, fg_color = 'transparent', border_width=0,
+            border_color='black')#394
+        self.frame_der.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, expand=True)
+
+        self.unTexto2 = ctk.CTkLabel(self.frame_der,text="Nuevo Proyecto",text_color="black",font=('', 24))
+        self.unTexto2.place(relx=0.1, rely=0.1, anchor='nw')
+
+        self.el_entry = ctk.CTkEntry(self.frame_der, placeholder_text="Seleccionar Excel", fg_color="#D9D9D9",
+            text_color='black', font=('', 18), border_width=0, corner_radius=0)
+        self.el_entry.place(relx=0.1, rely=0.17, relwidth=0.7, relheight=0.06, anchor='nw')
+
+        el_btn = ctk.CTkButton(self.frame_der, text="Buscar", corner_radius=0, fg_color=self.CGreen,
+            font=('', 18), command=view.button_event)
+        el_btn.place(relx=0.1, rely=0.25, anchor='nw')
+
+        self.Separador = ctk.CTkLabel(self.Frame1, fg_color=self.CGreen, text='', width=0)
+        self.Separador.place(relx=0.49, rely=0.08, relwidth=0.005, relheight=0.8, anchor='n')
     
     def button_event():
         print("button pressed")
