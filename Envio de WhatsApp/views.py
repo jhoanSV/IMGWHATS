@@ -1,10 +1,13 @@
 import customtkinter as ctk
 import tkinter
+from tkinter import filedialog
 #from whasApp import envio_msj
 
 class view(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.xl_path = None
+
         self.geometry("1024x728+200+5")
         self.minsize(900,640)
 
@@ -15,11 +18,11 @@ class view(ctk.CTk):
         self.configure(fg_color = self.CGreen)
         
         #root - contenedor verde principal
-        main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)
-        main_container.pack(fill=tkinter.BOTH, expand=True)
+        self.main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)
+        self.main_container.pack(fill=tkinter.BOTH, expand=True)
 
         #frame1 - frame1 del program
-        self.Frame1 = ctk.CTkFrame(main_container, fg_color="white", corner_radius = 0, width = 1018)
+        self.Frame1 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0, width = 1018)
         self.Frame1.pack(fill=tkinter.BOTH, expand=True, padx=55, pady=55)
 
         #panel izquierdo
@@ -42,15 +45,19 @@ class view(ctk.CTk):
             text_color='black', font=('', 18), border_width=0, corner_radius=0)
         self.el_entry.place(relx=0.1, rely=0.17, relwidth=0.7, relheight=0.06, anchor='nw')
 
-        el_btn = ctk.CTkButton(self.frame_der, text="Buscar", corner_radius=0, fg_color=self.CGreen,
-            font=('', 18), command=view.button_event)
-        el_btn.place(relx=0.1, rely=0.25, anchor='nw')
+        self.el_btn = ctk.CTkButton(self.frame_der, text="Buscar", corner_radius=0, fg_color=self.CGreen,
+            font=('', 18), command=self.buscar_xl)
+        self.el_btn.place(relx=0.1, rely=0.25, anchor='nw')
 
         self.Separador = ctk.CTkLabel(self.Frame1, fg_color=self.CGreen, text='', width=0)
         self.Separador.place(relx=0.49, rely=0.08, relwidth=0.005, relheight=0.8, anchor='n')
     
-    def button_event():
-        print("button pressed")
+    def buscar_xl(self):
+        self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
+        self.xl_path = self.file_name
+        print(type(self.xl_path))
+        self.el_entry.delete(0, "end")  # Limpiar el contenido del Entry
+        self.el_entry.insert(0, self.xl_path)
     '''def frame1(self):
         myFrame = ctk.CTkFrame(self, fg_color="green")
         myFrame.grid(row=0,col=0)'''
