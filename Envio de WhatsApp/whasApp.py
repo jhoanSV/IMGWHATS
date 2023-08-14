@@ -16,26 +16,31 @@ whatsapp_web_url = "https://web.whatsapp.com/"
 options = webdriver.ChromeOptions()
 # Todo: Configure Chrome driver option
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
-# Todo: Initialize Chrome driver with options
-driver = webdriver.Chrome(options=options)
 
 #* Lista de variables
-nombre_proyecto = 'pedidos en ruta'
-#nombre_proyecto = ''
-excel_file_path = './Numero_mensaje_whatsapp.xlsx'
+#nombre_proyecto = 'pedidos en ruta'
+nombre_proyecto = ''
+#excel_file_path = './Numero_mensaje_whatsapp.xlsx'
+excel_file_path = ''
+sheet = None
+
+data_xl = []
+
 # "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 # "¡Hola @NOMBRE! Queríamos informarles que hemos realizado cambios en nuestro equipo de asesores comerciales. Les presentamos a Derwin Valencia un profesional altamente capacitado y amplia experiencia en el campo de Ferretería. En los próximos días, Derwin los visitará para conocer sus necesidades y ofrecer soluciones personalizadas. También pueden revisar nuestras promociones y productos en nuestra página web www.ferresierra.com Tus aliados estratégicos."
-message = "¡Hola @Nombre !¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
-image_path = r'E:\PROGRAMACION\pythonxD\IMGWHATS\Envio de WhatsApp\imagen.jpg'
-#image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
-variables = {
+#message = "¡Hola @Nombre !¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
+message = ""
+#image_path = r'E:\PROGRAMACION\pythonxD\IMGWHATS\Envio de WhatsApp\imagen.jpg'
+image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
+'''variables = {
                 "@cod":0,
                 "@Nombre":1,
                 "@Responsable":2,
                 "@Cel":3,
                 "@ValorFactura":4,
                 "@NFactura":5
-            }
+            }'''
+variables = {}
 colCelular = 3
 nomCli = 2
 
@@ -53,7 +58,7 @@ def read_excel_file(sheet):
     return data
 
 
-def first_row(sheet):
+def read_first_row():
 
     primera_fila = sheet[1]
     data = []
@@ -85,6 +90,17 @@ def search_file(folder, filename):
             return os.path.join(folder, f)
     return None
 
+def set_xl(file):
+    global excel_file_path
+    global sheet
+
+    excel_file_path = file
+    print(excel_file_path)#borrar después
+    #global excel_data
+    # Todo: Specify la hoja de excel
+    wb = openpyxl.load_workbook(excel_file_path)
+    sheet = wb.active
+
 def llenarVars(proyecto):
     global excel_file_path
     global message
@@ -102,11 +118,12 @@ def llenarVars(proyecto):
     colCelular = Jvariables['colCelular']
     nomCli = Jvariables['NomCli']
 
-# Todo: Specify la hoja de excel
-wb = openpyxl.load_workbook(excel_file_path)
-sheet = wb.active
-# Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list
-excel_data = read_excel_file(sheet)
+def lee_excel():
+    # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list
+    excel_data = read_excel_file(sheet)
+    print(excel_data)
+    #return excel_data
+
 #cols = funcionjsjs2(first_row(sheet))
 
 #pepe = list(cols.keys())# Todo: estas son solo llaves
@@ -114,7 +131,9 @@ excel_data = read_excel_file(sheet)
 #print(excel_data)
 
 # Todo: Iterate over the message properties and send messages
-def envio_msj():
+def envio_msj(excel_data):
+    # Todo: Initialize Chrome driver with options
+    driver = webdriver.Chrome(options=options)
     # Open WhatsApp Web and wait for QR code scan
     driver.get(whatsapp_web_url)
     print("Scan the QR code and press enter")
@@ -274,4 +293,4 @@ def envio_msj():
     # Close the browser
     driver.quit()
 
-envio_msj()
+#envio_msj()

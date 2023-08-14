@@ -1,13 +1,14 @@
 import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
-#from whasApp import envio_msj
+import whasApp
 
 class view(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.xl_path = None
-        current = None
+        self.cols = ['Columnas encontradas','Variables','celular','Nombre Destinatario']
+        current = None        
 
         self.geometry("1024x728+200+5")
         self.minsize(900,640)
@@ -22,6 +23,16 @@ class view(ctk.CTk):
         #root - contenedor verde principal
         self.main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)
         self.main_container.pack(fill=tkinter.BOTH, expand=True)
+
+        self.Nav_bar = ctk.CTkFrame(self.main_container, fg_color=self.CGreen, corner_radius = 0, height=77)
+
+        self.btn_vars = ctk.CTkButton(self.Nav_bar, text="Variables", text_color=self.CGreen, corner_radius=0,
+            fg_color='white', hover_color='white', font=('', 18), width=140, command=self.vars)
+        self.btn_vars.place(x=0, rely=1, anchor='sw')
+
+        self.btn_env = ctk.CTkButton(self.Nav_bar, text="Envío", text_color='white', corner_radius=0,
+            fg_color=self.CGreen, hover_color=self.CGreen_hov, font=('', 18), width=140, command=self.env)
+        self.btn_env.place(x=140, rely=1, anchor='sw')
 
         #self.Nav = ctk.CTkTabview(self.main_container)
 
@@ -61,29 +72,25 @@ class view(ctk.CTk):
         self.btn_sig.place(relx=0.9, rely=0.92, anchor='se')
 
         #frame2 - frame1 del program----------------------------------------------------------------------------
-        self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
+        self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
-        self.Nav_bar = ctk.CTkFrame(self.main_container, fg_color=self.CGreen, corner_radius = 0, height=77)
-
-        self.btn_vars = ctk.CTkButton(self.Nav_bar, text="Variables", text_color=self.CGreen, corner_radius=0,
-            fg_color='white', hover_color='white', font=('', 18), width=140, command=self.vars)
-        self.btn_vars.place(x=0, rely=1, anchor='sw')
-
-        self.btn_env = ctk.CTkButton(self.Nav_bar, text="Envío", text_color='white', corner_radius=0,
-            fg_color=self.CGreen, hover_color=self.CGreen_hov, font=('', 18), width=140, command=self.env)
-        self.btn_env.place(x=140, rely=1, anchor='sw')
-
-        self.borrar = ctk.CTkLabel(self.Frame2, text="xDDDDDD",text_color="black",font=('', 24))
-        self.borrar.place(relx=0.5,rely=0.5)
+        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="black")
+        self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
 
         #frame2 - frame1 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
     
+    #funciones de vista
+
     def siguiente(self):
-        if self.el_entry.get() != '':            
+        if self.el_entry.get() != '':
+            whasApp.set_xl(self.el_entry.get())
+            #whasApp.lee_excel()
+            self.create_table(whasApp.read_first_row())
             self.Frame1.pack_forget()
             self.Frame2.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=True)
             self.Nav_bar.pack(side=tkinter.TOP, fill=tkinter.X, expand=False)
+
 
     def vars(self):
         self.Frame3.pack_forget()
@@ -97,6 +104,21 @@ class view(ctk.CTk):
         self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
         self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
     
+    #Funciones de archivo
+
+    def create_table(self, fr):
+        total_rows = len(fr)
+        total_columns = 4
+        for i in range(total_rows):
+            for j in range(total_columns):
+                self.e = ctk.CTkEntry(self.leTable, font=('Arial',16,'bold'))
+                self.e.grid(row=i, column=j, sticky='nsew')
+
+                if i == 0:
+                    self.e.insert(0, self.cols[j])
+                else:
+                    self.e.insert(0, fr[i])
+
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
         self.xl_path = self.file_name
