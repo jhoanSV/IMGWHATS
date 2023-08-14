@@ -3,6 +3,20 @@ import tkinter
 from tkinter import filedialog
 import whasApp
 
+class El_Item(ctk.CTkFrame):
+    def __init__(self, *args,
+                 master,
+                 json_list: dict = None,
+                 **kwargs):
+        super().__init__(master, *args, **kwargs)
+
+        self.json_list = json_list
+
+        self.configure(fg_color='blue')
+        
+        self.f = ctk.CTkFrame(self, fg_color='black')
+        self.grid(column=0, row=1)
+
 class view(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -75,9 +89,14 @@ class view(ctk.CTk):
         self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
         self.leTable = ctk.CTkFrame(self.Frame2, fg_color="black")
-        self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
+        #self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
+        self.leTable.grid(padx=50, pady=50)
+        self.leTable.columnconfigure(0, weight=3)
+        self.leTable.columnconfigure(1, weight=3)
+        self.leTable.columnconfigure(2, weight=1)
+        self.leTable.columnconfigure(3, weight=1)
 
-        #frame2 - frame1 del program----------------------------------------------------------------------------
+        #frame3 - frame2 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
     
     #funciones de vista
@@ -103,21 +122,29 @@ class view(ctk.CTk):
         self.Frame3.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=True)
         self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
         self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
+
+    def create_frame_and_label(self, parent, column, row, text):
+
+        frame = ctk.CTkFrame(parent, fg_color="white", height=40, border_width=1, corner_radius=0)
+        frame.grid(column=column, row=row, sticky='wens')
+        
+        label = ctk.CTkLabel(frame, text_color='black', text=text)
+        label.place(relx=0.5, rely=0.5, anchor='center')
+    
+        return frame, label
     
     #Funciones de archivo
 
     def create_table(self, fr):
-        total_rows = len(fr)
-        total_columns = 4
-        for i in range(total_rows):
-            for j in range(total_columns):
-                self.e = ctk.CTkEntry(self.leTable, font=('Arial',16,'bold'))
-                self.e.grid(row=i, column=j, sticky='nsew')
+        
+        self.item_row = El_Item(master=self.leTable)
 
-                if i == 0:
-                    self.e.insert(0, self.cols[j])
-                else:
-                    self.e.insert(0, fr[i])
+        self.f1, self.l1 = self.create_frame_and_label(self.leTable, column=0, row=0, text=self.cols[0])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=1, row=0, text=self.cols[1])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=2, row=0, text=self.cols[2])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=3, row=0, text=self.cols[3])
+        self.item_row
+
 
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
