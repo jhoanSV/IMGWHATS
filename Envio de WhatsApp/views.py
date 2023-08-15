@@ -3,19 +3,36 @@ import tkinter
 from tkinter import filedialog
 import whasApp
 
-class El_Item(ctk.CTkFrame):
-    def __init__(self, *args,
-                 master,
-                 json_list: dict = None,
-                 **kwargs):
-        super().__init__(master, *args, **kwargs)
+class El_Item(ctk.CTk):
+    def __init__(self, master):
+        #super().__init__()
 
-        self.json_list = json_list
-
-        self.configure(fg_color='blue')
+        #self.json_list = json_list
         
-        self.f = ctk.CTkFrame(self, fg_color='black')
-        self.grid(column=0, row=1)
+        self.f = ctk.CTkFrame(master, fg_color='white', height=40, corner_radius=0)
+        self.f.pack(side='bottom', fill='x', expand=True, anchor='n')
+
+        self.lf = ctk.CTkFrame(self.f, fg_color='white', height=40, width=200, corner_radius=0, border_width=1)
+        self.lf.pack(side='left', expand=True, anchor='n')
+        self.l = ctk.CTkLabel(self.lf, text='jsjs', text_color='black', font=('', 12), fg_color='transparent')
+        self.l.place(relx=0.1, rely=0.1, anchor='nw')
+
+        self.ef = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.ef.pack(side='left', fill='x', expand=True, anchor='n')
+        self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), placeholder_text='@example',
+            text_color='black', height=40)
+        self.e.place(relx=0, rely=0, anchor='nw')
+
+        self.r1f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
+        self.r1 = ctk.CTkRadioButton(self.r1f)
+        self.r1.place(relx=0.5, rely=0.1, anchor='nw')
+        
+        self.r2f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
+        self.r2 = ctk.CTkRadioButton(self.r2f)
+        self.r2.place(relx=0.5, rely=0.1, anchor='nw')
+
 
 class view(ctk.CTk):
     def __init__(self):
@@ -88,13 +105,8 @@ class view(ctk.CTk):
         #frame2 - frame1 del program----------------------------------------------------------------------------
         self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
-        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="black")
-        #self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
-        self.leTable.grid(padx=50, pady=50)
-        self.leTable.columnconfigure(0, weight=3)
-        self.leTable.columnconfigure(1, weight=3)
-        self.leTable.columnconfigure(2, weight=1)
-        self.leTable.columnconfigure(3, weight=1)
+        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="white")
+        self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
 
         #frame3 - frame2 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
@@ -123,10 +135,10 @@ class view(ctk.CTk):
         self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
         self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
 
-    def create_frame_and_label(self, parent, column, row, text):
+    def create_frame_and_label(self, parent, text):
 
-        frame = ctk.CTkFrame(parent, fg_color="white", height=40, border_width=1, corner_radius=0)
-        frame.grid(column=column, row=row, sticky='wens')
+        frame = ctk.CTkFrame(parent, fg_color="gray", height=40, border_width=1, corner_radius=0)
+        frame.pack(side=tkinter.LEFT, fill='x', expand=True, anchor='n')
         
         label = ctk.CTkLabel(frame, text_color='black', text=text)
         label.place(relx=0.5, rely=0.5, anchor='center')
@@ -137,12 +149,12 @@ class view(ctk.CTk):
 
     def create_table(self, fr):
         
-        self.item_row = El_Item(master=self.leTable)
+        self.item_row = El_Item(self.leTable)
 
-        self.f1, self.l1 = self.create_frame_and_label(self.leTable, column=0, row=0, text=self.cols[0])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=1, row=0, text=self.cols[1])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=2, row=0, text=self.cols[2])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, column=3, row=0, text=self.cols[3])
+        self.f1, self.l1 = self.create_frame_and_label(self.leTable, text=self.cols[0])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[1])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[2])
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])
         self.item_row
 
 
