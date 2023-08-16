@@ -3,19 +3,20 @@ import tkinter
 from tkinter import filedialog
 import whasApp
 
-class El_Item(ctk.CTk):
-    def __init__(self, master):
+class El_Item:
+    def __init__(self, master, destino, mob_num, val, label_text):
         #super().__init__()
-
+        self.f = master
+        self.mob_num = mob_num
+        self.valor = val
+        self.destino = destino
+        self.la_columna = label_text
         #self.json_list = json_list
-        
-        self.f = ctk.CTkFrame(master, fg_color='white', height=40, corner_radius=0)
-        self.f.pack(side='bottom', fill='x', expand=True, anchor='n')
 
-        self.lf = ctk.CTkFrame(self.f, fg_color='white', height=40, width=200, corner_radius=0, border_width=1)
-        self.lf.pack(side='left', expand=True, anchor='n')
-        self.l = ctk.CTkLabel(self.lf, text='jsjs', text_color='black', font=('', 12), fg_color='transparent')
-        self.l.place(relx=0.1, rely=0.1, anchor='nw')
+        self.lf = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.lf.pack(side='left', fill='x', expand=True, anchor='n')
+        self.l = ctk.CTkLabel(self.lf, text=self.la_columna, text_color='black', font=('', 12), fg_color='transparent')
+        self.l.place(relx=0.05, rely=0.05)
 
         self.ef = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.ef.pack(side='left', fill='x', expand=True, anchor='n')
@@ -25,12 +26,12 @@ class El_Item(ctk.CTk):
 
         self.r1f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r1 = ctk.CTkRadioButton(self.r1f)
+        self.r1 = ctk.CTkRadioButton(self.r1f, variable=self.mob_num, value=self.valor)
         self.r1.place(relx=0.5, rely=0.1, anchor='nw')
         
         self.r2f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r2 = ctk.CTkRadioButton(self.r2f)
+        self.r2 = ctk.CTkRadioButton(self.r2f, variable=self.destino, value=self.valor)
         self.r2.place(relx=0.5, rely=0.1, anchor='nw')
 
 
@@ -149,14 +150,19 @@ class view(ctk.CTk):
 
     def create_table(self, fr):
         
-        self.item_row = El_Item(self.leTable)
+        self.mob_num = ctk.IntVar()
+        self.destino = ctk.IntVar()
+        
+        self.f = ctk.CTkFrame(self.master, fg_color='white', height=40, corner_radius=0)
+        self.f.pack(side='bottom', fill='x', expand=True, anchor='n')
+        self.item_row = El_Item(self.f, self.destino, self.mob_num, 0, 'jsjs')
+        self.item_row2 = El_Item(self.f, self.destino, self.mob_num, 1, 'jsjs2')
+        self.item_row3 = El_Item(self.f, self.destino, self.mob_num, 2, 'jsjs3')
 
         self.f1, self.l1 = self.create_frame_and_label(self.leTable, text=self.cols[0])
         self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[1])
         self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[2])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])
-        self.item_row
-
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])        
 
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
