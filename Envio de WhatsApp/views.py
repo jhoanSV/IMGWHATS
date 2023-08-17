@@ -2,6 +2,9 @@ import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
 import whasApp
+from Vcss import FlatList
+import json
+from components import ItemProject
 
 class El_Item:
     def __init__(self, master, destino, mob_num, val, label_text):
@@ -72,13 +75,20 @@ class view(ctk.CTk):
         self.Frame1 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0, width = 1018)
         self.Frame1.pack(fill=tkinter.BOTH, expand=True, padx=55, pady=55)
 
-        #panel izquierdo
+        # TODO: panel izquierdo
         self.frame_iz = ctk.CTkFrame(self.Frame1, fg_color = 'transparent', border_width=0, 
             border_color='black')#394
         self.frame_iz.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=True)
 
         self.unTexto = ctk.CTkLabel(self.frame_iz, text="Proyectos", text_color="black", font=('', 24))
         self.unTexto.place(relx=0.1, rely=0.1, anchor='nw')
+
+        with open('./proyectos.json', 'r') as json_file:
+            projects_json = json.load(json_file)
+
+        self.ListaDeProyectos = FlatList(self.frame_iz, json_list=projects_json, Item= ItemProject, width= 200)
+        self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
+
 
         #panel derecho
         self.frame_der = ctk.CTkFrame(self.Frame1, fg_color = 'transparent', border_width=0,

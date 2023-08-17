@@ -270,6 +270,8 @@ class FlatList(ctk.CTkFrame):
                  height: int = 100,
                  json_list: dict = None,  # Use dict for JSON object
                  Item: Optional[Callable] = None, # Default to None
+                 background_color: str = '#FFFFFF', # Default to
+                 adaptable: bool = False, #For adaptability of the width and height
                  **kwargs):
         
         super().__init__(*args, width=width, height=height, **kwargs)
@@ -278,13 +280,16 @@ class FlatList(ctk.CTkFrame):
         self.height = height
         self.json_list = json_list
         self.Item = Item
+        self.Key_List = list(json_list.keys())
+        self.background_color = background_color
         
         # *frame configuration
-        self.configure(fg_color=("gray78", "gray28"))  # set frame color
+        #self.configure(fg_color=("gray78", "gray28"))  # set frame color
         
         self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height)
-        self.FrameList.configure(fg_color=("gray78", "gray28")) 
-
+        #self.FrameList.configure(fg_color=("gray78", "gray28")) 
+        self.FrameList.configure(fg_color=self.background_color) 
+        
         self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
         self.grid_columnconfigure(1, weight=1)  # entry expands
 
@@ -296,7 +301,8 @@ class FlatList(ctk.CTkFrame):
             FrameItem.grid(row=i, column=0 )
             
             if self.Item is not None:
-                item_instance = self.Item(FrameItem, json_list= self.json_list[i])
+                key = self.Key_List[i]
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = key)
                 item_instance.grid(row = 0, column = 0)
             else:
                 print('is none')
@@ -316,7 +322,7 @@ class FlatList(ctk.CTkFrame):
 
     def Number_of_items(self):
         #json_data = json.loads(self.json_list)
-        num_items = len(self.json_list)
+        num_items = len(self.Key_List)
         return num_items
 
 class DraggableLabel(ctk.CTkLabel):
