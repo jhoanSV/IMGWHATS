@@ -41,17 +41,20 @@ excel_data = read_excel_file(excel_file_path)
 #print(excel_data)
 
 # Path to your Chrome driver executable
-chromedriver_path = "C:\Program Files\Google\Chrome\Application\chromedriver.exe"
+#chromedriver_path = "C:\Program Files\Google\Chrome\Application\chromedriver.exe"
 
 # URL of WhatsApp Web
 whatsapp_web_url = "https://web.whatsapp.com/"
 
 # Configure Chrome driver options
-options = webdriver.ChromeOptions() 
+options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging']) 
 
 # Initialize Chrome driver with options
-driver = webdriver.Chrome(executable_path=chromedriver_path, options=options)
+#driver = webdriver.Chrome(executable_path=chromedriver_path, options=options)
+
+# Initialize Chrome driver with options
+driver = webdriver.Chrome(options=options)
 
 # Open WhatsApp Web and wait for QR code scan
 driver.get(whatsapp_web_url)
@@ -64,12 +67,16 @@ wait.until(EC.title_contains("WhatsApp"))
 
 # Iterate over the message properties and send messages
 #for properties in message_properties:
+#message = "Hola, quería recordarle que este es un mensaje de prueba jsjs"
 # "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 # "¡Hola @NOMBRE! Queríamos informarles que hemos realizado cambios en nuestro equipo de asesores comerciales. Les presentamos a Derwin Valencia un profesional altamente capacitado y amplia experiencia en el campo de Ferretería. En los próximos días, Derwin los visitará para conocer sus necesidades y ofrecer soluciones personalizadas. También pueden revisar nuestras promociones y productos en nuestra página web www.ferresierra.com Tus aliados estratégicos."
+#message = "¡Hola @NOMBRE! Queríamos informarles que hemos realizado cambios en nuestro equipo de asesores comerciales. Les presentamos a Daniela Gutierrez una profesional Capacitada y con experiencia en el campo de Ferretería. En los próximos días, Daniela los visitará para conocer sus necesidades y ofrecer soluciones personalizadas. También pueden revisar nuestras promociones y productos en nuestra página web www.ferresierra.com Tus aliados estratégicos"
 message = "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 
 #image_path = r'C:\Users\pc\Documents\proyectos empresa\Envio de WhatsApp\pikachu.png'
-image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
+#image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
+#image_path = r'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen Daniela.jpg'
+image_path = r'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\videoPrueba.mp4'
 
 print(image_path)
 
@@ -111,7 +118,7 @@ for contacto in excel_data:
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
             chat_element.click()
             continue
-    elif image_path.endswith('.jpg') or image_path.endswith('.png') or image_path.endswith('.mp4'):
+    elif image_path.endswith('.jpg') or image_path.endswith('.png'):
         try:
             #esta es la parte para enviar la imagen
             attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]')))
@@ -125,6 +132,36 @@ for contacto in excel_data:
 
             #To write the message that it will send with the image
             message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+            message_input.send_keys(text)
+            message_input.send_keys(Keys.ENTER)
+            time.sleep(5)
+
+            #fin de la prueba para seleccionar la imaen a mandar
+            #Give a random number from 2 and 8 to send the next message.
+            random_number = random.randint(2, 8)
+            time.sleep(random_number)
+        except Exception as e:
+            print("An error occurred:", str(e))
+            print('Ocurrio un error con '+ contacto['Ferreteria'])
+            # Click on the button to errace the 
+            chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
+            chat_element.click()
+            continue
+    elif image_path.endswith('.mp4'):
+        try:
+            #esta es la parte para enviar la imagen
+            attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]')))
+            attachment_button.click()
+            time.sleep(1)
+
+            #prueba para seleccionar la imagen
+            attach_image_option = wait.until(EC.presence_of_element_located((By.XPATH, '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]')))
+            attach_image_option.send_keys(image_path)
+            time.sleep(7)
+
+            #To write the message that it will send with the image
+            # //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span
+            message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]/p')#'//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
             message_input.send_keys(text)
             message_input.send_keys(Keys.ENTER)
             time.sleep(5)
@@ -187,3 +224,4 @@ time.sleep(7)
 
 # Close the browser
 driver.quit()
+
