@@ -2,34 +2,43 @@ import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
 import whasApp
+from Vcss import FlatList
 
-class El_Item:
-    def __init__(self, master, destino, mob_num, val, label_text):
-        #super().__init__()
-        self.f = master
+class El_Item(ctk.CTkFrame):
+    #def __init__(self, master, destino, mob_num, val, label_text):
+    def __init__(self, *args,
+                 mob_num,
+                 val,
+                 destino,
+                 label_text,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.mob_num = mob_num
         self.valor = val
         self.destino = destino
         self.la_columna = label_text
         #self.json_list = json_list
+        self.configure(fg_color='green')
+        self.pack(fill='x')
 
-        self.lf = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.lf = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.lf.pack(side='left', fill='x', expand=True, anchor='n')
         self.l = ctk.CTkLabel(self.lf, text=self.la_columna, text_color='black', font=('', 12), fg_color='transparent')
         self.l.place(relx=0.05, rely=0.05)
 
-        self.ef = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.ef = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.ef.pack(side='left', fill='x', expand=True, anchor='n')
         self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), placeholder_text='@example',
             text_color='black', height=40)
         self.e.place(relx=0, rely=0, anchor='nw')
 
-        self.r1f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.r1f = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r1 = ctk.CTkRadioButton(self.r1f, variable=self.mob_num, value=self.valor)
+        self.r1 = ctk.CTkRadioButton(self.r1f, variable=self.mob_num, value=self.valor, fg_color=('blue', 'green'))
         self.r1.place(relx=0.5, rely=0.1, anchor='nw')
         
-        self.r2f = ctk.CTkFrame(self.f, fg_color='white', height=40, corner_radius=0, border_width=1)
+        self.r2f = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
         self.r2 = ctk.CTkRadioButton(self.r2f, variable=self.destino, value=self.valor)
         self.r2.place(relx=0.5, rely=0.1, anchor='nw')
@@ -106,8 +115,8 @@ class view(ctk.CTk):
         #frame2 - frame1 del program----------------------------------------------------------------------------
         self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
-        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="white")
-        self.leTable.pack(padx=50, pady=50, fill=tkinter.BOTH, expand=True)
+        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="blue")
+        self.leTable.pack(padx=50, pady=50, fill='x', expand=True, anchor='n')
 
         #frame3 - frame2 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
@@ -141,7 +150,7 @@ class view(ctk.CTk):
         frame = ctk.CTkFrame(parent, fg_color="gray", height=40, border_width=1, corner_radius=0)
         frame.pack(side=tkinter.LEFT, fill='x', expand=True, anchor='n')
         
-        label = ctk.CTkLabel(frame, text_color='black', text=text)
+        label = ctk.CTkLabel(frame, text_color='black', text=text, font=('',15))
         label.place(relx=0.5, rely=0.5, anchor='center')
     
         return frame, label
@@ -150,19 +159,27 @@ class view(ctk.CTk):
 
     def create_table(self, fr):
         
+        #Variables
+        print(fr)
         self.mob_num = ctk.IntVar()
         self.destino = ctk.IntVar()
+            
         
-        self.f = ctk.CTkFrame(self.master, fg_color='white', height=40, corner_radius=0)
-        self.f.pack(side='bottom', fill='x', expand=True, anchor='n')
-        self.item_row = El_Item(self.f, self.destino, self.mob_num, 0, 'jsjs')
-        self.item_row2 = El_Item(self.f, self.destino, self.mob_num, 1, 'jsjs2')
-        self.item_row3 = El_Item(self.f, self.destino, self.mob_num, 2, 'jsjs3')
+        self.t_head = ctk.CTkFrame(self.leTable, fg_color='white', height=40)
+        self.t_head.pack(fill='x')
+        self.t_body = ctk.CTkFrame(self.leTable, fg_color='white')
+        self.t_body.pack(side='bottom', fill='both')
 
-        self.f1, self.l1 = self.create_frame_and_label(self.leTable, text=self.cols[0])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[1])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[2])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])
+        self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0])
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1])
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2])
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[3])
+
+        #self.t_flatlist = FlatList(self.t_body, json_list=fr, Item=(El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=0, label_text='jsjs')))
+
+        self.item_row = El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=0, label_text=fr[0])
+        self.item_row2 = El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=1, label_text=fr[1])
+        self.item_row3 = El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=2, label_text=fr[2])
 
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
