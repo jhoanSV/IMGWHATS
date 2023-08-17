@@ -162,7 +162,7 @@ class view(ctk.CTk):
         self.f1, self.l1 = self.create_frame_and_label(self.leTable, text=self.cols[0])
         self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[1])
         self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[2])
-        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])        
+        self.f2, self.l2 = self.create_frame_and_label(self.leTable, text=self.cols[3])
 
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
