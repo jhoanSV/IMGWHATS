@@ -282,11 +282,12 @@ class FlatList(ctk.CTkFrame):
         self.Item = Item
         self.Key_List = list(json_list.keys())
         self.background_color = background_color
+        self.configure(fg_color='transparent')
         
         # *frame configuration
         #self.configure(fg_color=("gray78", "gray28"))  # set frame color
         
-        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height)
+        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height, fg_color='transparent')
         #self.FrameList.configure(fg_color=("gray78", "gray28")) 
         self.FrameList.configure(fg_color=self.background_color) 
         
@@ -297,12 +298,12 @@ class FlatList(ctk.CTkFrame):
         
         # * frame scheme Input
         for i in range(self.Number_of_items()):
-            FrameItem = ctk.CTkFrame(self.FrameList)
+            FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
             FrameItem.grid(row=i, column=0 )
             
             if self.Item is not None:
                 key = self.Key_List[i]
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = key)
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = key , width = self.width, height = self.height)
                 item_instance.grid(row = 0, column = 0)
             else:
                 print('is none')
