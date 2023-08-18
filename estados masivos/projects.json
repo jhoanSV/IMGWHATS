@@ -1,0 +1,54 @@
+{
+    "proyecto1": [
+        {
+            "Type": "Background",
+            "Name": "caminar.jpg",
+            "Width": 300,
+            "Height": 400,
+            "Rotate": 0,
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": true,
+            "yCenter": true,
+            "BackgroundColor": "#FFFFFF"
+        },
+        {
+            "Type": "image",
+            "Name": "caminar.jpg",
+            "Width": 300,
+            "Height": 300,
+            "Rotate": 90,
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": true,
+            "yCenter": true
+        },
+        {
+            "Type": "image",
+            "Name": "pikachu.png",
+            "Width": 300,
+            "Height": 300,
+            "Rotate": 60,
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": false,
+            "yCenter": false
+        },
+        {
+            "Type": "text",
+            "text": "Prueba del texto\nque vamos a poner @holi",
+            "fontType": "Arial.ttf",
+            "color": "(0, 0, 0, 1)",
+            "x_position": 0,
+            "y_position": 0,
+            "xCenter": true,
+            "yCenter": true,
+            "align" : "center",
+            "bold" : true,
+            "italic" : true,
+            "fontSize" : 60,
+            "boxWidth": 1500,
+            "boxHeight": 800
+        }
+    ]
+}
