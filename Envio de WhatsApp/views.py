@@ -19,23 +19,27 @@ class El_Item(ctk.CTkFrame):
         self.configure(fg_color='green')
         self.pack(fill='x')
 
+        #* Label con el nombre de col
         self.lf = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.lf.pack(side='left', fill='x', expand=True, anchor='n')
         self.l = ctk.CTkLabel(self.lf, text='self.la_columna', text_color='black', font=('', 12), fg_color='transparent')
         self.l.place(relx=0.05, rely=0.05)
 
+        #* Entry para la variable
         self.ef = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.ef.pack(side='left', fill='x', expand=True, anchor='n')
         self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), placeholder_text='@example',
             text_color='black', height=40)
         self.e.place(relx=0, rely=0, anchor='nw')
 
+        #* RadioButton1
         self.r1f = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
         self.r1 = ctk.CTkRadioButton(self.r1f, variable=self.mob_num, value=self.valor, 
             text='')
         self.r1.place(relx=0.5, rely=0.1, anchor='nw')
         
+        #* RadioButton2
         self.r2f = ctk.CTkFrame(self, fg_color='white', height=40, corner_radius=0, border_width=1)
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
         self.r2 = ctk.CTkRadioButton(self.r2f, variable=self.destino, value=self.valor, 
@@ -151,6 +155,7 @@ class view(ctk.CTk):
         
         label = ctk.CTkLabel(frame, text_color='black', text=text, font=('',15))
         label.place(relx=0.5, rely=0.5, anchor='center')
+        #label.pack()
     
         return frame, label
     
