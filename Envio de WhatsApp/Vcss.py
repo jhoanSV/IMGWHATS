@@ -268,7 +268,7 @@ class FlatList(ctk.CTkFrame):
     def __init__(self, *args,
                  width: int = 100,
                  height: int = 100,
-                 json_list: dict = None,  # Use dict for JSON object
+                 json_list: list | dict = None ,  # Use dict for JSON object
                  Item: Optional[Callable] = None, # Default to None
                  background_color: str = '#FFFFFF', # Default to
                  adaptable: bool = False, #For adaptability of the width and height
@@ -280,7 +280,13 @@ class FlatList(ctk.CTkFrame):
         self.height = height
         self.json_list = json_list
         self.Item = Item
-        self.Key_List = list(json_list.keys())
+        self.si_list = True
+        if (type(self.json_list) == dict):
+            self.Key_List = list(self.json_list.keys())
+            self.si_list = False
+        else:
+            self.Key_List = self.json_list
+        #self.Key_List = list(json_list.keys())
         self.background_color = background_color
         self.configure(fg_color='transparent')
         
@@ -297,14 +303,19 @@ class FlatList(ctk.CTkFrame):
         self.FrameList.grid(row=0, column=0)
         
         # * frame scheme Input
-        for i in range(self.Number_of_items()):
+        #for i in range(self.Number_of_items()):
+        for i in range(len(self.Key_List)):
             FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
             FrameItem.grid(row=i, column=0 )
             
             if self.Item is not None:
-                key = self.Key_List[i]
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = key , width = self.width, height = self.height)
+                if self.si_list:
+                    key = i
+                else:
+                    key = self.Key_List[i]
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key) , width = self.width, height = self.height)
                 item_instance.grid(row = 0, column = 0)
+                print(self.json_list[key])
             else:
                 print('is none')
 
@@ -325,6 +336,8 @@ class FlatList(ctk.CTkFrame):
         #json_data = json.loads(self.json_list)
         num_items = len(self.Key_List)
         return num_items
+    
+
 
 class DraggableLabel(ctk.CTkLabel):
     def __init__(self, *args,

@@ -4,10 +4,10 @@ from tkinter import filedialog
 import whasApp
 from Vcss import FlatList
 import json
-from components import ItemProject
+from components import ItemProject, Table
 
 
-class El_Item(ctk.CTkFrame):
+'''class El_Item(ctk.CTkFrame):
     #def __init__(self, master, destino, mob_num, val, label_text):
     def __init__(self, *args,                 
                  json_list: dict=None,
@@ -47,7 +47,7 @@ class El_Item(ctk.CTkFrame):
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
         self.r2 = ctk.CTkRadioButton(self.r2f, variable=self.destino, value=self.valor, 
             text='')
-        self.r2.place(relx=0.5, rely=0.1, anchor='nw')
+        self.r2.place(relx=0.5, rely=0.1, anchor='nw')'''
 
 
 class view(ctk.CTk):
@@ -128,8 +128,11 @@ class view(ctk.CTk):
         #frame2 - frame1 del program----------------------------------------------------------------------------
         self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
-        self.leTable = ctk.CTkFrame(self.Frame2, fg_color="blue")
-        self.leTable.pack(padx=50, pady=50, fill='x', expand=True, anchor='n')
+        whasApp.set_xl(r'C:\Users\pc\Desktop\Numero_mensaje_whatsapp.xlsx')
+        self.lista = whasApp.read_first_row()
+        self.Tablajs = Table(self.Frame2, t_lista=self.lista)
+        '''self.leTable = ctk.CTkFrame(self.Frame2, fg_color="blue")
+        self.leTable.pack(padx=50, pady=50, fill='x', expand=True, anchor='n')'''
 
         #frame3 - frame2 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
@@ -138,9 +141,9 @@ class view(ctk.CTk):
 
     def siguiente(self):
         if self.el_entry.get() != '':
-            whasApp.set_xl(self.el_entry.get())
+            #whasApp.set_xl(self.el_entry.get())
             #whasApp.lee_excel()
-            self.create_table(whasApp.read_first_row())
+            #self.create_table(whasApp.read_first_row())
             self.Frame1.pack_forget()
             self.Frame2.pack(side=tkinter.BOTTOM, fill=tkinter.BOTH, expand=True)
             self.Nav_bar.pack(side=tkinter.TOP, fill=tkinter.X, expand=False)
