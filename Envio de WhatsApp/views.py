@@ -2,10 +2,13 @@ import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
 import whasApp
-from Vcss import FlatList
+from Vcss import FlatList, El_Tab_view
 import json
-from components import ItemProject, Table
+from components import ItemProject, Table, El_Item
 
+class colorsitos:
+    def __init__(self) -> None:
+        pass
 
 '''class El_Item(ctk.CTkFrame):
     #def __init__(self, master, destino, mob_num, val, label_text):
@@ -54,23 +57,25 @@ class view(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.xl_path = None
-        self.cols = ['Columnas encontradas','Variables','celular','Nombre Destinatario']
+        #self.cols = ['Columnas encontradas','Variables','celular','Nombre Destinatario']
         current = None        
 
         self.geometry("1024x728+200+5")
         self.minsize(900,640)
 
-        #Colores
+        #*Colores
         self.CGreen = "#1C9F80"
         self.CGreen_hov = "#115e45"
 
+        #*configuración de la ventana 
         self.title("Wapp Sender")
         self.configure(fg_color = self.CGreen)
         
-        #root - contenedor verde principal
+        #*root - contenedor verde principal
         self.main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)
         self.main_container.pack(fill=tkinter.BOTH, expand=True)
 
+        #Barra de navegación
         self.Nav_bar = ctk.CTkFrame(self.main_container, fg_color=self.CGreen, corner_radius = 0, height=77)
 
         self.btn_vars = ctk.CTkButton(self.Nav_bar, text="Variables", text_color=self.CGreen, corner_radius=0,
@@ -81,9 +86,7 @@ class view(ctk.CTk):
             fg_color=self.CGreen, hover_color=self.CGreen_hov, font=('', 18), width=140, command=self.env)
         self.btn_env.place(x=140, rely=1, anchor='sw')
 
-        #self.Nav = ctk.CTkTabview(self.main_container)
-
-        #frame1 - frame1 del program----------------------------------------------------------------------------
+        #frame1 - frame1 proyectos----------------------------------------------------------------------------
         self.Frame1 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0, width = 1018)
         self.Frame1.pack(fill=tkinter.BOTH, expand=True, padx=55, pady=55)
 
@@ -125,18 +128,31 @@ class view(ctk.CTk):
             hover_color='#115e45', font=('', 18), command=self.siguiente)
         self.btn_sig.place(relx=0.9, rely=0.92, anchor='se')
 
-        #frame2 - frame1 del program----------------------------------------------------------------------------
+        #frame2 - frame2 del program----------------------------------------------------------------------------
         self.Frame2 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)        
 
         whasApp.set_xl(r'C:\Users\pc\Desktop\Numero_mensaje_whatsapp.xlsx')
         self.lista = whasApp.read_first_row()
-        self.Tablajs = Table(self.Frame2, t_lista=self.lista)
+        self.Tablajs = Table(self.Frame2, t_lista=self.lista, width=900)
         '''self.leTable = ctk.CTkFrame(self.Frame2, fg_color="blue")
         self.leTable.pack(padx=50, pady=50, fill='x', expand=True, anchor='n')'''
 
-        #frame3 - frame2 del program----------------------------------------------------------------------------
+        #frame3 - frame3 del program----------------------------------------------------------------------------
         self.Frame3 = ctk.CTkFrame(self.main_container, fg_color="white", corner_radius = 0)
-    
+        
+        self.jsjs = El_Tab_view(self.Frame3)
+        self.jsjs.pack(fill='both', expand=True)
+
+        frame_prueba = ctk.CTkFrame(self.jsjs, fg_color='#6d6357')
+        frame_prueba2 = ctk.CTkFrame(self.jsjs, fg_color='#e7f392')
+        self.jsjs.add_frame(0, frame_prueba2)
+        self.jsjs.add_frame(1, frame_prueba)
+
+        btn_mientras = ctk.CTkButton(self.jsjs, text='btn', command=lambda: self.jsjs.toggle_frame_by_id(1))
+        btn_mientras2 = ctk.CTkButton(self.jsjs, text='btn', command=lambda: self.jsjs.toggle_frame_by_id(0))
+        btn_mientras.pack()
+        btn_mientras2.pack()
+
     #funciones de vista
 
     def siguiente(self):
@@ -189,7 +205,7 @@ class view(ctk.CTk):
         self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2])
         self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[3])
 
-        self.t_flatlist = FlatList(self.t_body, json_list=fr, Item=El_Item)
+        #self.t_flatlist = FlatList(self.t_body, json_list=fr, Item=El_Item)
 
         '''self.item_row = El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=0, label_text=fr[0])
         self.item_row2 = El_Item(self.t_body, destino=self.destino, mob_num=self.mob_num, val=1, label_text=fr[1])
