@@ -314,7 +314,7 @@ class FlatList(ctk.CTkFrame):
                 else:
                     key = self.Key_List[i]
                 item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key) , width = self.width, height = self.height)
-                item_instance.grid(row = 0, column = 0)                
+                item_instance.grid(row = 0, column = 0)
             else:
                 print('is none')
 
@@ -383,31 +383,34 @@ class El_Tab_view(ctk.CTkFrame):
                  num_frames: int=2,
                  width: int=300,
                  height: int=300,
-                 pad_x: int=0,
-                 pad_y: int=0,
                  border_width: int | str | None = None,
-                 fg_color: str | Tuple[str, str] | None = '#ffa500',
-                 *args, 
+                 fg_color: str | Tuple[str, str] | None = None,
+                 *args,
                  **kwargs):
-        super().__init__(master, *args, width=width, height=height, 
+        super().__init__(master, *args, width=width, height=height,
                 border_width=border_width, fg_color=fg_color, **kwargs)
 
         self.num_frames = num_frames
+        #self.Frame = Frame
 
-        El_Tab_view.frames = (self.create_frames())
-        self.toggle_frame_by_id(0)
+        #self.pack(fill='both', expand=True, padx=self.padx, pady=self.pady)
 
-    def create_frames(self):
-        self.frames = {}
+        #El_Tab_view.frames = (self.create_frames())
         for i in range(self.num_frames):
-            self.frames[i] = ctk.CTkFrame(self)
-            #self.frames[i].pack()
-        return self.frames
-    
-    def toggle_frame_by_id(self, frame_id):
-    
-        print(El_Tab_view.frames)
+            El_Tab_view.frames[i] = ctk.CTkFrame(self, fg_color='transparent')
+            le_label = ctk.CTkLabel(El_Tab_view.frames[i], text='Espacio para tu tab('+ str(i+1) +')', text_color='black', fg_color='white')
+            le_label.place(relx=0.5, rely=0.5, anchor='center')
+        self.show_frame(0)
 
+    '''def create_frames(self):
+        for i in range(self.num_frames):
+            El_Tab_view.frames[i] = ctk.CTkFrame(self)            
+            #self.frames[i].pack()
+        return self.frames'''
+    
+    def show_frame(self, frame_id):
+
+        print("frame_id: " + str(frame_id))
         if El_Tab_view.frames[frame_id] is not None:
             if El_Tab_view.current is El_Tab_view.frames[frame_id]:
                 print("current is la actual")
@@ -419,9 +422,11 @@ class El_Tab_view(ctk.CTkFrame):
                 El_Tab_view.current = El_Tab_view.frames[frame_id]
                 El_Tab_view.current.pack(in_=self, side='top', fill='both', expand=True, padx=0, pady=0)
             else:
-                print("1")
+                print("1 xD")
                 El_Tab_view.current = El_Tab_view.frames[frame_id]
                 El_Tab_view.current.pack(in_=self, side='top', fill='both', expand=True, padx=0, pady=0)
             
-    def add_frame(self, tab_key, tg_frame):
-        El_Tab_view.frames[tab_key] = tg_frame
+    def add_frame(self, tab_key, frame, method=None):
+        #El_Tab_view.frames[tab_key] = frame
+        Frame_instance = frame(master=El_Tab_view.frames[tab_key], El_metodo=method)
+        Frame_instance.pack(fill='both', expand=True)

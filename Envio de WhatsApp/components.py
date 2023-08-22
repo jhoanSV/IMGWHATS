@@ -4,6 +4,7 @@ import tkinter
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from Vcss import FlatList
+import json
 
 class Wapp_Nav_bar(ctk.CTkFrame):
     def __init__():
@@ -78,7 +79,7 @@ class Table(ctk.CTkFrame):
         self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[3])
 
         #*Crea cuerpo o filas de tabla-----------------------------
-        self.t_body = FlatList(self, width=self.width, height=500, json_list=self.t_lista, Item=El_Item(la_var=self.la_var))
+        self.t_body = FlatList(self, width=self.width, height=500, json_list=self.t_lista, Item=El_Item)
         self.t_body.pack(side='bottom', fill='both')
     
     #!Esta funcion es para las filas de la tabla        
@@ -95,13 +96,11 @@ class Table(ctk.CTkFrame):
 
 class El_Item(ctk.CTkFrame):
     #def __init__(self, master, destino, mob_num, val, label_text):
-    def __init__(self, *args,
-                 master: any,                 
+    def __init__(self, *args,                
                  json_list: str = 'NotFound',
                  Project_name: str=None,
-                 la_var: int=1,
                  **kwargs):
-        super().__init__(*args, master, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.mob_num = ctk.IntVar()
         self.valor = ctk.IntVar()
