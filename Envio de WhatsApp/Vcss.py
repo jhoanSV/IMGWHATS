@@ -398,7 +398,7 @@ class El_Tab_view(ctk.CTkFrame):
         #El_Tab_view.frames = (self.create_frames())
         for i in range(self.num_frames):
             El_Tab_view.frames[i] = ctk.CTkFrame(self, fg_color='transparent')
-            le_label = ctk.CTkLabel(El_Tab_view.frames[i], text='Espacio para tu tab('+ str(i+1) +')', text_color='black', fg_color='white')
+            le_label = ctk.CTkLabel(El_Tab_view.frames[i], text='Espacio para tu tab('+ str(i) +')', text_color='black', fg_color='white')
             le_label.place(relx=0.5, rely=0.5, anchor='center')
         self.show_frame(0)
 
@@ -414,8 +414,8 @@ class El_Tab_view(ctk.CTkFrame):
         if El_Tab_view.frames[frame_id] is not None:
             if El_Tab_view.current is El_Tab_view.frames[frame_id]:
                 print("current is la actual")
-                El_Tab_view.current.pack_forget()
-                El_Tab_view.current = None
+                #El_Tab_view.current.pack_forget()
+                #El_Tab_view.current = None
             elif El_Tab_view.current is not None:
                 print("current is None")
                 El_Tab_view.current.pack_forget()

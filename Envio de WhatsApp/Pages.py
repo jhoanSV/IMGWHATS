@@ -68,20 +68,15 @@ class Los_proyectos(ctk.CTkFrame):
         self.Separador.place(relx=0.49, rely=0.08, relwidth=0.005, relheight=0.84, anchor='n')
 
         self.btn_sig = ctk.CTkButton(self.frame_der, text="Siguiente", corner_radius=0, fg_color=self.CGreen,
-            hover_color='#115e45', font=('', 18), command=self.next)
+            hover_color='#115e45', font=('', 18), command=self.btn_sig_funct)
         self.btn_sig.place(relx=0.9, rely=0.92, anchor='se')
 
-    def siguiente(self):
-        print("Hola")
+    def btn_sig_funct(self):
         if self.el_entry.get() != '':
-            #whasApp.set_xl(self.el_entry.get())
-            #whasApp.lee_excel()
-            #self.create_table(whasApp.read_first_row())
-            #El_Tab_view.show_frame(frame_id=1)
-            #Nav_bar
-            print("ola")
-        else:
-            print("Seleccione un archivo excel o eliga un proyecto")
+            whasApp.set_xl(self.el_entry.get())
+            #lista = whasApp.read_first_row()
+            #La_tablajs = Table(self.Frame2, t_lista=lista, width=900)
+        self.next()
 
 class Vars(ctk.CTkFrame):
     def __init__(self,
@@ -98,24 +93,7 @@ class Vars(ctk.CTkFrame):
 
         self.configure(fg_color='white')
 
-        whasApp.set_xl(r'C:\Users\pc\Desktop\Numero_mensaje_whatsapp.xlsx')
-        self.lista = whasApp.read_first_row()
-        self.La_tablajs = Table(self, t_lista=self.lista, width=900)
-
-class Nav_bar(ctk.CTkFrame):
-    def __init__(self, master: any,
-                 width: int = 200,
-                 height: int = 77,
-                 corner_radius: int | str | None = 0,
-                 fg_color: str | Tuple[str, str] | None = None,
-                 **kwargs):
-        super().__init__(master, width, height, corner_radius, fg_color, **kwargs)
-
-        self.btn_vars = ctk.CTkButton(self, text="Variables", text_color=CGreen, corner_radius=0,
-            fg_color='white', hover_color='white', font=('', 18), width=140, command='self.vars')
-        self.btn_vars.place(x=0, rely=1, anchor='sw')
-
-        self.btn_env = ctk.CTkButton(self, text="Envío", text_color='white', corner_radius=0,
-            fg_color=CGreen, hover_color=CGreen_hov, font=('', 18), width=140, command='self.env')
-        self.btn_env.place(x=140, rely=1, anchor='sw')
+        #whasApp.set_xl(r'C:\Users\pc\Desktop\Numero_mensaje_whatsapp.xlsx')
+        #self.lista = whasApp.read_first_row()
+        #self.La_tablajs = Table(self, t_lista=self.lista, width=900)
     
