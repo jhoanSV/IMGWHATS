@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import tkinter
+from tkinter import filedialog
 from typing import Tuple, Callable
 from Vcss import FlatList, El_Tab_view
 from components import ItemProject, Table
@@ -12,6 +13,7 @@ CGreen_hov = "#115e45"
 
 #*Frame de proyectos-------------------------------------------------------
 class Los_proyectos(ctk.CTkFrame):
+    lista = []
     def __init__(self, 
                  master: any,
                  El_metodo: Callable = None,
@@ -19,12 +21,13 @@ class Los_proyectos(ctk.CTkFrame):
                  height: int = 200,
                  corner_radius: int | str | None = 0,
                  fg_color: str | Tuple[str, str] | None = None,
+                 path: str=None,
                  *args,
                  **kwargs):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                     fg_color=fg_color, **kwargs)
 
-        self.next = El_metodo
+        self.next = El_metodo        
 
         #*Colores
         self.CGreen = "#1C9F80"
@@ -61,7 +64,7 @@ class Los_proyectos(ctk.CTkFrame):
         self.el_entry.place(relx=0.1, rely=0.17, relwidth=0.7, relheight=0.06, anchor='nw')
 
         self.el_btn = ctk.CTkButton(self.frame_der, text="Buscar", corner_radius=0, fg_color=self.CGreen,
-            hover_color="#115e45", font=('', 18), command='self.buscar_xl')
+            hover_color="#115e45", font=('', 18), command=self.buscar_xl)
         self.el_btn.place(relx=0.1, rely=0.25, anchor='nw')
 
         self.Separador = ctk.CTkLabel(self, fg_color=self.CGreen, text='', width=0)
@@ -72,11 +75,14 @@ class Los_proyectos(ctk.CTkFrame):
         self.btn_sig.place(relx=0.9, rely=0.92, anchor='se')
 
     def btn_sig_funct(self):
-        if self.el_entry.get() != '':
-            whasApp.set_xl(self.el_entry.get())
-            #lista = whasApp.read_first_row()
-            #La_tablajs = Table(self.Frame2, t_lista=lista, width=900)
         self.next()
+
+    def buscar_xl(self):
+        self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
+        self.xl_path = self.file_name
+        print(type(self.xl_path))
+        self.el_entry.delete(0, "end")  # Limpiar el contenido del Entry
+        self.el_entry.insert(0, self.xl_path)
 
 class Vars(ctk.CTkFrame):
     def __init__(self,
@@ -87,13 +93,39 @@ class Vars(ctk.CTkFrame):
                  height: int = 200,
                  corner_radius: int | str | None = 0,
                  fg_color: str | Tuple[str, str] | None = None,
+                 path: str=None,
                  **kwargs):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                 fg_color=fg_color, **kwargs)
 
+        self.path = r''+path
         self.configure(fg_color='white')
+        whasApp.set_xl(self.path)
+        self.lista = whasApp.read_first_row()
+        self.La_tablajs = Table(self, t_lista=self.lista, width=908)
 
-        #whasApp.set_xl(r'C:\Users\pc\Desktop\Numero_mensaje_whatsapp.xlsx')
-        #self.lista = whasApp.read_first_row()
-        #self.La_tablajs = Table(self, t_lista=self.lista, width=900)
-    
+        self.save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=self.save)
+        self.save_btn.place(relx=0.8, rely=0.8, anchor='se')
+
+    def save(self):
+        print("guardar")
+
+    #def get(self):
+        
+
+class Send(ctk.CTkFrame):
+    def __init__(self,
+                 *args,
+                 master: any,
+                 El_metodo: Callable = None,
+                 width: int = 200,
+                 height: int = 200,
+                 corner_radius: int | str | None = 0,
+                 fg_color: str | Tuple[str, str] | None = None,
+                 path: str=None,
+                 **kwargs):
+        super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
+                fg_color=fg_color, **kwargs)
+        
+        self.pack(fill='x', expand=True)
