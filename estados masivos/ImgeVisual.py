@@ -4,7 +4,7 @@ import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 from tkinter import filedialog
 from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel
-from parts import ImageContainer, ItemElement
+from Components import ImageContainer, ItemElement, property_image_bar
 
 size = width, height = 3000, 3000
 # *JSON image properties
@@ -35,45 +35,15 @@ button = ctk.CTkButton(app, text="Subir", command=Buscar)
 button.grid(row=1, column=0, padx=10, pady=10)
 
 # *Barra de propiedades de formatos imagenes
+Up_bar = property_image_bar(app, json_list= {"Width": 200,
+                                            "Height": 150,
+                                            "Rotate": 6,
+                                            "x_position": 17,
+                                            "y_position": 7,
+                                            "xCenter": True,
+                                            "yCenter": True})
+Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
-tools_image_frame = ctk.CTkFrame(app)
-tools_image_frame.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
-
-label_x_position = ctk.CTkLabel(tools_image_frame, text= "X:")
-label_x_position.grid(row=0, column=0, padx=5, pady=5)
-
-Input_x_position = InputNumber(tools_image_frame, width=50, step_size=1)
-Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
-
-label_y_position = ctk.CTkLabel(tools_image_frame, text= "Y:")
-label_y_position.grid(row=0, column=2, padx=5, pady=5)
-
-Input_y_position = ctk.CTkEntry(tools_image_frame, width=30)
-Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
-
-label_width = ctk.CTkLabel(tools_image_frame, text= "W:")
-label_width.grid(row=0, column=4, padx=5, pady=5)
-
-Input_width = InputNumber(tools_image_frame, width=50, step_size=1)
-Input_width.grid(row=0, column=5 , padx=5, pady=5)
-
-label_heid = ctk.CTkLabel(tools_image_frame, text= "H:")
-label_heid.grid(row=0, column=6, padx=5, pady=5)
-
-Input_heid = InputNumber(tools_image_frame, width=50, step_size=1)
-Input_heid.grid(row=0, column=7 , padx=5, pady=5)
-
-label_rotate = ctk.CTkLabel(tools_image_frame, text= "Girar:")
-label_rotate.grid(row=0, column=8, padx=5, pady=5)
-
-spinbox_1 = InputNumber(tools_image_frame, width=50, step_size=1, ciclic= True)
-spinbox_1.grid(row=0, column=9 ,padx=5, pady=5)
-
-checkbox_xCentro = ctk.CTkCheckBox(tools_image_frame, text= "xCentro:")
-checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
-
-checkbox_yCentro = ctk.CTkCheckBox(tools_image_frame, text= "yCentro:")
-checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
 
 #spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
 #spinbox_1.grid(row=2, column=0 ,padx=5, pady=5)

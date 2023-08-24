@@ -1,10 +1,10 @@
 from tkinter import filedialog
 import customtkinter as ctk
 from PIL import ImageTk, Image
-from Vcss import DraggableLabel
+from Vcss import DraggableLabel, InputNumber
 from typing import Union, Callable
 import tkinter as tk
-class ImageContainer(ctk.CTkFrame):
+class ImageContainer(ctk.CTkCanvas):
     def __init__(self, *args,
                  width: int = 700,
                  height: int = 500,
@@ -14,29 +14,34 @@ class ImageContainer(ctk.CTkFrame):
                  **kwargs):
         
         super().__init__(*args, **kwargs)
+        
         self.Background_image_width = Background_image_width
         self.Background_image_height = Background_image_height
         self.json_list = json_list
         self.width = width
         self.height = height
+        self.configure(width=self.width, height=self.height)
         num_items = len(self.json_list)
 
+        #canvas = tk.Canvas
         size = (self.Background_image_width, self.Background_image_height)
         ImageContainer = ctk.CTkFrame(self, width= self.width, height= self.height, fg_color='#D9D9D9')
         ImageContainer.pack(fill= None)
+        ImageContainer.lower()
 
         for Item in  self.json_list:
             if Item['Type'] == 'Background':
                 size_background = Item['Width'], Item['Height']
                 background_color = Item['BackgroundColor']
-
+                on_x = (self.width - Item['Width'])/2
+                on_y = (self.height - Item['Height'])/2
                 background_image = Image.new('RGB',size_background, background_color)
                 Bg_image = ctk.CTkImage(background_image, size = size_background)
-                background_continer = ctk.CTkLabel(self, image= Bg_image, text="", width=Item['Width'], height=Item['Height'])
-                background_continer.place(x=0, y=0)
+                background_continer = ctk.CTkLabel(ImageContainer, image= Bg_image, text="", width=Item['Width'], height=Item['Height'])
+                background_continer.place(x=on_x, y=on_y)
+                #background_continer.lower()
             elif Item['Type'] == 'image':
                 picture = Image.open(Item['Name'])
-
                 frameImage = DraggableLabel(ImageContainer, image=picture)
                 frameImage.place(x=0, rely=0)
         #image_tk = ctk.CTkImage(background_image, size=size)
@@ -61,7 +66,7 @@ class ImageContainer(ctk.CTkFrame):
                 new_width = int(child.image_width * zoom_level)
                 new_height = int(child.image_height * zoom_level)
                 new_image = child.image.resize((new_width, new_height))
-                new_image_tk = ImageTk.PhotoImage(new_image)
+                new_image_tk = ctk.CTkImage(new_image)
                 child.configure(image=new_image_tk)
                 child.image_tk = new_image_tk
                 child.image_width = new_width
@@ -130,4 +135,64 @@ class ItemElement(ctk.CTkFrame):
     def set(self, value: float):
         self.entry.delete(0, "end")
         self.entry.insert(0, str(float(value)))
- 
+
+class property_image_bar(ctk.CTkFrame):
+    def __init__(self, *args,
+                 width: int = 100,
+                 command: Callable = None,
+                 json_list: dict = None,
+                 **kwargs):
+        
+        super().__init__(*args, **kwargs)
+        self.json_list = json_list
+        # *Barra de propiedades de formatos imagenes
+        
+        tools_image_frame = ctk.CTkFrame(self)
+        tools_image_frame.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
+
+        label_x_position = ctk.CTkLabel(tools_image_frame, text= "X:")
+        label_x_position.grid(row=0, column=0, padx=5, pady=5)
+
+        Input_x_position = InputNumber(tools_image_frame, width=50, step_size=1)
+        Input_x_position.set(self.json_list['x_position'])
+        Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
+
+        label_y_position = ctk.CTkLabel(tools_image_frame, text= "Y:")
+        label_y_position.grid(row=0, column=2, padx=5, pady=5)
+
+        Input_y_position = InputNumber(tools_image_frame, width=50, step_size=1)
+        Input_y_position.set(self.json_list['y_position'])
+        Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
+
+        label_width = ctk.CTkLabel(tools_image_frame, text= "W:")
+        label_width.grid(row=0, column=4, padx=5, pady=5)
+
+        Input_width = InputNumber(tools_image_frame, width=50, step_size=1)
+        Input_width.set(self.json_list['Width'])
+        Input_width.grid(row=0, column=5 , padx=5, pady=5)
+
+        label_heid = ctk.CTkLabel(tools_image_frame, text= "H:")
+        label_heid.grid(row=0, column=6, padx=5, pady=5)
+
+        Input_heid = InputNumber(tools_image_frame, width=50, step_size=1)
+        Input_heid.set(self.json_list['Height'])
+        Input_heid.grid(row=0, column=7 , padx=5, pady=5)
+
+        label_rotate = ctk.CTkLabel(tools_image_frame, text= "Girar:")
+        label_rotate.grid(row=0, column=8, padx=5, pady=5)
+
+        Input_rotate = InputNumber(tools_image_frame, width=50, step_size=1, ciclic= True, max=360, command=lambda: self.printHello())
+        Input_heid.set(self.json_list['Rotate'])
+        Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
+
+        checkbox_xCentro = ctk.CTkCheckBox(tools_image_frame, text= "xCentro:")
+        #checkbox_xCentro.
+        checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
+
+        checkbox_yCentro = ctk.CTkCheckBox(tools_image_frame, text= "yCentro:")
+        
+        checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
+
+    def printHello(self):
+        print("Hello")
+        

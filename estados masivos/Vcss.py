@@ -207,64 +207,6 @@ class InputNumber(ctk.CTkFrame):
         if event.widget.get() == '':
             self.entry.delete(0, "end")
             self.entry.insert(0, str(float(0)))
-
-    
-'''class ItemElement(ctk.CTkFrame):
-    def __init__(self, *args,
-                 width: int = 100,
-                 command: Callable = None,
-                 images: str = "Default/No_image.jpg",
-                 json_list: dict = None,
-                 **kwargs):
-        
-        super().__init__(*args, **kwargs)
-        # *variables
-        self.command = command
-        self.images = images
-        self.json_list = json_list
-        self.smallImage = ctk.CTkImage(Image.open('caminar.jpg'), size=(30,30))
-        self.smallMove = ctk.CTkImage(light_image=Image.open("Default/bars_dark.png"), dark_image=Image.open("Default/bars_dark.png"), size=(30, 30))
-
-
-        # *frame configuration
-        self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        
-        self.FrameButons = ctk.CTkFrame(self)
-        self.FrameButons.configure(fg_color=("gray78", "gray28")) 
-
-        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
-        self.grid_columnconfigure(1, weight=1)  # entry expands
-
-        self.FrameButons.grid(row=0, column=0)
-        
-        # * frame scheme Input
-        
-        self.frameMove = ctk.CTkLabel(self.FrameButons, image=self.smallMove, width=30, text="")
-        self.frameMove.grid( row=0, column=0, padx=1, pady=1)
-
-        self.frameImage = ctk.CTkLabel(self.FrameButons, image=self.smallImage, width=30, text="")
-        self.frameImage.grid(row=0, column=1, padx=1, pady=1)
-
-        self.frameInfomation = ctk.CTkFrame(self.FrameButons)
-        self.frameInfomation.grid(row=0, column=2, padx=1, pady=1)
-
-        self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Name: " + self.json_list['Name'])
-        self.Name_Label.grid(row=0, column=0, padx=0, pady=0)
-
-        self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
-        self.Name_Label.grid(row=1, column=0, padx=0, pady=0)
-        # *default value
-
-
-    def get(self) -> Union[float, None]:
-        try:
-            return float(self.entry.get())
-        except ValueError:
-            return None
-
-    def set(self, value: float):
-        self.entry.delete(0, "end")
-        self.entry.insert(0, str(float(value)))'''
     
 class FlatList(ctk.CTkFrame):
     def __init__(self, *args,
@@ -321,32 +263,35 @@ class FlatList(ctk.CTkFrame):
         num_items = len(self.json_list)
         return num_items
     
-class DraggableLabel(ctk.CTkLabel):
+class DraggableLabel(ctk.CTkFrame):
     def __init__(self, *args,
                  x: int = 100,
                  y: int = 100,
                  image: Image = None,  # for a CTkimage object
                  resize_width: int = None,
                  resize_height: int = None,
+                 transform: bool = False,
                  **kwargs):
         
         # Set default text to an empty string
-        kwargs.setdefault("text", "")
-
+        #kwargs.setdefault("text", "")
+        #kwargs.setdefault("fg_color", "red")
+        #kwargs.setdefault("bg_color", "#FFFFff00")
         super().__init__(*args, **kwargs)
+        self.configure(fg_color='transparent', bg_color='transparent')
         self.image = image
         self.image_width, self.image_height = self.image.size
-        self.image_tk = ImageTk.PhotoImage(self.image) #ctk.CTkImage(self.image, size= self.image.size)
+        self.image_tk = ctk.CTkImage(self.image, size=(self.image.size))
         self.x = x
         self.y = y
         
         if self.image is not None:
-            size = width, height = 5, 5
-            self.background_image = Image.new('RGB', size, 'black')
-            self.square = ctk.CTkImage(self.background_image, size= size)
+            size = 5, 5
+            self.square_image = Image.new('RGB', size, 'black')
+            self.square = ctk.CTkImage(self.square_image, size= size)
             
             #* Draggable effect
-            self.ImageDraggable = ctk.CTkLabel(self, image= self.image_tk, text="")
+            self.ImageDraggable = ctk.CTkLabel(self, image= self.image_tk, text="", fg_color= "transparent", bg_color="transparent")
             self.ImageDraggable.grid(row=1, column=1)
             self.ImageDraggable.bind("<Button-1>", self.start_drag)
             self.ImageDraggable.bind("<ButtonRelease-1>", self.stop_drag)
@@ -413,7 +358,7 @@ class DraggableLabel(ctk.CTkLabel):
             self.Pld.bind("<ButtonRelease-1>", self.stop_drag)
             self.drag_data = {"x": 0, "y": 0}
 
-            print('el tamaño es ' + str(self.image_width) + str(self.image_height))
+            #print('el tamaño es ' + str(self.image_width) + str(self.image_height))
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
@@ -463,3 +408,43 @@ class DraggableLabel(ctk.CTkLabel):
         self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
+
+    def On_Resize(self, width = 0, height = 0):
+        size_x = self.ImageDraggable.winfo_width()
+        size_y = self.ImageDraggable.winfo_height()
+        if width != 0:
+            size_x = width
+        if height != 0:
+            size_y = height
+        resized_image = self.image.resize((size_x, size_y), Image.ANTIALIAS)
+        self.image_tk = ImageTk.PhotoImage(resized_image)
+        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
+
+    def On_Reposition(self, position_x = 0 , position_y = 0):
+        new_x = self.winfo_x()
+        new_y = self.winfo_y()
+        if position_x != 0:
+            new_x = position_x
+        if position_y != 0:
+            new_y = position_y
+        self.place(x=new_x, y=new_y)
+
+    def get_data(self):
+        return {"Width": self.ImageDraggable.winfo_width(),
+                "Height": self.ImageDraggable.winfo_height(),
+                "Rotate": 0,
+                "x_position": self.winfo_x(),
+                "y_position": self.winfo_y(),
+                "xCenter": True,
+                "yCenter": True}
+    
+    def On_rotate(self, rotate):
+        rotated_image = self.image.rotate(rotate, expand = True)
+        size_x, size_y = rotated_image.size
+        self.image_tk = ImageTk.PhotoImage(rotated_image)
+        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
+
+def relative_position(anchor_x, anchor_y, x, y):
+    relative_x = x - anchor_x
+    relative_y = y - anchor_y
+    return relative_x, relative_y
