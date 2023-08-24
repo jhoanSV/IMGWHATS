@@ -313,7 +313,7 @@ class FlatList(ctk.CTkFrame):
                     key = i
                 else:
                     key = self.Key_List[i]
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], index=key, Project_name = str(key) ,
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key) ,
                     width = self.width, height = self.height)
                 item_instance.grid(row = 0, column = 0)
             else:

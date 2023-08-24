@@ -101,7 +101,8 @@ class Vars(ctk.CTkFrame):
         self.path = r''+path
         self.configure(fg_color='white')
         whasApp.set_xl(self.path)
-        self.lista = whasApp.read_first_row()
+        #self.lista = whasApp.read_first_row()
+        self.lista = whasApp.lee_excel()
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
 
         self.save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,

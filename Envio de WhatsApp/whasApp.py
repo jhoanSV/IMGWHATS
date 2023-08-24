@@ -26,12 +26,10 @@ sheet = None
 
 data_xl = []
 
-# "¡Hola @NOMBRE!¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
-# "¡Hola @NOMBRE! Queríamos informarles que hemos realizado cambios en nuestro equipo de asesores comerciales. Les presentamos a Derwin Valencia un profesional altamente capacitado y amplia experiencia en el campo de Ferretería. En los próximos días, Derwin los visitará para conocer sus necesidades y ofrecer soluciones personalizadas. También pueden revisar nuestras promociones y productos en nuestra página web www.ferresierra.com Tus aliados estratégicos."
-#message = "¡Hola @Nombre !¡Quería recordarte que tu pedido número @NFactura está en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo que necesites."
 message = ""
-#image_path = r'E:\PROGRAMACION\pythonxD\IMGWHATS\Envio de WhatsApp\imagen.jpg'
-image_path = r''#'C:\Users\pc\Dropbox\Instalador sierra\envio whatsapp\Envio de WhatsApp\Imagen derwin.jpg'#'C:\Users\pc\Documents\proyectos empresa\IMGWHATS\Envio de WhatsApp\LOGOS FERRETERIAS'
+
+image_path = r''
+
 '''variables = {
                 "@cod":0,
                 "@Nombre":1,
@@ -67,9 +65,9 @@ def read_first_row():
         if item.value is not None:
             data.append(item.value)
 
-    print("Excel leído, sus columnas son: ")    
-    for item in data:
-        print(item)
+    #print("Excel leído, sus columnas son: ")    
+    #for item in data:
+    #    print(item)
     return data
 
 '''def funcionjsjs2(data):
@@ -119,10 +117,20 @@ def llenarVars(proyecto):
     nomCli = Jvariables['NomCli']
 
 def lee_excel():
-    # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list
+    # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list    
+    whole_excel = {}
+    first_row = read_first_row()
     excel_data = read_excel_file(sheet)
-    print(excel_data)
-    #return excel_data
+    
+    for i in range(len(excel_data)):
+        whole_excel[i] = {
+            "Columnas excel" : first_row[i],
+            "Variables" : '@example',
+            "Celular" : False,
+            "Destino" : False
+        }
+    #print(excel_data)
+    return whole_excel
 
 #cols = funcionjsjs2(first_row(sheet))
 

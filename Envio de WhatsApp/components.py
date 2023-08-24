@@ -18,7 +18,6 @@ class ItemProject(ctk.CTkFrame):
                  json_list: dict = None,  # Use dict for JSON object
                  Project_name: str = None,
                  On_press: callable = None,
-                 index: int | str | None = None,
                  **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -58,7 +57,7 @@ class Table(ctk.CTkFrame):
                  bg_color: str | Tuple[str, str] = "transparent", 
                  fg_color: str | Tuple[str, str] | None = 'transparent', 
                  border_color: str | Tuple[str, str] | None = None,                 
-                 t_lista: list = None,
+                 t_lista: list | dict | None = None,
                  la_var: int=1, 
                  **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, **kwargs)
@@ -98,15 +97,14 @@ class El_Item(ctk.CTkFrame):
     def __init__(self, *args,                
                  json_list: str = 'NotFound',
                  Project_name: str=None,
-                 index: int | str | None = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.mob_num = ctk.IntVar()
-        self.destino = ctk.IntVar()
-        self.valor = index
-        #self.Proyect_name = Proyect_name
-        self.nom_col = json_list
+        self.nom_col = json_list['Columnas excel']
+        self.entry_text = tkinter.StringVar()
+        self.entry_text.set(json_list['Variables'])
+        self.cel = json_list['Celular']
+        self.des = json_list['Destino']
         self.configure(fg_color='green')
         self.pack(fill='x')
 
@@ -119,23 +117,21 @@ class El_Item(ctk.CTkFrame):
         #* Entry para la variable
         self.ef = ctk.CTkFrame(self, fg_color='white', width=310, height=40, corner_radius=0, border_width=1)
         self.ef.pack(side='left', fill='x', expand=True, anchor='n')
-        self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), placeholder_text='@example',
+        self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), textvariable=self.entry_text,
             text_color='black', height=40)
         self.e.place(relx=0, rely=0, anchor='nw')
 
-        #* RadioButton1
+        #* Checkbox1
         self.r1f = ctk.CTkFrame(self, fg_color='white', width=86, height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r1 = ctk.CTkRadioButton(self.r1f, variable=self.mob_num, value=self.valor, width=20,
-            text='')
-        self.r1.place(relx=0.5, rely=0.1, anchor='nw')
+        self.r1 = ctk.CTkCheckBox(self.r1f, onvalue=self.cel, width=20, text='')
+        self.r1.place(relx=0.5, rely=0.5, anchor='center')
         
-        #* RadioButton2
+        #* Checkbox2
         self.r2f = ctk.CTkFrame(self, fg_color='white', width=132, height=40, corner_radius=0, border_width=1)
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r2 = ctk.CTkRadioButton(self.r2f, variable=self.destino, value=self.valor, width=20,
-            text='')
-        self.r2.place(relx=0.5, rely=0.1, anchor='nw')
+        self.r2 = ctk.CTkCheckBox(self.r2f, onvalue=self.des, width=20, text='')
+        self.r2.place(relx=0.5, rely=0.5, anchor='center')
 
-        self.dik = {self.nom_col:self.e.get()}
-        print(self.dik)
+    #def update(self):
+            
