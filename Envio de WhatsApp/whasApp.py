@@ -41,6 +41,7 @@ image_path = r''
 variables = {}
 colCelular = 3
 nomCli = 2
+excel_data = []#data sin encabezados
 
 #* Funciones
 def read_excel_file(sheet):
@@ -118,6 +119,7 @@ def llenarVars(proyecto):
 
 def lee_excel():
     # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list    
+    global excel_data
     whole_excel = {}
     first_row = read_first_row()
     excel_data = read_excel_file(sheet)
@@ -132,6 +134,8 @@ def lee_excel():
     #print(excel_data)
     return whole_excel
 
+
+
 #cols = funcionjsjs2(first_row(sheet))
 
 #pepe = list(cols.keys())# Todo: estas son solo llaves
@@ -139,8 +143,9 @@ def lee_excel():
 #print(excel_data)
 
 # Todo: Iterate over the message properties and send messages
-def envio_msj(excel_data):
+def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir excel_data, msj, col_num, col_destino, variables
     # Todo: Initialize Chrome driver with options
+    
     driver = webdriver.Chrome(options=options)
     # Open WhatsApp Web and wait for QR code scan
     driver.get(whatsapp_web_url)
@@ -151,13 +156,15 @@ def envio_msj(excel_data):
     wait.until(EC.title_contains("WhatsApp"))
 
     print(image_path)
+    print("excel_data:")
+    print(excel_data)
     
     if nombre_proyecto != '':
        llenarVars(nombre_proyecto)
     for contacto in excel_data:
         #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
         chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
-        text = message
+        text = msj
         try:
             # Todo: Here we change the text with the name of the store
             #?text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
@@ -169,7 +176,7 @@ def envio_msj(excel_data):
                             
             # Search for the chat by phone number
             #search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
-            search_btn = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[3]')))
+            search_btn = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()-1]')))
             search_btn.click()
             search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/div[2]/div/div[1]')))        
                                                                                 
@@ -207,7 +214,7 @@ def envio_msj(excel_data):
                 random_number = random.randint(2, 8)
                 time.sleep(random_number)
             except Exception as e:            
-                print('Ocurrio un error con '+ contacto[nomCli] + ' En envio 1')
+                print('Ocurrio un error con '+ contacto[colDestino] + ' En envio 1')
                 print(e)
                 '''
                 # Click on the button to errace the 

@@ -204,65 +204,8 @@ class InputNumber(ctk.CTkFrame):
     def Leave_input(self, event):
         if event.widget.get() == '':
             self.entry.delete(0, "end")
-            self.entry.insert(0, str(float(0)))
+            self.entry.insert(0, str(float(0)))    
 
-    
-class ItemElement(ctk.CTkFrame):
-    def __init__(self, *args,
-                 width: int = 100,
-                 command: Callable = None,
-                 images: str = "Default/No_image.jpg",
-                 json_list: dict = None,
-                 **kwargs):
-        
-        super().__init__(*args, **kwargs)
-        # *variables
-        self.command = command
-        self.images = images
-        self.json_list = json_list
-        self.smallImage = ctk.CTkImage(Image.open('caminar.jpg'), size=(30,30))
-        self.smallMove = ctk.CTkImage(light_image=Image.open("Default/bars_dark.png"), dark_image=Image.open("Default/bars_dark.png"), size=(30, 30))
-
-
-        # *frame configuration
-        self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        
-        self.FrameButons = ctk.CTkFrame(self)
-        self.FrameButons.configure(fg_color=("gray78", "gray28")) 
-
-        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
-        self.grid_columnconfigure(1, weight=1)  # entry expands
-
-        self.FrameButons.grid(row=0, column=0)
-        
-        # * frame scheme Input
-        
-        self.frameMove = ctk.CTkLabel(self.FrameButons, image=self.smallMove, width=30, text="")
-        self.frameMove.grid( row=0, column=0, padx=1, pady=1)
-
-        self.frameImage = ctk.CTkLabel(self.FrameButons, image=self.smallImage, width=30, text="")
-        self.frameImage.grid(row=0, column=1, padx=1, pady=1)
-
-        self.frameInfomation = ctk.CTkFrame(self.FrameButons)
-        self.frameInfomation.grid(row=0, column=2, padx=1, pady=1)
-
-        self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Name: " + self.json_list['Name'])
-        self.Name_Label.grid(row=0, column=0, padx=0, pady=0)
-
-        self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
-        self.Name_Label.grid(row=1, column=0, padx=0, pady=0)
-        # *default value
-
-
-    def get(self) -> Union[float, None]:
-        try:
-            return float(self.entry.get())
-        except ValueError:
-            return None
-
-    def set(self, value: float):
-        self.entry.delete(0, "end")
-        self.entry.insert(0, str(float(value)))
     
 class FlatList(ctk.CTkFrame):
     def __init__(self, *args,
@@ -272,10 +215,12 @@ class FlatList(ctk.CTkFrame):
                  Item: Optional[Callable] = None, # Default to None
                  background_color: str = '#FFFFFF', # Default to
                  adaptable: bool = False, #For adaptability of the width and height
+                 Otros: Optional[any] = None,
                  **kwargs):
         
         super().__init__(*args, width=width, height=height, **kwargs)
         # *variables
+        self.otros = Otros
         self.width = width
         self.height = height
         self.json_list = json_list
@@ -313,7 +258,10 @@ class FlatList(ctk.CTkFrame):
                     key = i
                 else:
                     key = self.Key_List[i]
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key) ,
+                #item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key),
+                #    width = self.width, height = self.height)
+                #print(callable(self.otros))
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
                     width = self.width, height = self.height)
                 item_instance.grid(row = 0, column = 0)
             else:

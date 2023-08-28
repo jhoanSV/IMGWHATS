@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Optional
 from Vcss import FlatList, El_Tab_view
 from components import ItemProject, Table
 import whasApp
@@ -27,7 +27,7 @@ class Los_proyectos(ctk.CTkFrame):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                     fg_color=fg_color, **kwargs)
 
-        self.next = El_metodo        
+        self.next = El_metodo
 
         #*Colores
         self.CGreen = "#1C9F80"
@@ -45,11 +45,10 @@ class Los_proyectos(ctk.CTkFrame):
         self.unTexto.place(relx=0.1, rely=0.1, anchor='nw')
 
         with open('./proyectos.json', 'r') as json_file:
-            projects_json = json.load(json_file)
+            self.projects_json = json.load(json_file)
 
-        self.ListaDeProyectos = FlatList(self.frame_iz, json_list=projects_json, Item=ItemProject, width= 200)
+        self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject, width= 200, Otros=self.proj_selection)
         self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
-
 
         #panel derecho
         self.frame_der = ctk.CTkFrame(self, fg_color = 'transparent', border_width=0,
@@ -75,7 +74,7 @@ class Los_proyectos(ctk.CTkFrame):
         self.btn_sig.place(relx=0.9, rely=0.92, anchor='se')
 
     def btn_sig_funct(self):
-        self.next()
+        self.next(1)
 
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
@@ -83,6 +82,11 @@ class Los_proyectos(ctk.CTkFrame):
         print(type(self.xl_path))
         self.el_entry.delete(0, "end")  # Limpiar el contenido del Entry
         self.el_entry.insert(0, self.xl_path)
+
+    def proj_selection(self, rutXl, json):
+        self.el_entry.delete(0, "end")
+        self.el_entry.insert(0, rutXl)
+        self.next(2, json)
 
 class Vars(ctk.CTkFrame):
     def __init__(self,
@@ -119,14 +123,54 @@ class Send(ctk.CTkFrame):
     def __init__(self,
                  *args,
                  master: any,
-                 El_metodo: Callable = None,
                  width: int = 200,
                  height: int = 200,
                  corner_radius: int | str | None = 0,
                  fg_color: str | Tuple[str, str] | None = None,
-                 path: str=None,
+                 data_proj: Optional[dict] = None,
                  **kwargs):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                 fg_color=fg_color, **kwargs)
         
-        self.pack(fill='x', expand=True)
+        self.data_proj = data_proj
+
+        #self.El_metodo = El_metodo
+        
+        self.configure(fg_color='white')
+
+        self.label1 = ctk.CTkLabel(self, text='Adjuntar archivos multimedia', text_color=CGreen,
+            font=('', 20))
+        self.label1.place(relx=0.05, rely=0.09)
+
+        self.search_btn = ctk.CTkButton(self, text="Buscar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command='laFuncion')
+        self.search_btn.place(relx=0.05, rely=0.15, anchor='nw')
+        self.entry_media = ctk.CTkEntry(self, placeholder_text="Foto/s, Video/s, carpeta", fg_color="#D9D9D9",
+            text_color='black', font=('', 18), border_width=0, corner_radius=0)
+        self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.7, relheight=0.06, anchor='nw')
+
+        self.label2 = ctk.CTkLabel(self, text='Mensaje', text_color=CGreen,
+            font=('', 20))
+        self.label2.place(relx=0.05, rely=0.25)
+
+        self.entry_msj = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
+            font=('', 18), border_width=0, corner_radius=0)
+        self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.9, relheight=0.5, anchor='nw')
+
+        self.send_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.enviar_msj())
+        self.send_btn.place(relx=0.05, rely=0.84, anchor='nw')
+
+        #Llena entrys
+        if self.data_proj:
+            print(self.data_proj['msj'])
+            self.entry_media.delete(0, "end")
+            self.entry_media.insert(0, self.data_proj['recurso'])
+            self.entry_msj.delete(0.0, "end")
+            self.entry_msj.insert(0.0, self.data_proj['msj'])
+    
+    def enviar_msj(self):
+
+        whasApp.envio_msj(msj=self.entry_msj.get("0.0", "end"), image_path=self.entry_media.get(), 
+            variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
+            colDestino=self.data_proj["colDestino"])

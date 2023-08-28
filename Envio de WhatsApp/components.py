@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Callable
 import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
@@ -16,16 +16,17 @@ class ItemProject(ctk.CTkFrame):
                  width: int = 700,
                  height: int = 500,
                  json_list: dict = None,  # Use dict for JSON object
-                 Project_name: str = None,
-                 On_press: callable = None,
+                 #Project_name: str = None,
+                 On_press: Optional[Callable] = None,
+                 Otros: Optional[any] = None,
                  **kwargs):
         
         super().__init__(*args, **kwargs)
         self.json_list = json_list
         self.width = width
         self.height = height
-        self.Project_name = Project_name
-        self.On_press = On_press
+        self.Project_name = Otros["Project_name"]
+        self.On_press = Otros['Hook']
         self.configure(width=self.width, fg_color='transparent')
         self.pack()
 
@@ -44,8 +45,13 @@ class ItemProject(ctk.CTkFrame):
         self.Name_Label.bind("<Button-1>", self.start_drag)
 
     def start_drag(self, event):
+        print(callable(self.On_press))
         if self.On_press:
-            self.On_press
+            print(self.On_press)
+            self.On_press(self.json_list['rutaXl'], self.json_list)
+
+    def get_data(self):        
+        return self.json_list, self.Project_name
 
 class Table(ctk.CTkFrame):
     def __init__(self, 
@@ -97,6 +103,7 @@ class El_Item(ctk.CTkFrame):
     def __init__(self, *args,                
                  json_list: str = 'NotFound',
                  Project_name: str=None,
+                 Otros: Optional[any] = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
