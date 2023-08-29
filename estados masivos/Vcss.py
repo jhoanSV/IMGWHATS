@@ -717,7 +717,8 @@ class ImageContainer(tk.Frame):
                 #print(self.image_objects)
                 # Create an image item on the canvas for each image object in the list
                 # Crear un objeto ObjectOnCanvas para cada imagen y agregarlo a la lista
-                obj = ObjectOnCanvas(self.canvas, x, y, image)
+                #obj = ObjectOnCanvas(self.canvas, x, y, image)
+                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'])
                 self.image_objects.append(obj)
                 #self.canvas.create_image(self.x, self.y, anchor="nw", image=self.Image)
                 #bg = self.capture_screenshot()
@@ -773,11 +774,13 @@ class ImageContainer(tk.Frame):
     '''    #screenshot.save(save_path)
 
 class ObjectOnCanvas:
-    def __init__(self, canvas, x, y, image):
+    def __init__(self, canvas, x, y, picture):
         self.canvas = canvas
         self.x = x
         self.y = y
-        self.image = image
+        #self.image = picture
+        self.picture = Image.open(picture)
+        self.image = ImageTk.PhotoImage(self.picture)
         self.Width = self.image.width()
         self.Height = self.image.height()
         super().__init__()
@@ -794,22 +797,48 @@ class ObjectOnCanvas:
         self.Square = Image.new('RGBA',(4,4), '#000000')
         self.square_point = ImageTk.PhotoImage(self.Square)
 
-        #Punto superior izquierdo
+        #?Punto superior izquierdo
         self.Psi = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.square_point)
-        #Punto superior central
+        self.canvas.tag_bind(self.Psi,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psi,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psi,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto superior central
         self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y, anchor="nw", image=self.square_point)
-        #Punto superior derecho
+        self.canvas.tag_bind(self.Psc,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psc,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psc,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto superior derecho
         self.Psd = self.canvas.create_image(self.x + self.Width - 4,self.y, anchor="nw", image=self.square_point)
-        #Punto inferior izquierdo
+        self.canvas.tag_bind(self.Psd,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psd,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psd,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior izquierdo
         self.Pii = self.canvas.create_image(self.x, self.y + self.Height - 4, anchor="nw", image=self.square_point)
-        #Punto inferior central
+        self.canvas.tag_bind(self.Pii,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pii,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
+        self.canvas.tag_bind(self.Pii,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior central
         self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 4, anchor="nw", image=self.square_point)
-        #Punto inferior derecho
+        self.canvas.tag_bind(self.Pic,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pic,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
+        self.canvas.tag_bind(self.Pic,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior derecho
         self.Pid = self.canvas.create_image(self.x + self.Width - 4,self.y + self.Height - 4, anchor="nw", image=self.square_point)
-        # Punto lateral izquierdo
+        self.canvas.tag_bind(self.Pid,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pid,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
+        self.canvas.tag_bind(self.Pid,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto lateral izquierdo
         self.Pli = self.canvas.create_image(self.x,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
-        #Punto lateral derecho
+        self.canvas.tag_bind(self.Pli,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pli,"<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
+        self.canvas.tag_bind(self.Pli,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto lateral derecho
         self.Pld = self.canvas.create_image(self.x + self.Width - 4,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
+        self.canvas.tag_bind(self.Pld,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pld,"<B1-Motion>", lambda event: self.on_resize(event, anchor_x = 1, move_x=1, move_y=0))
+        self.canvas.tag_bind(self.Pld,"<ButtonRelease-1>", self.stop_drag)
+        self.drag_data = {"x": 0, "y": 0}
+        
     def start_drag(self, event):
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
@@ -845,27 +874,51 @@ class ObjectOnCanvas:
         dy = event.y - self.drag_data["y"]
         
         if move_x != 0 and move_y != 0:
-            aspect_ratio = (self.image_width + (sign*dx))/ self.image_width
-            size_x = int(np.around(aspect_ratio * self.ImageDraggable.winfo_width()))
-            size_y = int(np.around(aspect_ratio * self.ImageDraggable.winfo_height()))
+            aspect_ratio = (self.Width + (sign*dx))/ self.Width
+            size_x = int(np.around(aspect_ratio * self.Width))
+            size_y = int(np.around(aspect_ratio * self.Height))
         else:
             drag_x = move_x * dx
             drag_y = move_y * dy
-            size_x = self.ImageDraggable.winfo_width() + drag_x
-            size_y = self.ImageDraggable.winfo_height() + drag_y
+            size_x = self.Width + drag_x
+            size_y = self.Height + drag_y
 
-        new_x = self.winfo_x() + (anchor_x * dx)
-        new_y = self.winfo_y() + (anchor_y * dy)
-        self.place(x=new_x, y=new_y)
+        new_x = anchor_x * dx #self.x + (anchor_x * dx)
+        new_y = anchor_y * dy #self.y + (anchor_y * dy)
 
         if size_x <=0:
             size_x = 1
         if size_y <=0:
             size_y = 1
         #* resizin the image
-        resized_image = self.image.resize((size_x, size_y), Image.ANTIALIAS)
-        self.image_tk = ImageTk.PhotoImage(resized_image)
-        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
+        
+        resized_image = self.picture.resize((size_x, size_y), Image.ANTIALIAS)
+        self.image = ImageTk.PhotoImage(resized_image)
+        self.canvas.itemconfig(self.canvas_obj, image=self.image)
+        self.Width = size_x
+        self.Height = size_y
+        #* Move the image
+        #Principal image
+        self.canvas.move(self.canvas_obj, new_x, new_y)
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, self.x, self.y)
+        #Punto superior central
+        self.canvas.coords(self.Psc, self.x + round((self.Width/2))-2,self.y)
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, self.x + self.Width - 4,self.y)
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, self.x, self.y + self.Height - 4)
+        #Punto inferior central
+        self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 4)
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, self.x + self.Width - 4,self.y + self.Height - 4)
+        # Punto lateral izquierdo
+        self.canvas.coords(self.Pli, self.x,self.y + round((self.Height/2))-2)
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, self.x + self.Width - 4,self.y + round((self.Height/2))-2)
+
+        self.x = self.x + new_x
+        self.y = self.y + new_y
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
         
