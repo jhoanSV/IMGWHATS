@@ -3,8 +3,8 @@ import customtkinter as ctk
 import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 from tkinter import filedialog
-from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel
-from Components import ImageContainer, ItemElement, property_image_bar
+from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer
+from Components import ItemElement, property_image_bar #ImageContainer
 
 size = width, height = 3000, 3000
 # *JSON image properties

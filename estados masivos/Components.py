@@ -4,6 +4,8 @@ from PIL import ImageTk, Image
 from Vcss import DraggableLabel, InputNumber
 from typing import Union, Callable
 import tkinter as tk
+
+
 class ImageContainer(ctk.CTkCanvas):
     def __init__(self, *args,
                  width: int = 700,
@@ -21,7 +23,7 @@ class ImageContainer(ctk.CTkCanvas):
         self.width = width
         self.height = height
         self.configure(width=self.width, height=self.height)
-        num_items = len(self.json_list)
+        #num_items = len(self.json_list)
 
         #canvas = tk.Canvas
         size = (self.Background_image_width, self.Background_image_height)
@@ -37,12 +39,12 @@ class ImageContainer(ctk.CTkCanvas):
                 on_y = (self.height - Item['Height'])/2
                 background_image = Image.new('RGB',size_background, background_color)
                 Bg_image = ctk.CTkImage(background_image, size = size_background)
-                background_continer = ctk.CTkLabel(ImageContainer, image= Bg_image, text="", width=Item['Width'], height=Item['Height'])
+                background_continer = ctk.CTkLabel(self, image= Bg_image, text="", width=Item['Width'], height=Item['Height'])
                 background_continer.place(x=on_x, y=on_y)
                 #background_continer.lower()
             elif Item['Type'] == 'image':
                 picture = Image.open(Item['Name'])
-                frameImage = DraggableLabel(ImageContainer, image=picture)
+                frameImage = DraggableLabel(self, image=picture)
                 frameImage.place(x=0, rely=0)
         #image_tk = ctk.CTkImage(background_image, size=size)
 
