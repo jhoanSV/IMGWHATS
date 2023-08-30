@@ -52,6 +52,9 @@ class ItemProject(ctk.CTkFrame):
 
     def get_data(self):        
         return self.json_list, self.Project_name
+    
+    def get_itemData(self):
+        return
 
 class Table(ctk.CTkFrame):
     def __init__(self, 
@@ -69,18 +72,17 @@ class Table(ctk.CTkFrame):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, **kwargs)
         self.la_var = la_var
         #self.width = width
-        self.t_lista = t_lista
+        self.t_lista = t_lista #Aquí llega el diccionario de datos de la tabla
         self.pack(padx=55, pady=55, fill='x', expand=False, anchor='n')
 
         #*Crea cabecera de tabla----------------------------------
         self.t_head = ctk.CTkFrame(self, fg_color='white', height=40)
         self.t_head.pack(fill='x')
-        self.cols = ['Columnas encontradas','Variables','celular','Nombre Destinatario']
+        self.cols = ['Columnas encontradas','celular','Nombre Destinatario']
         #Crea las 4 columnas de la cabecera
         self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0], width=320)
-        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=310)
-        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=86)
-        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[3], width=132)
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=86)
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
 
         #*Crea cuerpo o filas de tabla-----------------------------
         self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item)
@@ -97,6 +99,10 @@ class Table(ctk.CTkFrame):
         #label.pack()
     
         return frame, label
+    
+    def get_dataTable(self):
+        return self.t_body.otro_get()
+
 
 class El_Item(ctk.CTkFrame):
     #def __init__(self, master, destino, mob_num, val, label_text):
@@ -108,10 +114,12 @@ class El_Item(ctk.CTkFrame):
         super().__init__(*args, **kwargs)
 
         self.nom_col = json_list['Columnas excel']
-        self.entry_text = tkinter.StringVar()
-        self.entry_text.set(json_list['Variables'])
-        self.cel = json_list['Celular']
-        self.des = json_list['Destino']
+        #self.entry_text = tkinter.StringVar()
+        #self.entry_text.set(json_list['Variables'])
+        #self.cel = json_list['Celular']
+        #self.des = json_list['Destino']
+        self.cel = tkinter.IntVar()
+        self.des = tkinter.IntVar()
         self.configure(fg_color='green')
         self.pack(fill='x')
 
@@ -122,23 +130,33 @@ class El_Item(ctk.CTkFrame):
         self.l.place(relx=0.05, rely=0.05)
 
         #* Entry para la variable
-        self.ef = ctk.CTkFrame(self, fg_color='white', width=310, height=40, corner_radius=0, border_width=1)
+        '''self.ef = ctk.CTkFrame(self, fg_color='white', width=310, height=40, corner_radius=0, border_width=1)
         self.ef.pack(side='left', fill='x', expand=True, anchor='n')
         self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), textvariable=self.entry_text,
             text_color='black', height=40)
-        self.e.place(relx=0, rely=0, anchor='nw')
+        self.e.place(relx=0, rely=0, anchor='nw')'''
 
         #* Checkbox1
         self.r1f = ctk.CTkFrame(self, fg_color='white', width=86, height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r1 = ctk.CTkCheckBox(self.r1f, onvalue=self.cel, width=20, text='')
+        self.r1 = ctk.CTkCheckBox(self.r1f, variable=self.cel, width=20, text='')
         self.r1.place(relx=0.5, rely=0.5, anchor='center')
         
         #* Checkbox2
         self.r2f = ctk.CTkFrame(self, fg_color='white', width=132, height=40, corner_radius=0, border_width=1)
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r2 = ctk.CTkCheckBox(self.r2f, onvalue=self.des, width=20, text='')
+        self.r2 = ctk.CTkCheckBox(self.r2f, variable=self.des, width=20, text='', command=self.update_checkboxes)
         self.r2.place(relx=0.5, rely=0.5, anchor='center')
+
+        #self.get_itemData()
+
+    #def 
+    def update_checkboxes(self):
+        print("update")
+
+    def get_itemData(self):
+        return self.cel.get(), self.des.get()
+
 
     #def update(self):
             

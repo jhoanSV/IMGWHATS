@@ -227,6 +227,7 @@ class FlatList(ctk.CTkFrame):
         self.Item = Item
         self.si_list = True
         self.frames = {}
+        self.items = []
         if (type(self.json_list) == dict):
             self.Key_List = list(self.json_list.keys())
             self.si_list = False
@@ -263,6 +264,7 @@ class FlatList(ctk.CTkFrame):
                 #print(callable(self.otros))
                 item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
                     width = self.width, height = self.height)
+                self.items.append(item_instance.get_itemData())
                 item_instance.grid(row = 0, column = 0)
             else:
                 print('is none')
@@ -285,7 +287,8 @@ class FlatList(ctk.CTkFrame):
         num_items = len(self.Key_List)
         return num_items
     
-
+    def otro_get(self):        
+        return self.items
 
 class DraggableLabel(ctk.CTkLabel):
     def __init__(self, *args,

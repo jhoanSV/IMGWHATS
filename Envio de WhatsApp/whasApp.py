@@ -120,19 +120,19 @@ def llenarVars(proyecto):
 def lee_excel():
     # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list    
     global excel_data
-    whole_excel = {}
+    dict_Xl = {}
     first_row = read_first_row()
     excel_data = read_excel_file(sheet)
     
     for i in range(len(excel_data)):
-        whole_excel[i] = {
+        dict_Xl[i] = {
             "Columnas excel" : first_row[i],
-            "Variables" : '@example',
+            #"Variables" : first_row[],
             "Celular" : False,
             "Destino" : False
         }
     #print(excel_data)
-    return whole_excel
+    return dict_Xl
 
 
 

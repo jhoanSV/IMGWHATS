@@ -108,6 +108,8 @@ class Vars(ctk.CTkFrame):
         #self.lista = whasApp.read_first_row()
         self.lista = whasApp.lee_excel()
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
+        print("data table")
+        print(self.La_tablajs.get_dataTable())
 
         self.save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=self.save)
