@@ -271,6 +271,8 @@ class FlatList(ctk.CTkFrame):
             self.frames[i] = FrameItem
         # *default value
 
+    def update_list(self, new_list):
+        self.json_list = new_list
 
     def get(self) -> Union[float, None]:
         try:
@@ -287,7 +289,7 @@ class FlatList(ctk.CTkFrame):
         num_items = len(self.Key_List)
         return num_items
     
-    def otro_get(self):        
+    def otro_get(self):
         return self.items
 
 class DraggableLabel(ctk.CTkLabel):

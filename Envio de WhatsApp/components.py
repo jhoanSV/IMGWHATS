@@ -85,9 +85,20 @@ class Table(ctk.CTkFrame):
         self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
 
         #*Crea cuerpo o filas de tabla-----------------------------
-        self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item)
+
+        self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
         self.t_body.pack(side='bottom', fill='both')
-    
+
+    def change(self, row, col, val):
+        for i in range(len(self.t_lista)):
+            var = self.t_lista[i]
+            if int(row) == i:
+                var[col] = val
+            else:
+                var[col] = 0
+        self.t_body.update_list(new_list=self.t_lista)
+        print(self.t_lista)
+
     #!Esta funcion es para las filas de la tabla        
     def create_frame_and_label(self, parent, text, width):
 
@@ -114,14 +125,17 @@ class El_Item(ctk.CTkFrame):
         super().__init__(*args, **kwargs)
 
         self.nom_col = json_list['Columnas excel']
+        self.fila = Otros['Project_name']
+        self.change = Otros['Hook']
         #self.entry_text = tkinter.StringVar()
         #self.entry_text.set(json_list['Variables'])
-        #self.cel = json_list['Celular']
-        #self.des = json_list['Destino']
-        self.cel = tkinter.IntVar()
-        self.des = tkinter.IntVar()
+        #self.cel = tkinter.IntVar()
+        #self.des = tkinter.IntVar()
+        self.cel = json_list['Celular']
+        self.des = json_list['Destino']
         self.configure(fg_color='green')
         self.pack(fill='x')
+
 
         #* Label con el nombre de col
         self.lf = ctk.CTkFrame(self, fg_color='white', width=320, height=40, corner_radius=0, border_width=1)
@@ -139,24 +153,45 @@ class El_Item(ctk.CTkFrame):
         #* Checkbox1
         self.r1f = ctk.CTkFrame(self, fg_color='white', width=86, height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r1 = ctk.CTkCheckBox(self.r1f, variable=self.cel, width=20, text='')
-        self.r1.place(relx=0.5, rely=0.5, anchor='center')
+        #self.checkbox1.configure(master=self.r1f)
+        #self.checkbox1.place(relx=0.5, rely=0.5, anchor='center')
+        self.cb1 = ctk.CTkCheckBox(self.r1f, onvalue=1, offvalue=0, width=20, text='',
+            command=lambda: self.update_cel())
+        self.cb1.place(relx=0.5, rely=0.5, anchor='center')
         
         #* Checkbox2
         self.r2f = ctk.CTkFrame(self, fg_color='white', width=132, height=40, corner_radius=0, border_width=1)
-        self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
-        self.r2 = ctk.CTkCheckBox(self.r2f, variable=self.des, width=20, text='', command=self.update_checkboxes)
-        self.r2.place(relx=0.5, rely=0.5, anchor='center')
+        self.r2f.pack(side='left', fill='x', expand=True, anchor='n')        
+        #self.checkbox2.configure(master=self.r1f)
+        #self.checkbox2.place(relx=0.5, rely=0.5, anchor='center')
+        self.cb2 = ctk.CTkCheckBox(self.r2f, onvalue=1, offvalue=0, width=20, text='',
+            command=lambda: self.update_des())
+        self.cb2.place(relx=0.5, rely=0.5, anchor='center')
 
         #self.get_itemData()
 
     #def 
-    def update_checkboxes(self):
-        print("update")
+
+    def update_cel(self):
+        self.change(self.fila, 'Celular', self.cb1.get())
+        
+    def update_des(self):
+        self.change(self.fila, 'Destino', self.cb2.get())
 
     def get_itemData(self):
-        return self.cel.get(), self.des.get()
+        return #self.cel.get(), self.des.get(), self.nom_col
 
 
     #def update(self):
-            
+
+class CheckboxGroup:
+    def __init__(self, master, checkbox_groups):
+        self.var = tkinter.IntVar()
+        self.checkbox = ctk.CTkCheckBox(master, text='', variable=self.var, command=self.update_checkboxes, width=20)
+        self.checkbox.pack()
+        self.checkbox_groups = checkbox_groups
+
+    def update_checkboxes(self):
+        for checkbox_group in self.checkbox_groups:
+            if checkbox_group is not self:
+                checkbox_group.var.set(0)

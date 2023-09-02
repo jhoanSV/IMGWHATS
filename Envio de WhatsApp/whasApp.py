@@ -124,14 +124,14 @@ def lee_excel():
     first_row = read_first_row()
     excel_data = read_excel_file(sheet)
     
-    for i in range(len(excel_data)):
+    for i in range(len(first_row)):
         dict_Xl[i] = {
             "Columnas excel" : first_row[i],
             #"Variables" : first_row[],
-            "Celular" : False,
-            "Destino" : False
+            "Celular" : 0,
+            "Destino" : 0
         }
-    #print(excel_data)
+    print(dict_Xl)
     return dict_Xl
 
 
