@@ -26,11 +26,11 @@
         {
             "Type": "image",
             "Name": "001.png",
-            "Width": 300,
-            "Height": 300,
+            "Width": 200,
+            "Height": 200,
             "Rotate": 60,
-            "x_position": 100,
-            "y_position": 0,
+            "x_position": 200,
+            "y_position": 50,
             "xCenter": false,
             "yCenter": false
         },
