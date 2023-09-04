@@ -45,15 +45,16 @@ class ItemProject(ctk.CTkFrame):
         self.Name_Label.bind("<Button-1>", self.start_drag)
 
     def start_drag(self, event):
-        print(callable(self.On_press))
         if self.On_press:
-            print(self.On_press)
             self.On_press(self.json_list['rutaXl'], self.json_list)
 
     def get_data(self):        
         return self.json_list, self.Project_name
     
     def get_itemData(self):
+        return
+    
+    def update_row(self,  bla):
         return
 
 class Table(ctk.CTkFrame):
@@ -73,6 +74,8 @@ class Table(ctk.CTkFrame):
         self.la_var = la_var
         #self.width = width
         self.t_lista = t_lista #Aquí llega el diccionario de datos de la tabla
+        self.prevCb = None
+
         self.pack(padx=55, pady=55, fill='x', expand=False, anchor='n')
 
         #*Crea cabecera de tabla----------------------------------
@@ -89,15 +92,18 @@ class Table(ctk.CTkFrame):
         self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
         self.t_body.pack(side='bottom', fill='both')
 
-    def change(self, row, col, val):
+    def change(self, numbCol, nomCol, val):
         for i in range(len(self.t_lista)):
             var = self.t_lista[i]
-            if int(row) == i:
-                var[col] = val
+            if int(numbCol) == i:
+                var[nomCol] = val
             else:
-                var[col] = 0
-        self.t_body.update_list(new_list=self.t_lista)
-        print(self.t_lista)
+                var[nomCol] = 0
+        
+        self.prevCb = int(numbCol)
+        #print("checkButton selecionado: " + str(self.prevCb))
+        self.t_body.update_list(new_list=self.t_lista)#, prev=self.prevCb)
+        #print(self.t_lista)
 
     #!Esta funcion es para las filas de la tabla        
     def create_frame_and_label(self, parent, text, width):
@@ -124,15 +130,18 @@ class El_Item(ctk.CTkFrame):
                  **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.nom_col = json_list['Columnas excel']
-        self.fila = Otros['Project_name']
+        self.json_list = json_list
+        self.nom_col = self.json_list['Columnas excel']
+        self.numCol = Otros['Project_name']
         self.change = Otros['Hook']
         #self.entry_text = tkinter.StringVar()
         #self.entry_text.set(json_list['Variables'])
         #self.cel = tkinter.IntVar()
         #self.des = tkinter.IntVar()
-        self.cel = json_list['Celular']
-        self.des = json_list['Destino']
+        self.cel = tkinter.IntVar()#json_list['Celular']
+        self.cel.set(self.json_list['Celular'])
+        self.des = tkinter.IntVar()
+        self.des.set(self.json_list['Destino'])
         self.configure(fg_color='green')
         self.pack(fill='x')
 
@@ -155,7 +164,7 @@ class El_Item(ctk.CTkFrame):
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
         #self.checkbox1.configure(master=self.r1f)
         #self.checkbox1.place(relx=0.5, rely=0.5, anchor='center')
-        self.cb1 = ctk.CTkCheckBox(self.r1f, onvalue=1, offvalue=0, width=20, text='',
+        self.cb1 = ctk.CTkCheckBox(self.r1f, variable=self.cel, onvalue=1, offvalue=0, width=20, text='',
             command=lambda: self.update_cel())
         self.cb1.place(relx=0.5, rely=0.5, anchor='center')
         
@@ -164,7 +173,7 @@ class El_Item(ctk.CTkFrame):
         self.r2f.pack(side='left', fill='x', expand=True, anchor='n')        
         #self.checkbox2.configure(master=self.r1f)
         #self.checkbox2.place(relx=0.5, rely=0.5, anchor='center')
-        self.cb2 = ctk.CTkCheckBox(self.r2f, onvalue=1, offvalue=0, width=20, text='',
+        self.cb2 = ctk.CTkCheckBox(self.r2f, variable=self.des, onvalue=1, offvalue=0, width=20, text='',
             command=lambda: self.update_des())
         self.cb2.place(relx=0.5, rely=0.5, anchor='center')
 
@@ -173,10 +182,17 @@ class El_Item(ctk.CTkFrame):
     #def 
 
     def update_cel(self):
-        self.change(self.fila, 'Celular', self.cb1.get())
+        self.change(self.numCol, 'Celular', self.cb1.get())
         
     def update_des(self):
-        self.change(self.fila, 'Destino', self.cb2.get())
+        self.change(self.numCol, 'Destino', self.cb2.get())
+
+    def update_row(self, n_list):
+        self.json_list=n_list
+        self.cel.set(self.json_list['Celular'])
+        self.des.set(self.json_list['Destino'])
+        self.cb1.configure(variable=self.cel)
+        self.cb2.configure(variable=self.des)
 
     def get_itemData(self):
         return #self.cel.get(), self.des.get(), self.nom_col

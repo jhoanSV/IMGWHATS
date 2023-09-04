@@ -63,7 +63,7 @@ class view(ctk.CTk):
     def siguiente(self, tab, data_proj=None):
             #try:
                 #*Crea el frame de variables                
-                variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get())
+                variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(), El_metodo=self.reload_switch)
                 self.main_tabV.add_frame(1, variables)
                 self.envio = Send(master=self.main_tabV, data_proj=data_proj)
                 self.main_tabV.add_frame(2, self.envio)
@@ -72,7 +72,7 @@ class view(ctk.CTk):
                 self.Nav_bar.pack(side='top', fill='x', expand=False)
                 self.main_tabV.pack_configure(padx=0, pady=0)
             #except Exception as e:
-                print("error---------------------------jiji")
+                #print("error---------------------------jiji")
                 #print(e)
                 #crea un label para avisar del error
                 error = 'No se ha podido abrir el excel\npor favor verifique c:'
@@ -89,6 +89,10 @@ class view(ctk.CTk):
         elif tab == 2:
             self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
             self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
+    
+    def reload_switch(self, tab, new_dataP):
+         self.envio.update_data(new_dataP)
+         self.switch_tab(tab)
 
 
     '''def btn_tab_vars(self):#!Borrar, aparentemente no se están usando

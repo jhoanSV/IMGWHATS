@@ -228,6 +228,7 @@ class FlatList(ctk.CTkFrame):
         self.si_list = True
         self.frames = {}
         self.items = []
+        self.prev = None
         if (type(self.json_list) == dict):
             self.Key_List = list(self.json_list.keys())
             self.si_list = False
@@ -249,6 +250,7 @@ class FlatList(ctk.CTkFrame):
 
         self.FrameList.grid(row=0, column=0)
         
+        #self.crear()
         # * frame scheme Input
         #for i in range(self.Number_of_items()):
         for i in range(len(self.Key_List)):
@@ -266,13 +268,16 @@ class FlatList(ctk.CTkFrame):
                     width = self.width, height = self.height)
                 self.items.append(item_instance.get_itemData())
                 item_instance.grid(row = 0, column = 0)
+                item_instance.update_row(self.json_list[key])
             else:
                 print('is none')
-            self.frames[i] = FrameItem
+            self.frames[i] = item_instance
         # *default value
 
     def update_list(self, new_list):
         self.json_list = new_list
+        for i in self.frames:
+            self.frames[i].update_row(new_list[i])
 
     def get(self) -> Union[float, None]:
         try:

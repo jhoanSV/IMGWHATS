@@ -1,10 +1,12 @@
 import json
 import time
+import tkinter as tk
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 import openpyxl
 import random
 import os
@@ -94,7 +96,6 @@ def set_xl(file):
     global sheet
 
     excel_file_path = file
-    print(excel_file_path)#borrar después
     #global excel_data
     # Todo: Specify la hoja de excel
     wb = openpyxl.load_workbook(excel_file_path)
@@ -131,7 +132,6 @@ def lee_excel():
             "Celular" : 0,
             "Destino" : 0
         }
-    print(dict_Xl)
     return dict_Xl
 
 
@@ -141,13 +141,15 @@ def lee_excel():
 #pepe = list(cols.keys())# Todo: estas son solo llaves
 #excel_data = read_excel_file(sheet)
 #print(excel_data)
+wait = None
+driver = None
 
 # Todo: Iterate over the message properties and send messages
 def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir excel_data, msj, col_num, col_destino, variables
+
     # Todo: Initialize Chrome driver with options
-    
+    # Open WhatsApp Web and wait for QR code scan        
     driver = webdriver.Chrome(options=options)
-    # Open WhatsApp Web and wait for QR code scan
     driver.get(whatsapp_web_url)
     print("Scan the QR code and press enter")
     input()
@@ -169,8 +171,8 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             # Todo: Here we change the text with the name of the store
             #?text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
             # Todo: The next loop begins selecting each key/var, and if it exists in the message, change it
-            for i, key in enumerate(variables):#Pepe es una lista de claves
-                text = text.replace(key, contacto[i])
+            for i, key in enumerate(variables):
+                text = text.replace(key, str(contacto[i]))
             print("Vista previa del mensaje: ")
             print(text)
                             
@@ -182,7 +184,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                                                                                 
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             #search_input.clear()
-            search_input.send_keys('+57'+contacto[colCelular])
+            search_input.send_keys('+57'+str(contacto[colCelular]))
             time.sleep(3)
 
             # Click on the chat to open it
@@ -193,7 +195,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             time.sleep(5)
         except Exception as e:
             print("An error occurred:", str(e));
-            print('Ocurrio un error con '+ contacto[nomCli] + ' al seleccionar contacto')
+            print('Ocurrio un error con '+ str(contacto[nomCli]) + ' al seleccionar contacto')
             print(e)
             # Click on the button to errace the //*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/span/button
             #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
@@ -214,7 +216,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 random_number = random.randint(2, 8)
                 time.sleep(random_number)
             except Exception as e:            
-                print('Ocurrio un error con '+ contacto[colDestino] + ' En envio 1')
+                print('Ocurrio un error con '+ str(contacto[colDestino]) + ' En envio 1')
                 print(e)
                 '''
                 # Click on the button to errace the 
@@ -247,7 +249,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 time.sleep(random_number)
             except Exception as e:
                 print("An error occurred:", str(e))
-                print('Ocurrio un error con '+ contacto[nomCli] + ' En envio 2')
+                print('Ocurrio un error con '+ str(contacto[nomCli]) + ' En envio 2')
                 # Click on the button to errace the
                 '''
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
@@ -256,7 +258,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 continue
         else:
             try:
-                image = search_file(image_path, contacto['Cod'])
+                image = search_file(image_path, str(contacto['Cod']))
                 
                 #esta es la parte para enviar la imagen
                 attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]')))
@@ -281,7 +283,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 time.sleep(random_number)
             except Exception as e:
                 print("An error occurred:", str(e))
-                print('Ocurrio un error con '+ contacto['Ferreteria'] + ' En envio 3')
+                print('Ocurrio un error con '+ str(contacto['Ferreteria']) + ' En envio 3')
                 # Click on the button to errace the 
                 '''
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))

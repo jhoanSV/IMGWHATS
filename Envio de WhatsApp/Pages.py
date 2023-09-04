@@ -79,7 +79,6 @@ class Los_proyectos(ctk.CTkFrame):
     def buscar_xl(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar Excel', filetypes=(('Archivo Excel', '*.xlsx'), ('Todos los archivos', '*')))
         self.xl_path = self.file_name
-        print(type(self.xl_path))
         self.el_entry.delete(0, "end")  # Limpiar el contenido del Entry
         self.el_entry.insert(0, self.xl_path)
 
@@ -102,21 +101,40 @@ class Vars(ctk.CTkFrame):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                 fg_color=fg_color, **kwargs)
 
-        self.path = r''+path
+        self.switch = El_metodo
+        self.El_path = path
+        self.path = r''+self.El_path
         self.configure(fg_color='white')
         whasApp.set_xl(self.path)
+        self.variables = {}
         #self.lista = whasApp.read_first_row()
         self.lista = whasApp.lee_excel()
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
 
-        self.save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command=self.save)
+        self.save_btn = ctk.CTkButton(self, text="Siguiente", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.save())
         self.save_btn.place(relx=0.8, rely=0.8, anchor='se')
 
     def save(self):
-        data_table = self.La_tablajs.get_dataTable()
-        print("data table")
-        print(data_table)
+        self.colCelular = 0
+        self.colDestino = 0        
+        for i in range(len(self.lista)):
+            col = self.lista[i]
+            self.variables['@' + str(col['Columnas excel'])] = i
+            if col['Celular'] == 1:
+                self.colCelular = i
+            if col['Destino'] == 1:
+                self.colDestino = i
+        self.temp = {
+            "rutaXl": str(self.El_path),
+            "msj":"",
+            "recurso":"",
+            "variables":self.variables,
+            "colCelular":self.colCelular,
+            "colDestino":self.colDestino
+        }
+        
+        self.switch(2, self.temp)
 
     #def get(self):
         
@@ -159,19 +177,38 @@ class Send(ctk.CTkFrame):
             font=('', 18), border_width=0, corner_radius=0)
         self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.9, relheight=0.5, anchor='nw')
 
-        self.send_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command=lambda: self.enviar_msj())
-        self.send_btn.place(relx=0.05, rely=0.84, anchor='nw')
+        self.Open_btn = ctk.CTkButton(self, text="Abrir Wasapo", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.open())
+        self.Open_btn.place(relx=0.05, rely=0.84, anchor='nw')
+
+        #self.Send_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
+            #hover_color='#115e45', font=('', 18), command=lambda: self.enviar_msj())#, state='disabled')
+        #self.Send_btn.place(relx=0.2, rely=0.84, anchor='nw')        
 
         #Llena entrys
         if self.data_proj:
-            print(self.data_proj['msj'])
-            self.entry_media.delete(0, "end")
-            self.entry_media.insert(0, self.data_proj['recurso'])
-            self.entry_msj.delete(0.0, "end")
-            self.entry_msj.insert(0.0, self.data_proj['msj'])
+            self.update_data(self.data_proj)
+            
     
-    def enviar_msj(self):
+    def update_data(self, data):
+        self.data_proj = data
+        print(self.data_proj['msj'])
+        self.entry_media.delete(0, "end")
+        self.entry_media.insert(0, self.data_proj['recurso'])
+        self.entry_msj.delete(0.0, "end")
+        self.entry_msj.insert(0.0, self.data_proj['msj'])   
+
+#self.after(5000, lambda: self.Send_btn.configure(state='normal'))
+
+    def open(self):
+
+        pregunta = tkinter.messagebox.askquestion(
+            "Precaución", "Por favor, esperar a que cargue completamente la página de whatsapp. Leer el QR y Luego oprimir el botón de Envío" +
+            "¿Volver a mostrar este mensaje?"
+        )
+
+        if pregunta == "yes":
+            print("hola")
 
         whasApp.envio_msj(msj=self.entry_msj.get("0.0", "end"), image_path=self.entry_media.get(), 
             variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
