@@ -18,6 +18,9 @@ whatsapp_web_url = "https://web.whatsapp.com/"
 options = webdriver.ChromeOptions()
 # Todo: Configure Chrome driver option
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
+wait = None
+driver = None
+Errors = []
 
 #* Lista de variables
 #nombre_proyecto = 'pedidos en ruta'
@@ -41,8 +44,8 @@ image_path = r''
                 "@NFactura":5
             }'''
 variables = {}
-colCelular = 3
-nomCli = 2
+#colCelular = 3
+colDes = 0
 excel_data = []#data sin encabezados
 
 #* Funciones
@@ -101,23 +104,6 @@ def set_xl(file):
     wb = openpyxl.load_workbook(excel_file_path)
     sheet = wb.active
 
-def llenarVars(proyecto):
-    global excel_file_path
-    global message
-    global image_path
-    global variables
-    global colCelular
-    global nomCli
-    with open("proyectos.json") as archi_json:
-        el_json = json.load(archi_json)
-    Jvariables = el_json[proyecto]
-    excel_file_path = Jvariables['rutaXl']
-    message = Jvariables['msj']
-    image_path = r''+Jvariables['recurso']
-    variables = Jvariables['variables']
-    colCelular = Jvariables['colCelular']
-    nomCli = Jvariables['NomCli']
-
 def lee_excel():
     # Todo: Read the Excel file and get the data as a dictionary. Currently as an array/list    
     global excel_data
@@ -134,19 +120,19 @@ def lee_excel():
         }
     return dict_Xl
 
-
-
-#cols = funcionjsjs2(first_row(sheet))
-
-#pepe = list(cols.keys())# Todo: estas son solo llaves
-#excel_data = read_excel_file(sheet)
-#print(excel_data)
-wait = None
-driver = None
+def set_errors(fil_contacto):
+    Errors.append(fil_contacto)
+def get_errors():
+    los_errores = []
+    for fila in Errors:
+        los_errores.append(fila[colDes])
+    return los_errores
 
 # Todo: Iterate over the message properties and send messages
 def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir excel_data, msj, col_num, col_destino, variables
 
+    global colDes
+    colDes = colDestino
     # Todo: Initialize Chrome driver with options
     # Open WhatsApp Web and wait for QR code scan        
     driver = webdriver.Chrome(options=options)
@@ -160,9 +146,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
     print(image_path)
     print("excel_data:")
     print(excel_data)
-    
-    if nombre_proyecto != '':
-       llenarVars(nombre_proyecto)
+
     for contacto in excel_data:
         #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
         chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
@@ -194,14 +178,10 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             chat_element.click()
             time.sleep(5)
         except Exception as e:
-            print("An error occurred:", str(e));
-            print('Ocurrio un error con '+ str(contacto[nomCli]) + ' al seleccionar contacto')
+            print('Ocurrio un error con '+ str(contacto[colDestino]) + ' al seleccionar contacto')
             print(e)
-            # Click on the button to errace the //*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/span/button
-            #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
-            #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div')))
+            set_errors(str(contacto))
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
-                                                                                  
             chat_element.click()
             continue
         if image_path == '':
@@ -218,6 +198,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             except Exception as e:            
                 print('Ocurrio un error con '+ str(contacto[colDestino]) + ' En envio 1')
                 print(e)
+                set_errors(str(contacto))
                 '''
                 # Click on the button to errace the 
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
@@ -249,7 +230,8 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 time.sleep(random_number)
             except Exception as e:
                 print("An error occurred:", str(e))
-                print('Ocurrio un error con '+ str(contacto[nomCli]) + ' En envio 2')
+                print('Ocurrio un error con '+ str(contacto[colDestino]) + ' En envio 2')
+                set_errors(str(contacto))
                 # Click on the button to errace the
                 '''
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
@@ -284,14 +266,10 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             except Exception as e:
                 print("An error occurred:", str(e))
                 print('Ocurrio un error con '+ str(contacto['Ferreteria']) + ' En envio 3')
-                # Click on the button to errace the 
-                '''
-                chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
-                chat_element.click()
-                '''
+                set_errors(str(contacto))
                 continue
 
-    #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+'''    #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
     send_button.click()
@@ -308,6 +286,6 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
     #click to send the message
 
     # Close the browser
-    driver.quit()
+    driver.quit()'''
 
 #envio_msj()

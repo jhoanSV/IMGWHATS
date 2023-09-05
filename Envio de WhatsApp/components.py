@@ -74,7 +74,6 @@ class Table(ctk.CTkFrame):
         self.la_var = la_var
         #self.width = width
         self.t_lista = t_lista #Aquí llega el diccionario de datos de la tabla
-        self.prevCb = None
 
         self.pack(padx=55, pady=55, fill='x', expand=False, anchor='n')
 
@@ -98,12 +97,9 @@ class Table(ctk.CTkFrame):
             if int(numbCol) == i:
                 var[nomCol] = val
             else:
-                var[nomCol] = 0
+                var[nomCol] = 0        
         
-        self.prevCb = int(numbCol)
-        #print("checkButton selecionado: " + str(self.prevCb))
-        self.t_body.update_list(new_list=self.t_lista)#, prev=self.prevCb)
-        #print(self.t_lista)
+        self.t_body.update_list(new_list=self.t_lista)
 
     #!Esta funcion es para las filas de la tabla        
     def create_frame_and_label(self, parent, text, width):

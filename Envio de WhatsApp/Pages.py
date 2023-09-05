@@ -37,18 +37,21 @@ class Los_proyectos(ctk.CTkFrame):
         self.pack(padx=55, pady=55)
 
         #panel izquierdo
-        self.frame_iz = ctk.CTkFrame(self, fg_color = 'transparent', border_width=0, 
+        self.frame_iz = ctk.CTkFrame(self, fg_color = 'transparent', border_width=0,
             border_color='black')#394
         self.frame_iz.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=True)
 
         self.unTexto = ctk.CTkLabel(self.frame_iz, text="Proyectos", text_color="black", font=('', 24))
         self.unTexto.place(relx=0.1, rely=0.1, anchor='nw')
 
-        with open('./proyectos.json', 'r') as json_file:
-            self.projects_json = json.load(json_file)
-
-        self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject, width= 200, Otros=self.proj_selection)
-        self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
+        try:
+            with open('./proyectos.json', 'r') as json_file:
+                self.projects_json = json.load(json_file)
+            
+            self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject, width= 200, Otros=self.proj_selection)
+            self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
+        except:# Exception as e:
+            print("Ocurrió un error al leer el archivo de proyectos")
 
         #panel derecho
         self.frame_der = ctk.CTkFrame(self, fg_color = 'transparent', border_width=0,
@@ -111,11 +114,11 @@ class Vars(ctk.CTkFrame):
         self.lista = whasApp.lee_excel()
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
 
-        self.save_btn = ctk.CTkButton(self, text="Siguiente", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command=lambda: self.save())
-        self.save_btn.place(relx=0.8, rely=0.8, anchor='se')
+        self.sig_btn = ctk.CTkButton(self, text="Siguiente", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.sig())
+        self.sig_btn.place(relx=0.8, rely=0.8, anchor='se')
 
-    def save(self):
+    def sig(self):
         self.colCelular = 0
         self.colDestino = 0        
         for i in range(len(self.lista)):
@@ -136,8 +139,9 @@ class Vars(ctk.CTkFrame):
         
         self.switch(2, self.temp)
 
-    #def get(self):
-        
+    #def update_table(self):
+     #   self.La_tablajs.update()
+                
 
 class Send(ctk.CTkFrame):
     def __init__(self,
@@ -153,6 +157,7 @@ class Send(ctk.CTkFrame):
                 fg_color=fg_color, **kwargs)
         
         self.data_proj = data_proj
+        self.name_proj = None
 
         #self.El_metodo = El_metodo
         
@@ -167,38 +172,48 @@ class Send(ctk.CTkFrame):
         self.search_btn.place(relx=0.05, rely=0.15, anchor='nw')
         self.entry_media = ctk.CTkEntry(self, placeholder_text="Foto/s, Video/s, carpeta", fg_color="#D9D9D9",
             text_color='black', font=('', 18), border_width=0, corner_radius=0)
-        self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.7, relheight=0.06, anchor='nw')
+        self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.75, relheight=0.06, anchor='nw')
 
         self.label2 = ctk.CTkLabel(self, text='Mensaje', text_color=CGreen,
             font=('', 20))
         self.label2.place(relx=0.05, rely=0.25)
 
+        self.label3 = ctk.CTkLabel(self, text='Notas', text_color=CGreen,
+            font=('', 20))
+        self.label3.place(relx=0.73, rely=0.25)
+
         self.entry_msj = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
             font=('', 18), border_width=0, corner_radius=0)
-        self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.9, relheight=0.5, anchor='nw')
+        self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.65, relheight=0.5, anchor='nw')
+
+        self.notes = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
+            font=('', 18), border_width=0, corner_radius=0)
+        self.notes.place(relx=0.73, rely=0.3, relwidth=0.22, relheight=0.5, anchor='nw')
 
         self.Open_btn = ctk.CTkButton(self, text="Abrir Wasapo", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
         self.Open_btn.place(relx=0.05, rely=0.84, anchor='nw')
 
-        #self.Send_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
-            #hover_color='#115e45', font=('', 18), command=lambda: self.enviar_msj())#, state='disabled')
-        #self.Send_btn.place(relx=0.2, rely=0.84, anchor='nw')        
+        self.Save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
+        self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
+
+        self.show_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.Update_textB())#, state='disabled')
+        self.show_btn.place(relx=0.35, rely=0.84, anchor='nw')
 
         #Llena entrys
         if self.data_proj:
             self.update_data(self.data_proj)
-            
     
     def update_data(self, data):
         self.data_proj = data
-        print(self.data_proj['msj'])
         self.entry_media.delete(0, "end")
         self.entry_media.insert(0, self.data_proj['recurso'])
         self.entry_msj.delete(0.0, "end")
-        self.entry_msj.insert(0.0, self.data_proj['msj'])   
+        self.entry_msj.insert(0.0, self.data_proj['msj'])
 
-#self.after(5000, lambda: self.Send_btn.configure(state='normal'))
+    #self.after(5000, lambda: self.Send_btn.configure(state='normal'))
 
     def open(self):
 
@@ -210,6 +225,41 @@ class Send(ctk.CTkFrame):
         if pregunta == "yes":
             print("hola")
 
-        whasApp.envio_msj(msj=self.entry_msj.get("0.0", "end"), image_path=self.entry_media.get(), 
+        el_msj = self.entry_msj.get("0.0", "end")
+
+        print(self.data_proj)
+        whasApp.envio_msj(msj=el_msj, image_path=self.entry_media.get(), 
             variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
             colDestino=self.data_proj["colDestino"])
+
+    def Save_proj(self):
+        el_msj = str(self.entry_msj.get("0.0", "end"))
+        el_msj = el_msj[:-1]
+        self.data_proj['msj'] = el_msj
+        self.data_proj['recurso'] = self.entry_media.get()
+        print(self.data_proj)
+        dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
+        self.name_proj = dialog.get_input()
+        
+        if self.name_proj:
+            try:
+                with open('./proyectos.json', 'r') as json_file:
+                    projects_json = json.load(json_file)
+                
+                projects_json[str(self.name_proj)] = self.data_proj
+
+                with open("./proyectos.json", "w") as json_file:
+                    json.dump(projects_json, json_file, indent=4)
+
+            except:# Exception as e:
+                print("Ocurrió un error al leer el archivo de proyectos")
+        else:
+            return
+    
+    def Update_textB(self):
+        self.errors = whasApp.get_errors()
+        print(self.errors)
+
+        for i in range(len(self.errors)):
+            self.notes.insert(((i/10) + 0.0), self.errors[i])
+

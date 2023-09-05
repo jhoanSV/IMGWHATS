@@ -63,8 +63,8 @@ class view(ctk.CTk):
     def siguiente(self, tab, data_proj=None):
             #try:
                 #*Crea el frame de variables                
-                variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(), El_metodo=self.reload_switch)
-                self.main_tabV.add_frame(1, variables)
+                self.variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(), El_metodo=self.reload_switch)
+                self.main_tabV.add_frame(1, self.variables)
                 self.envio = Send(master=self.main_tabV, data_proj=data_proj)
                 self.main_tabV.add_frame(2, self.envio)
                 #self.main_tabV.toggle_frame_by_id(tab)
@@ -92,6 +92,7 @@ class view(ctk.CTk):
     
     def reload_switch(self, tab, new_dataP):
          self.envio.update_data(new_dataP)
+         #self.variables.update_table() que acutalice los checkboxes cuando sea un proyecto ya guardado
          self.switch_tab(tab)
 
 
