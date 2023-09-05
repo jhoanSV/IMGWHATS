@@ -856,7 +856,8 @@ class ObjectOnCanvas:
         self.Rotate_pictureSD = self.Rotate_picture.rotate(90)
         self.RotarSD = ImageTk.PhotoImage(self.Rotate_pictureSD)
         self.Rsd = self.canvas.create_image(self.x + self.Width - 8, self.y - 8 , anchor="nw", image=self.RotarSD)
-        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = self.x + self.Width - 8, border_y = self.y - 8 ))
+        border_x, border_y = self.canvas.coords(self.Rsd)
+        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
         #Rotar inferior izquierdo
         self.Rotate_pictureII = self.Rotate_picture.rotate(-90)
         self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
@@ -867,6 +868,9 @@ class ObjectOnCanvas:
         self.Rid = self.canvas.create_image(self.x + self.Width - 8, self.y + self.Height - 8 , anchor="nw", image=self.RotarID)
         self.rotated_reference = {"x": 0, "y":0}
         self.Show_points(state_resize = 'normal', state_rotate = 'hidden')
+        #centered point
+        self.Cp = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2 , anchor="nw", image=self.square_point)
+        self.canvas.itemconfigure(self.Cp, state='hidden')
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
@@ -896,6 +900,8 @@ class ObjectOnCanvas:
         self.canvas.move(self.Rsd, dx, dy)
         self.canvas.move(self.Rii, dx, dy)
         self.canvas.move(self.Rid, dx, dy)
+        # Move the centered point
+        self.canvas.move(self.Cp, dx, dy)
         # Update the current position
         self.x = new_x
         self.y = new_y
@@ -952,6 +958,8 @@ class ObjectOnCanvas:
         self.canvas.coords(self.Pli, self.x,self.y + round((self.Height/2))-2)
         #Punto lateral derecho
         self.canvas.coords(self.Pld, self.x + self.Width - 4,self.y + round((self.Height/2))-2)
+        #Centered point
+        self.canvas.coords(self.Cp, self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2)
         
         #? Move the reference points to rotate the image
         #Rotar superior izquierdo
@@ -1003,12 +1011,16 @@ class ObjectOnCanvas:
         self.angle = self.angle + self.new_angle
 
     def On_rotate(self, event, border_x, border_y):
+        Cp_coords = self.canvas.coords(self.Cp)
         self.coords = self.canvas.coords(self.canvas_obj)
-        self.coordsRsd = self.canvas.coords(self.Rsd)
-        dx = event.x - (self.coords[0] + self.Width/2)
-        dy = event.y - (self.coords[1] + self.Height/2)
+        vector1 = (border_x - (Cp_coords[0] + 2), border_y - (Cp_coords[1] + 2))
+        Vector2 = (event.x - (Cp_coords[0] + 2), event.y - (Cp_coords[1] + 2))
+        dx = event.x - (Cp_coords[0] + 2) #event.x - (self.coords[0] + self.Width/2)
+        dy = event.y - (Cp_coords[1] + 2) #event.y - (self.coords[1] + self.Height/2)
         # Calculate the angle of rotation based on mouse movement
-        self.new_angle = np.arctan2(dy, dx)
+        #self.new_angle = np.arctan2(dy, dx)
+        self.new_angle = Angle_between_vectors(vector1, Vector2)
+        print(Angle_between_vectors(vector1, Vector2))
         # *To rotate de image 
         #Current_width, Current_height = self.image.size
         self.resized_image = self.picture.resize((self.Width, self.Height))
@@ -1032,7 +1044,7 @@ class ObjectOnCanvas:
         #? Move the reference points to rotate the image
         # Define the distances from the rotated image's center to its corners
         diagonal_length = np.sqrt((self.Width / 2) ** 2 + (self.Height / 2) ** 2)
-        angle1 = np.arctan2(self.Width / 2,self.Height / 2)
+        angle1 = Angle_between_vectors((1,0), (self.Width,self.Height))#np.arctan2(self.Width / 2,self.Height / 2)
         angle2 = np.pi - angle1
         angles = [
             self.new_angle - angle1, #superior derecho
@@ -1042,12 +1054,12 @@ class ObjectOnCanvas:
         ]
 
         for i, reference_point in enumerate([self.Rsd, self.Rid, self.Rsi, self.Rii]): #, self.Rsi, self.Rii
-            #* To move the rotate points around the image_obj 
-            x = self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
-            y = self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
+            #* To move the rotate points around the image_obj
+            x = Cp_coords[0] + 2 + diagonal_length * np.cos(angles[i])#self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
+            y = Cp_coords[1] + 2 + diagonal_length * np.sin(angles[i])#self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
             self.canvas.coords(reference_point, x - 8, y - 8)
             #* to rotate the image face to the center of the image_obj
-            #Rsd
+            #?Rsd
             self.Rotate_pictureSD = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)) + 90, expand=True)
             self.RotarSD = ImageTk.PhotoImage(self.Rotate_pictureSD)
             self.canvas.itemconfig(self.Rsd, image=self.RotarSD)
@@ -1063,38 +1075,27 @@ class ObjectOnCanvas:
             self.Rotate_pictureII = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)) - 90, expand=True)
             self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
             self.canvas.itemconfig(self.Rii, image=self.RotarII)
+            New_dx = Cp_coords[0] - (self.size[0]/2)
+            New_dy = Cp_coords[1] - (self.size[1]/2)
+            self.canvas.coords(self.canvas_obj, New_dx, New_dy)
 
-
+        #self.angle = self.angle + self.new_angle
         self.rotated_reference["x"] = event.x
         self.rotated_reference["y"] = event.y
+        print("angle = ", self.angle)
+
         
         
 
 def Angle_between_vectors(vector1, vector2):
-    '''# Calculate the angle in radians
+    # Calculate the angle in radians
     angle_radians = np.arccos(np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2)))
-    # Convert the angle to degrees if needed
-    angle_degrees = np.degrees(angle_radians)
 
     if vector1[0]*vector2[1]-vector1[1]*vector2[0]<0:
-        angle_degrees = 360-angle_degrees
-    print(angle_degrees)
-    return angle_degrees'''
-    
-    # Calculate the angle in radians
-    angle_radians = np.arctan2(vector2[1] - vector1[1], vector2[0] - vector1[0])
-    
-    # Convert the angle to degrees
-    angle_degrees = np.degrees(angle_radians)
-    
-    # Ensure the angle is positive
-    if angle_degrees < 0:
-        angle_degrees += 360.0
-    elif angle_degrees >= 360.0:
-        angle_degrees -= 360.0
-    
-    #print(angle_degrees)
-    return angle_degrees
+        #angle_degrees = 360-angle_degrees
+        angle_radians = np.pi + (np.pi - angle_radians)
+
+    return angle_radians
 
 def sum_angles(angle_1, angle_2):
     total_degrees = angle_1 + angle_2
