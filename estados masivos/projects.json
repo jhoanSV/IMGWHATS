@@ -26,8 +26,8 @@
         {
             "Type": "image",
             "Name": "001.png",
-            "Width": 200,
-            "Height": 200,
+            "Width": 150,
+            "Height": 150,
             "Rotate": 60,
             "x_position": 200,
             "y_position": 50,

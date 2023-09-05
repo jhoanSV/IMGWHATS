@@ -1007,52 +1007,62 @@ class ObjectOnCanvas:
         self.coordsRsd = self.canvas.coords(self.Rsd)
         dx = event.x - (self.coords[0] + self.Width/2)
         dy = event.y - (self.coords[1] + self.Height/2)
-        #self.bla = self.canvas.create_line(self.coords[0] + self.Width/2, self.coords[1] + self.Height/2,self.coordsRsd[0],self.coordsRsd[1]) #(border_x - self.Width/2, border_y -self.Height/2, dx, dy, fill="blue")
         # Calculate the angle of rotation based on mouse movement
         self.new_angle = np.arctan2(dy, dx)
-        
-        # Rotate the image and update the canvas
-        #self.rotate_image(rotation_angle)
-
-
-
-        # Define the components of the vector as NumPy arrays
-        #Center_vector = np.array([self.coords[0] + self.Width/2, self.coords[1] + self.Height/2])
-        #Angle_vector = np.array([dx,dy])
-        # Convert the angle to degrees if needed
-        #self.new_angle = Angle_between_vectors(Center_vector,Angle_vector)#np.degrees(angle_radians)
         # *To rotate de image 
         #Current_width, Current_height = self.image.size
         self.resized_image = self.picture.resize((self.Width, self.Height))
-        #Rotate the image
-        self.image_rotated = self.resized_image.rotate(-np.degrees(self.new_angle))
-        self.png_image = self.image_rotated.convert('RGBA')
-        # Create a new RGBA image with the same size as the PNG image
-        new_image = Image.new('RGBA', self.png_image.size, (0, 0, 0, 0))
+        # Create a new RGBA image with a transparent background
+        self.new_image = Image.new('RGBA', self.resized_image.size, (0, 0, 0, 0))
+        # Create a mask for the resized image (fully opaque)
+        mask = Image.new('L', self.resized_image.size, 255)
+        # Paste the loaded JPG image onto the new RGBA image with a mask
+        self.new_image.paste(self.resized_image, (0, 0), mask)
+        # Rotate the new RGBA image
+        self.image_rotated = self.new_image.rotate(-np.degrees(self.new_angle), expand=True)
+        # new size of the rotated image
         self.size = self.image_rotated.size
-        
+        # Create the new RGBA image
         self.new_rotated_image = self.image_rotated.resize(self.size, Image.ANTIALIAS)
-        #self.picture = self.new_rotated_image
+        # Convert the new rotated image to an ImageTk.PhotoImage
         self.image = ImageTk.PhotoImage(self.new_rotated_image)
-        
+        # Update the canvas object with the new image
         self.canvas.itemconfig(self.canvas_obj, image=self.image)
-        
+
         #? Move the reference points to rotate the image
         # Define the distances from the rotated image's center to its corners
         diagonal_length = np.sqrt((self.Width / 2) ** 2 + (self.Height / 2) ** 2)
         angle1 = np.arctan2(self.Width / 2,self.Height / 2)
         angle2 = np.pi - angle1
         angles = [
-            self.new_angle - angle1, #superior izquierdo
-            self.new_angle + angle1, #superior derecho
-            self.new_angle - angle2, #inferior izquierdo
-            self.new_angle + angle2, #inferior derecho
+            self.new_angle - angle1, #superior derecho
+            self.new_angle + angle1, #inferior derecho
+            self.new_angle - angle2, #superior izquierdo
+            self.new_angle + angle2, #inferior izquierdo
         ]
 
-        for i, reference_point in enumerate([self.Rsi, self.Rsd, self.Rii, self.Rid]):
+        for i, reference_point in enumerate([self.Rsd, self.Rid, self.Rsi, self.Rii]): #, self.Rsi, self.Rii
+            #* To move the rotate points around the image_obj 
             x = self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
             y = self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
             self.canvas.coords(reference_point, x - 8, y - 8)
+            #* to rotate the image face to the center of the image_obj
+            #Rsd
+            self.Rotate_pictureSD = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)) + 90, expand=True)
+            self.RotarSD = ImageTk.PhotoImage(self.Rotate_pictureSD)
+            self.canvas.itemconfig(self.Rsd, image=self.RotarSD)
+            #?Rid
+            self.Rotate_pictureID = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)), expand=True)
+            self.RotarID = ImageTk.PhotoImage(self.Rotate_pictureID)
+            self.canvas.itemconfig(self.Rid, image=self.RotarID)
+            #?Rsi
+            self.Rotate_pictureSI = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)) + 180, expand=True)
+            self.RotarSI = ImageTk.PhotoImage(self.Rotate_pictureSI)
+            self.canvas.itemconfig(self.Rsi, image=self.RotarSI)
+            #?Rii
+            self.Rotate_pictureII = self.Rotate_picture.rotate(-(np.degrees(self.new_angle)) - 90, expand=True)
+            self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
+            self.canvas.itemconfig(self.Rii, image=self.RotarII)
 
 
         self.rotated_reference["x"] = event.x
