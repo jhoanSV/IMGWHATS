@@ -6,7 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 import openpyxl
 import random
 import os
@@ -135,7 +136,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
     colDes = colDestino
     # Todo: Initialize Chrome driver with options
     # Open WhatsApp Web and wait for QR code scan        
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install()))
     driver.get(whatsapp_web_url)
     print("Scan the QR code and press enter")
     input()
