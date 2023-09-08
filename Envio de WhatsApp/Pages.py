@@ -168,7 +168,7 @@ class Send(ctk.CTkFrame):
         self.label1.place(relx=0.05, rely=0.09)
 
         self.search_btn = ctk.CTkButton(self, text="Buscar", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command='laFuncion')
+            hover_color='#115e45', font=('', 18), command=self.buscar_media)
         self.search_btn.place(relx=0.05, rely=0.15, anchor='nw')
         self.entry_media = ctk.CTkEntry(self, placeholder_text="Foto/s, Video/s, carpeta", fg_color="#D9D9D9",
             text_color='black', font=('', 18), border_width=0, corner_radius=0)
@@ -206,6 +206,13 @@ class Send(ctk.CTkFrame):
         if self.data_proj:
             self.update_data(self.data_proj)
     
+    def buscar_media(self):
+        self.file_name = filedialog.askopenfilename(title='Seleccionar archivo multimedia', 
+            filetypes=(('Jpg', '*.jpg'), ('Png', '*.png'), ('Mp4', '*.mp4'), ('Todos los archivos', '*')))
+        self.xl_path = self.file_name
+        self.entry_media.delete(0, "end")  # Limpiar el contenido del Entry
+        self.entry_media.insert(0, self.xl_path)
+
     def update_data(self, data):
         self.data_proj = data
         self.entry_media.delete(0, "end")
@@ -223,7 +230,7 @@ class Send(ctk.CTkFrame):
         )
 
         if pregunta == "yes":
-            print("hola")
+            print("Función para hacer que no se vuelva a mostrar el mensaje")
 
         el_msj = self.entry_msj.get("0.0", "end")
 

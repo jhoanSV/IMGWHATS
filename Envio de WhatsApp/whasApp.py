@@ -140,6 +140,7 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
     driver.get(whatsapp_web_url)
     print("Scan the QR code and press enter")
     input()
+        
     # Todo: Wait for the WhatsApp Web interface to load
     wait = WebDriverWait(driver, 10)
     wait.until(EC.title_contains("WhatsApp"))
@@ -177,29 +178,37 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div')))
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
             chat_element.click()
+            set_errors((contacto))
             time.sleep(5)
         except Exception as e:
             print('Ocurrio un error con '+ str(contacto[colDestino]) + ' al seleccionar contacto')
             print(e)
-            set_errors(str(contacto))
-            chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
-            chat_element.click()
+            set_errors((contacto))
+            #oprime una flecha para cancelar el proceso de ingreso de número
+            arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
+            arrow_back.click()
             continue
         if image_path == '':
             try:
                 # Send the message with the number of the contact that we want to contact ///Este es para wapp business
                 message_input = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]/p')
                 message_input.send_keys(text)
-                message_input.send_keys(Keys.ENTER)
+                print("3")#//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span
+                #message_input.send_keys(Keys.ENTER)
+                #send_button = driver.find_element(By.XPATH, '//span[@data-icon="send"]')
+                send_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="send"]')))
+                print("4")
+                send_button.click()
+                print("5")
                 time.sleep(2)
                 
                 #Give a random number from 2 and 8 to send the next message.
+                print("6")
                 random_number = random.randint(2, 8)
                 time.sleep(random_number)
             except Exception as e:            
                 print('Ocurrio un error con '+ str(contacto[colDestino]) + ' En envio 1')
-                print(e)
-                set_errors(str(contacto))
+                print(e)                
                 '''
                 # Click on the button to errace the 
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
@@ -207,10 +216,10 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 chat_element.click()
                 '''
                 continue
-        elif image_path.endswith('.jpg') or image_path.endswith('.png') or image_path.endswith('.mp4'):
+        elif image_path.endswith('.jpg') or image_path.endswith('.png'):
             try:
-                #esta es la parte para enviar la imagen
-                attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]')))
+                #esta es la parte para enviar la imagen                
+                attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
                 attachment_button.click()
                 time.sleep(1)
 
@@ -230,18 +239,43 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 random_number = random.randint(2, 8)
                 time.sleep(random_number)
             except Exception as e:
-                print("An error occurred:", str(e))
                 print('Ocurrio un error con '+ str(contacto[colDestino]) + ' En envio 2')
-                set_errors(str(contacto))
                 # Click on the button to errace the
                 '''
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
                 chat_element.click()
                 '''
                 continue
+        elif image_path.endswith('.mp4'):
+            try:
+                #esta es la parte para enviar la imagen                
+                attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
+                attachment_button.click()
+                time.sleep(1)                
+
+                #prueba para seleccionar la imagen
+                attach_image_option = wait.until(EC.presence_of_element_located((By.XPATH, '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]')))
+                attach_image_option.send_keys(image_path)
+                time.sleep(7)
+
+                #To write the message that it will send with the image
+                # //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span
+                message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]/p')#'//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+                message_input.send_keys(text)
+                message_input.send_keys(Keys.ENTER)
+                time.sleep(5)
+
+                #fin de la prueba para seleccionar la imaen a mandar
+                #Give a random number from 2 and 8 to send the next message.
+                random_number = random.randint(2, 8)
+                time.sleep(random_number)
+            except Exception as e:
+                #print("An error occurred:", str(e))
+                print('Ocurrio un error con '+ str(contacto[colDes]))
+                continue
         else:
             try:
-                image = search_file(image_path, str(contacto['Cod']))
+                image = search_file(image_path, str(contacto['Cod']))#!Esto va a botar error
                 
                 #esta es la parte para enviar la imagen
                 attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[1]/div[2]')))
@@ -265,28 +299,29 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 random_number = random.randint(2, 8)
                 time.sleep(random_number)
             except Exception as e:
-                print("An error occurred:", str(e))
-                print('Ocurrio un error con '+ str(contacto['Ferreteria']) + ' En envio 3')
+                print('Ocurrio un error con '+ str(contacto[colDes]) + ' En envio 3')
                 set_errors(str(contacto))
                 continue
 
-'''    #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
-    send_button.click()
+    close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+    close_button.click()
 
-    #send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[8]')))#'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[7]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
-    send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[4]/span/div/ul/li[last()]')))
-    send_button.click()
+    try:
+        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[9]/div')))
+    except:
+        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[(last()-1)]/div')))
+    close_button.click()
     time.sleep(1)
 
-    send_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
-    send_button.click()
+    close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+    close_button.click()
     time.sleep(7)
 
     #click to send the message
 
     # Close the browser
-    driver.quit()'''
+    driver.quit()
 
 #envio_msj()
