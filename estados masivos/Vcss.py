@@ -664,7 +664,8 @@ class ImageContainer(tk.Frame):
                  height: int = 500,
                  Background_image_width: int = 500,
                  Background_image_height: int = 200,
-                 json_list: dict = None,  # Use dict for JSON object   
+                 json_list: dict = None,  # Use dict for JSON object
+                 function: callable = None,
                  **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -679,18 +680,6 @@ class ImageContainer(tk.Frame):
 
         self.canvas = tk.Canvas(self, width = self.width, height = self.height, bg='#D9D9D9')
         self.canvas.pack()
-        #self.size = (self.Background_image_width, self.Background_image_height)
-        #self.bg_canvas_container = Image.new('RGBA',self.size, '#D0ED1C')
-        #self.canvas_container = ImageTk.PhotoImage(self.bg_canvas_container)
-
-        # Store a reference to the PhotoImage object
-        #self.image_reference = self.canvas_container
-        #self.bg_canvas = self.canvas.create_image(0,0, anchor="nw", image=self.canvas_container)
-        # Make sure the canvas background image is visible
-        #self.itemconfig(self.bg_canvas, state="normal")
-        #ImageContainer = ctk.CTkFrame(self, width= self.width, height= self.height, fg_color='#D9D9D9')
-        #ImageContainer.pack(fill= None)
-        #ImageContainer.lower()
         self.image_objects = []
 
         for Item in  self.json_list:
@@ -702,44 +691,18 @@ class ImageContainer(tk.Frame):
                 self.background_image = Image.new('RGBA',self.size_background, self.background_color)
                 self.Bg_image = ImageTk.PhotoImage(self.background_image)
                 self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image)
-                
-                #Bg_image = ctk.CTkImage(background_image, size = size_background)
-                #background_continer = ctk.CTkLabel(self, image= Bg_image, text="", width=Item['Width'], height=Item['Height'])
-                #background_continer.place(x=on_x, y=on_y)
-                #background_continer.lower()
+           
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
                 y = Item['y_position']
-                image = ImageTk.PhotoImage(self.picture)
-                 # Append the Image object to the list
-                #self.image_objects.append(self.Image)
-                #print(self.image_objects)
-                # Create an image item on the canvas for each image object in the list
-                # Crear un objeto ObjectOnCanvas para cada imagen y agregarlo a la lista
-                #obj = ObjectOnCanvas(self.canvas, x, y, image)
                 obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'])
                 self.image_objects.append(obj)
-                #self.canvas.create_image(self.x, self.y, anchor="nw", image=self.Image)
-                #bg = self.capture_screenshot()
-                #frameImage = DraggableLabel(self, image=picture, x_container= self.winfo_rootx(), y_container = self.winfo_rooty())
-                #frameImage.place(x=0, rely=0)
-                
-        # Call the update method to refresh the canvas
-        #self.update()  
-
-        #image_tk = ctk.CTkImage(background_image, size=size)
-
-        
-        #frameImage = DraggableLabel(ImageContainer, image=background_image)
-        #frameImage.place(x=0, rely=0)
-        # Add a scale (slider) widget for zooming
-        #self.zoom_var = tk.DoubleVar(value=1.0)
-        #self.zoom_scale = tk.Scale(self, from_=0.1, to=5.0, resolution=0.1, orient="horizontal", variable=self.zoom_var, label="Zoom")
-        #self.zoom_scale.pack(side="bottom")
-        
-        # Bind the zoom scale change event
-        #self.zoom_var.trace_add("write", self.update_image_size)
+            
+            elif Item['Type'] == 'text':
+                x = Item['x_position']
+                y = Item['y_position']
+                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'])
 
     def update_image_size(self, *args):
         zoom_level = self.zoom_var.get()
@@ -774,7 +737,12 @@ class ImageContainer(tk.Frame):
     '''    #screenshot.save(save_path)
 
 class ObjectOnCanvas:
-    def __init__(self, canvas, x, y, picture):
+    def __init__(self,
+                 canvas, 
+                 x, 
+                 y, 
+                 picture,
+                 function: callable = None):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -785,6 +753,7 @@ class ObjectOnCanvas:
         self.Height = self.image.height()
         self.state = True
         self.angle = 0
+        self.function = function
 
         super().__init__()
         # *principal image
@@ -851,7 +820,8 @@ class ObjectOnCanvas:
         self.Rotate_pictureSI = self.Rotate_picture.rotate(180)
         self.RotarSI = ImageTk.PhotoImage(self.Rotate_pictureSI)
         self.Rsi = self.canvas.create_image(self.x - 8,self.y - 8, anchor="nw", image=self.RotarSI)
-        self.canvas.tag_bind(self.Rsi,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = self.x, border_y = self.y))
+        border_x, border_y = self.canvas.coords(self.Rsi)
+        self.canvas.tag_bind(self.Rsi,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y))
         #Rotar superior derecho
         self.Rotate_pictureSD = self.Rotate_picture.rotate(90)
         self.RotarSD = ImageTk.PhotoImage(self.Rotate_pictureSD)
@@ -862,10 +832,15 @@ class ObjectOnCanvas:
         self.Rotate_pictureII = self.Rotate_picture.rotate(-90)
         self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
         self.Rii = self.canvas.create_image(self.x - 8, self.y + self.Height - 8 , anchor="nw", image=self.RotarII)
+        border_x, border_y = self.canvas.coords(self.Rii)
+        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
         #Rotar inferior derecho
         self.Rotate_pictureID = self.Rotate_picture
         self.RotarID = ImageTk.PhotoImage(self.Rotate_pictureID)
         self.Rid = self.canvas.create_image(self.x + self.Width - 8, self.y + self.Height - 8 , anchor="nw", image=self.RotarID)
+        border_x, border_y = self.canvas.coords(self.Rid)
+        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
+
         self.rotated_reference = {"x": 0, "y":0}
         self.Show_points(state_resize = 'normal', state_rotate = 'hidden')
         #centered point
@@ -986,6 +961,13 @@ class ObjectOnCanvas:
             self.state_resize = 'normal'
             self.state_rotate = 'hidden'
         self.Show_points(state_resize = self.state_resize, state_rotate= self.state_rotate)
+        self.function({"Width": self.Width,
+                        "Height": self.Height,
+                        "Rotate": self.angle,
+                        "x_position": self.x,
+                        "y_position": self.y,
+                        "xCenter": False,
+                        "yCenter": False})
     
     def Show_points(self, state_resize = 'normal', state_rotate = 'hidden'):
         self.canvas.itemconfigure(self.Psi, state=state_resize)
@@ -1015,8 +997,8 @@ class ObjectOnCanvas:
         self.coords = self.canvas.coords(self.canvas_obj)
         vector1 = (border_x - (Cp_coords[0] + 2), border_y - (Cp_coords[1] + 2))
         Vector2 = (event.x - (Cp_coords[0] + 2), event.y - (Cp_coords[1] + 2))
-        dx = event.x - (Cp_coords[0] + 2) #event.x - (self.coords[0] + self.Width/2)
-        dy = event.y - (Cp_coords[1] + 2) #event.y - (self.coords[1] + self.Height/2)
+        #dx = event.x - (Cp_coords[0] + 2) #event.x - (self.coords[0] + self.Width/2)
+        #dy = event.y - (Cp_coords[1] + 2) #event.y - (self.coords[1] + self.Height/2)
         # Calculate the angle of rotation based on mouse movement
         #self.new_angle = np.arctan2(dy, dx)
         self.new_angle = Angle_between_vectors(vector1, Vector2)
@@ -1055,8 +1037,8 @@ class ObjectOnCanvas:
 
         for i, reference_point in enumerate([self.Rsd, self.Rid, self.Rsi, self.Rii]): #, self.Rsi, self.Rii
             #* To move the rotate points around the image_obj
-            x = Cp_coords[0] + 2 + diagonal_length * np.cos(angles[i])#self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
-            y = Cp_coords[1] + 2 + diagonal_length * np.sin(angles[i])#self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
+            x = Cp_coords[0] + diagonal_length * np.cos(angles[i]) #self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
+            y = Cp_coords[1] + diagonal_length * np.sin(angles[i]) #self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
             self.canvas.coords(reference_point, x - 8, y - 8)
             #* to rotate the image face to the center of the image_obj
             #?Rsd
@@ -1084,15 +1066,253 @@ class ObjectOnCanvas:
         self.rotated_reference["y"] = event.y
         print("angle = ", self.angle)
 
+    def get(self):
         
+        return {"Width": self.Width,
+                "Height": self.Height,
+                "Rotate": self.angle,
+                "x_position": self.x,
+                "y_position": self.y,
+                "xCenter": False,
+                "yCenter": False}
         
+class TextBox:
+    def __init__(self, canvas, x, y, Text, width, height):
+        self.canvas = canvas
+        self.x = x
+        self.y = y
+        self.text = Text
+        self.Width = width
+        self.Height = height
+        self.state = True
+        self.angle = 0
+        self.editing = False
+        self.cursor_position = len(Text) - 1
+
+        super().__init__()
+        
+        self.text_container = self.canvas.create_rectangle(self.x, self.y, self.x + self.Width, self.Height, outline="#F2F2F2", width=4)
+
+        self.canvas_text = self.canvas.create_text(self.x, self.y, text=self.text, anchor='nw', fill="black", font=('Helvetica 15 bold'))
+        # to allow rewrite the text
+        self.canvas.tag_bind(self.canvas_text,"<Double-Button-1>", self.DoubleClick)
+        # To rewrite the text
+        self.canvas.bind("<KeyPress>", self.Re_write)
+        self.canvas.bind("<BackSpace>", self.backspace)
+        self.canvas.bind("<Left>", self.move_cursor_left)
+        self.canvas.bind("<Right>", self.move_cursor_right)
+        # To move the text
+        self.canvas.tag_bind(self.canvas_text,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.canvas_text,"<B1-Motion>", self.on_drag)
+        self.canvas.tag_bind(self.canvas_text,"<ButtonRelease-1>", self.stop_drag)
+        # Bind the key press event to the canvas
+        #self.canvas.tag_bind(self.canvas_text,"<KeyPress>", self.Re_write)
+
+        self.Square = Image.new('RGBA',(4,4), '#000000')
+        self.square_point = ImageTk.PhotoImage(self.Square)
+        self.H_line = Image.new('RGBA',(8,4), '#000000')
+        self.H_line_point = ImageTk.PhotoImage(self.H_line)
+        self.V_line = Image.new('RGBA',(4,8), '#000000')
+        self.V_line_point = ImageTk.PhotoImage(self.V_line)
+        #?Punto superior izquierdo
+        self.Psi = self.canvas.create_image(self.x - 2,self.y - 2, anchor="nw", image=self.square_point)
+        self.canvas.tag_bind(self.Psi,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psi,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psi,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto superior central
+        self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y - 2 , anchor="nw", image=self.H_line_point)
+        self.canvas.tag_bind(self.Psc,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psc,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psc,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto superior derecho
+        self.Psd = self.canvas.create_image(self.x + self.Width - 2,self.y - 2, anchor="nw", image=self.square_point)
+        self.canvas.tag_bind(self.Psd,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Psd,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
+        self.canvas.tag_bind(self.Psd,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior izquierdo
+        self.Pii = self.canvas.create_image(self.x - 2, self.y + self.Height - 2, anchor="nw", image=self.square_point)
+        self.canvas.tag_bind(self.Pii,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pii,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
+        self.canvas.tag_bind(self.Pii,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior central
+        self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 2, anchor="nw", image=self.H_line_point)
+        self.canvas.tag_bind(self.Pic,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pic,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
+        self.canvas.tag_bind(self.Pic,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto inferior derecho
+        self.Pid = self.canvas.create_image(self.x + self.Width - 2,self.y + self.Height - 2, anchor="nw", image=self.square_point)
+        self.canvas.tag_bind(self.Pid,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pid,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
+        self.canvas.tag_bind(self.Pid,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto lateral izquierdo
+        self.Pli = self.canvas.create_image(self.x - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point)
+        self.canvas.tag_bind(self.Pli,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pli,"<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
+        self.canvas.tag_bind(self.Pli,"<ButtonRelease-1>", self.stop_drag)
+        #?Punto lateral derecho
+        self.Pld = self.canvas.create_image(self.x + self.Width - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point)
+        self.canvas.tag_bind(self.Pld,"<Button-1>", self.start_drag)
+        self.canvas.tag_bind(self.Pld,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=0))
+        self.canvas.tag_bind(self.Pld,"<ButtonRelease-1>", self.stop_drag)
+        
+        self.drag_data = {"x": 0, "y": 0}
+
+
+    def start_drag(self, event):
+        self.drag_data["x"] = event.x
+        self.drag_data["y"] = event.y
+        
+    def stop_drag(self, event):
+        self.drag_data = {"x": 0, "y": 0}
+
+    def on_drag(self, event):
+        dx = event.x - self.drag_data["x"]
+        dy = event.y - self.drag_data["y"]
+        new_x = self.x + dx
+        new_y = self.y + dy
+        # Move the text
+        self.canvas.move(self.canvas_text, dx, dy)
+        self.canvas.move(self.text_container, dx, dy)
+        self.canvas.move(self.Psi, dx, dy)
+        self.canvas.move(self.Psd, dx, dy)
+        self.canvas.move(self.Pii, dx, dy)
+        self.canvas.move(self.Pid, dx, dy)
+        self.canvas.move(self.Psc, dx, dy)
+        self.canvas.move(self.Pic, dx, dy)
+        self.canvas.move(self.Pli, dx, dy)
+        self.canvas.move(self.Pld, dx, dy)
+        # Update the current position
+        self.drag_data["x"] = event.x
+        self.drag_data["y"] = event.y
+        # Update the current position
+        self.x = new_x
+        self.y = new_y
+
+    def DoubleClick(self, event):
+        self.editing = not self.editing
+        self.canvas.focus_set()
+        current_focus = self.canvas.focus_get()
+        if self.editing:
+            self.text = self.text + '|'
+            self.cursor_position += 1
+            self.canvas.itemconfig(self.canvas_text, text=self.text)
+        elif self.editing == False:
+            self.text = self.text[:self.cursor_position] + self.text[self.cursor_position + 1:]
+            self.canvas.itemconfig(self.canvas_text, text=self.text)
+            self.cursor_position = len(self.text)
+        '''if current_focus == self.canvas:
+            print("The canvas has keyboard focus.")
+        else:
+            print("Another widget has keyboard focus:", current_focus)'''
+
+    def Re_write(self, event):
+        current_focus = self.canvas.focus_get()
+        if current_focus == self.canvas:
+            key = event.char
+            if key:
+                if self.size_text()[0]>self.Width:
+                    indexes = [i for i, c in enumerate(self.text) if c == ' ']
+                    ultimo_indice = indexes[-1]
+                    self.text = self.text[:self.cursor_position] + self.text[self.cursor_position + 1:]
+                    self.text = self.text[:ultimo_indice] + '\n' + self.text[ultimo_indice:]
+                    self.cursor_position += 1
+                    self.text = self.text[:self.cursor_position] + '|' +  self.text[self.cursor_position + 1:]
+                    self.text = self.text[:self.cursor_position] + key + self.text[self.cursor_position:]
+                else:
+                    self.text = self.text[:self.cursor_position] + key + self.text[self.cursor_position:]
+        
+                self.cursor_position += 1
+                self.canvas.itemconfig(self.canvas_text, text=self.text)
+                
+
+    def move_cursor_left(self, event):
+        if self.editing and self.cursor_position > 0:
+            if self.cursor_position == len(self.text):
+                self.text = self.text[:self.cursor_position-1]
+            else:
+                self.text = self.text[:self.cursor_position] + self.text[self.cursor_position+1:]
+            self.cursor_position -= 1
+            self.text = self.text[:self.cursor_position] + "|" + self.text[self.cursor_position:]
+            self.canvas.itemconfig(self.canvas_text, text=self.text)
+
+    def move_cursor_right(self, event):
+        if self.editing and self.cursor_position < len(self.text):
+            self.text = self.text[:self.cursor_position] + self.text[self.cursor_position+1:]
+            self.cursor_position += 1
+            self.text = self.text[:self.cursor_position] + "|" + self.text[self.cursor_position:]
+            self.canvas.itemconfig(self.canvas_text, text=self.text)
+
+    def backspace(self, event):
+        if self.editing and self.cursor_position > 0:
+            self.text = self.text[:self.cursor_position - 1] + self.text[self.cursor_position:]
+            self.cursor_position -= 1
+            self.canvas.itemconfig(self.canvas_text, text=self.text)
+
+    def size_text(self):
+        bounds = self.canvas.bbox(self.canvas_text)  # returns a tuple like (x1, y1, x2, y2)
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+        return (width, height)
+    
+    def on_resize(self, event, move_x=0, move_y=0, sign = 1, anchor_x = 0, anchor_y = 0):
+        actual_x, actual_y, actual_width, actual_heigth = self.canvas.coords(self.text_container)
+        # *for the anchor
+        dx = event.x - self.drag_data["x"]
+        dy = event.y - self.drag_data["y"]
+        
+        if move_x != 0 and move_y != 0:
+            aspect_ratio = (self.Width + (sign*dx))/ self.Width
+            size_x = int(np.around(aspect_ratio * self.Width))
+            size_y = int(np.around(aspect_ratio * self.Height))
+        else:
+            drag_x = move_x * dx
+            drag_y = move_y * dy
+            size_x = self.Width + drag_x
+            size_y = self.Height + drag_y
+
+        new_x = actual_x + anchor_x * dx
+        new_y = actual_y + anchor_y * dy
+
+        if size_x <=0:
+            size_x = 1
+        if size_y <=0:
+            size_y = 1
+        #* resizin the textBox
+        new_x2 = new_x + size_x
+        new_y2 = new_y + size_y
+        self.Width = size_x
+        self.Height = size_y
+        self.canvas.coords(self.text_container, new_x, new_y, new_x2, new_y2)
+        self.canvas.coords(self.canvas_text, new_x, new_y)
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, self.x - 2, self.y - 2)
+        #Punto superior central
+        self.canvas.coords(self.Psc, self.x + round((self.Width/2)) - 2, self.y - 2)
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, self.x + self.Width - 2,self.y - 2)
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, self.x - 2, self.y + self.Height - 2)
+        #Punto inferior central
+        self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 2)
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, self.x + self.Width - 2,self.y + self.Height - 2)
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, self.x - 2,self.y + round((self.Height/2))-2)
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, self.x + self.Width - 2,self.y + round((self.Height/2))-2)
+
+        self.x = self.x + anchor_x * dx
+        self.y = self.y + anchor_y * dy
+        self.drag_data["x"] = event.x
+        self.drag_data["y"] = event.y
+
 
 def Angle_between_vectors(vector1, vector2):
     # Calculate the angle in radians
     angle_radians = np.arccos(np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2)))
 
     if vector1[0]*vector2[1]-vector1[1]*vector2[0]<0:
-        #angle_degrees = 360-angle_degrees
         angle_radians = np.pi + (np.pi - angle_radians)
 
     return angle_radians

@@ -47,8 +47,8 @@
             "bold" : true,
             "italic" : true,
             "fontSize" : 60,
-            "boxWidth": 1500,
-            "boxHeight": 800
+            "boxWidth": 250,
+            "boxHeight": 100
         }
     ]
 }

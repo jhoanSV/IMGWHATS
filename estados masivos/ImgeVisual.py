@@ -16,6 +16,10 @@ def button_callback():
     
     print("button pressed")
 
+def to_image_bar(lista):
+    list_property_bar = lista
+    print(list_property_bar)
+    
 def Buscar():
     '''Desplega el cuadro de busqueda para seleccionar imagenes de
        formato jpg, png y carpetas, descartando otros tipos de documentos 
@@ -35,6 +39,8 @@ button = ctk.CTkButton(app, text="Subir", command=Buscar)
 button.grid(row=1, column=0, padx=10, pady=10)
 
 # *Barra de propiedades de formatos imagenes
+list_property_bar = {}
+
 Up_bar = property_image_bar(app, json_list= {"Width": 200,
                                             "Height": 150,
                                             "Rotate": 6,
@@ -51,7 +57,7 @@ Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 ElementList = FlatList(app, json_list=image_properties_json['proyecto1'], Item = ItemElement, width=300)
 ElementList.grid(row=3, column=1 ,padx=5, pady=5)
 
-Image_Container = ImageContainer(app, json_list=image_properties_json['proyecto1'], width= 1000)
+Image_Container = ImageContainer(app, json_list=image_properties_json['proyecto1'], width= 1000, function = to_image_bar )
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 
 background_image = Image.new('RGB',size, 'white')
