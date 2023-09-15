@@ -1,3 +1,30 @@
 {
-    
+    "prueba": {
+        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
+        "msj": "mensaje prueba @Ferreteria, @Nfactura",
+        "recurso": "",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@Celular": 2,
+            "@Nfactura": 3
+        },
+        "colCelular": 2,
+        "colDestino": 1
+    },
+    "Pedidos ruta": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/Numero_mensaje_whatsapp.xlsx",
+        "msj": "\u00a1Hola @Ferreteria!\u00a1Quer\u00eda recordarte que tu pedido n\u00famero @Nfactura est\u00e1 en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo\u00a0que\u00a0necesites.",
+        "recurso": "",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@responsable": 2,
+            "@Celular": 3,
+            "@Valor factura": 4,
+            "@Nfactura": 5
+        },
+        "colCelular": 3,
+        "colDestino": 1
+    }
 }

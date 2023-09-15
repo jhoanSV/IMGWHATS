@@ -57,6 +57,38 @@ class ItemProject(ctk.CTkFrame):
     def update_row(self,  bla):
         return
 
+class ErrorItem(ctk.CTkFrame):
+    def __init__(self, *args,
+                 width: int = 0,
+                 height: int = 0,
+                 json_list: dict = None,  # Use dict for JSON object
+                 #Project_name: str = None,
+                 On_press: Optional[Callable] = None,
+                 Otros: Optional[any] = None,
+                 **kwargs):
+        
+        super().__init__(*args, **kwargs)
+
+        self.configure(fg_color='transparent', height=30, width =200)
+        self.width = width
+        self.height = height
+        
+        self.el_label = ctk.CTkLabel(self, text='prueba', text_color='black', font=('', 18))
+        self.el_label.place(relx=0, rely=0)
+
+        self.btn_quitar = ctk.CTkButton(self, text='X', text_color='white', font=('', 20),
+            fg_color='#BB1D1D', width=20)
+        self.btn_quitar.place(relx=1, rely=0, anchor='ne')
+
+    def get_data(self):        
+        return #self.json_list, self.Project_name
+    
+    def get_itemData(self):
+        return
+    
+    def update_row(self, n_list):
+        return
+
 class Table(ctk.CTkFrame):
     def __init__(self, 
                  master: any, 

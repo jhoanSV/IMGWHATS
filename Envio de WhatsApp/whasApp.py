@@ -121,9 +121,12 @@ def lee_excel():
         }
     return dict_Xl
 
+los_errores = None
+
 def set_errors(fil_contacto):
     Errors.append(fil_contacto)
 def get_errors():
+    global los_errores
     los_errores = []
     for fila in Errors:
         los_errores.append(fila[colDes])
@@ -178,7 +181,6 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
             #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div')))
             chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
             chat_element.click()
-            set_errors((contacto))
             time.sleep(5)
         except Exception as e:
             print('Ocurrio un error con '+ str(contacto[colDestino]) + ' al seleccionar contacto')
@@ -300,7 +302,6 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
                 time.sleep(random_number)
             except Exception as e:
                 print('Ocurrio un error con '+ str(contacto[colDes]) + ' En envio 3')
-                set_errors(str(contacto))
                 continue
 
     #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

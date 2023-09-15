@@ -269,9 +269,9 @@ class FlatList(ctk.CTkFrame):
                 self.items.append(item_instance.get_itemData())
                 item_instance.grid(row = 0, column = 0)
                 item_instance.update_row(self.json_list[key])
+                self.frames[i] = item_instance
             else:
-                print('is none')
-            self.frames[i] = item_instance
+                print('is none')            
         # *default value
 
     def update_list(self, new_list):

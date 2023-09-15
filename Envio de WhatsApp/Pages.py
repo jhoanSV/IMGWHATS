@@ -3,8 +3,8 @@ import tkinter
 from tkinter import filedialog
 from typing import Tuple, Callable, Optional
 from Vcss import FlatList, El_Tab_view
-from components import ItemProject, Table
-import whasApp
+from components import ItemProject, Table, ErrorItem
+import whasApp2, whasApp
 import json
 
 #*colores
@@ -157,7 +157,8 @@ class Send(ctk.CTkFrame):
                 fg_color=fg_color, **kwargs)
         
         self.data_proj = data_proj
-        self.name_proj = None
+        self.name_proj = None        
+        self.obj_enviar = whasApp2.Send_Wapp()
 
         #self.El_metodo = El_metodo
         
@@ -186,9 +187,13 @@ class Send(ctk.CTkFrame):
             font=('', 18), border_width=0, corner_radius=0)
         self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.65, relheight=0.5, anchor='nw')
 
-        self.notes = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
+        self.lista_errores = {'k1':'v1','k2':'v2','k3':'v3'}        
+        self.notes = FlatList(self, width=200, height=315, json_list=self.lista_errores,
+            Item=ErrorItem, background_color='#D9D9D9')
+        self.notes.place(relx=0.73, rely=0.3)
+        '''self.notes = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
             font=('', 18), border_width=0, corner_radius=0)
-        self.notes.place(relx=0.73, rely=0.3, relwidth=0.22, relheight=0.5, anchor='nw')
+        self.notes.place(relx=0.73, rely=0.3, relwidth=0.22, relheight=0.5, anchor='nw')'''
 
         self.Open_btn = ctk.CTkButton(self, text="Abrir Wasapo", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
@@ -198,9 +203,9 @@ class Send(ctk.CTkFrame):
             hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
         self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
 
-        self.show_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command=lambda: self.Update_textB())#, state='disabled')
-        self.show_btn.place(relx=0.35, rely=0.84, anchor='nw')
+        '''self.show_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.obj_enviar.valida_envio())#self.Update_textB())#, state='disabled')
+        self.show_btn.place(relx=0.35, rely=0.84, anchor='nw')'''
 
         #Llena entrys
         if self.data_proj:
@@ -220,9 +225,17 @@ class Send(ctk.CTkFrame):
         self.entry_msj.delete(0.0, "end")
         self.entry_msj.insert(0.0, self.data_proj['msj'])
 
-    #self.after(5000, lambda: self.Send_btn.configure(state='normal'))
-
     def open(self):
+
+        el_msj = self.entry_msj.get("0.0", "end")
+
+        self.obj_enviar.update_vars(msj=el_msj, image_path=self.entry_media.get(), 
+            variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
+            colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error)
+        
+        self.obj_enviar.envio_msj()
+        
+    def openX(self):
 
         pregunta = tkinter.messagebox.askquestion(
             "Precaución", "Por favor, esperar a que cargue completamente la página de whatsapp. Leer el QR y Luego oprimir el botón de Envío" +
@@ -263,10 +276,17 @@ class Send(ctk.CTkFrame):
         else:
             return
     
+    def Add_error(self, contacto):
+        #self.lista_errores['xD'] = 'nose'
+        print(contacto)
+
     def Update_textB(self):
+        #self.erros = None
         self.errors = whasApp.get_errors()
         print(self.errors)
-
-        for i in range(len(self.errors)):
-            self.notes.insert(((i/10) + 0.0), self.errors[i])
+        if self.errors is not None:
+            self.notes.insert(tkinter.END, 'Errores: \n',)
+            for i in range(len(self.errors)):
+                #self.notes.insert(((i/10) + 0.0), self.errors[i])
+                self.notes.insert(tkinter.END, self.errors[i]+'\n',)
 
