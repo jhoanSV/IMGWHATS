@@ -214,6 +214,122 @@ class FlatList(ctk.CTkFrame):
                  height: int = 100,
                  json_list: dict = None,  # Use dict for JSON object
                  Item: Optional[Callable] = None, # Default to None
+                 background_color: str = '#FFFFFF', # Default to
+                 adaptable: bool = False, #For adaptability of the width and height
+                 Otros: Optional[any] = None,
+                 **kwargs):
+        
+        super().__init__(*args, width=width, height=height, **kwargs)
+        # *variables
+        self.otros = Otros
+        self.width = width
+        self.height = height
+        self.json_list = json_list
+        self.Item = Item
+        self.si_list = True
+        self.frames = {}
+        self.items = []
+        self.prev = None
+        if (type(self.json_list) == dict):
+            self.Key_List = list(self.json_list.keys())
+            self.si_list = False
+        else:
+            self.Key_List = self.json_list
+        #self.Key_List = list(json_list.keys())
+        self.background_color = background_color
+        self.configure(fg_color='transparent')
+        
+        # *frame configuration
+        #self.configure(fg_color=("gray78", "gray28"))  # set frame color
+        
+        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height, fg_color='transparent')
+        #self.FrameList.configure(fg_color=("gray78", "gray28")) 
+        self.FrameList.configure(fg_color=self.background_color) 
+        
+        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
+        self.grid_columnconfigure(1, weight=1)  # entry expands
+
+        self.FrameList.grid(row=0, column=0)
+        
+        #self.crear()
+        # * frame scheme Input
+        #for i in range(self.Number_of_items()):
+        for i in range(len(self.Key_List)):
+            FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
+            FrameItem.grid(row=i, column=0 )
+            if self.Item is not None:
+                if self.si_list:
+                    key = i
+                else:
+                    key = self.Key_List[i]
+                #item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key),
+                #    width = self.width, height = self.height)
+                #print(callable(self.otros))
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
+                    width = self.width, height = self.height)
+                self.items.append(item_instance.get_itemData())
+                item_instance.grid(row = 0, column = 0)
+                item_instance.update_row(self.json_list[key])
+                self.frames[i] = item_instance
+            else:
+                print('is none')            
+        # *default value
+
+    def Update_list(self, new_list):
+        self.json_list = new_list
+        
+        # Elimina las filas que ya no están presentes en la nueva lista
+        for i in range(len(self.json_list), len(self.frames)):
+            self.frames[i].destroy()
+            del self.frames[i]
+        
+        # Actualiza o crea las filas existentes en la nueva lista
+        for i in range(len(self.json_list)):
+            if self.si_list:
+                key = i
+            else:
+                key = self.Key_List[i]
+            value = self.json_list[key]
+            if i < len(self.frames):
+                self.frames[i].update_row(value)
+            else:
+                FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
+                FrameItem.grid(row=i, column=0)
+                if self.Item is not None:
+                    item_instance = self.Item(FrameItem, json_list=value, Otros={'Project_name': str(key), 'Hook': self.otros},
+                                            width=self.width, height=self.height)
+                    self.items.append(item_instance.get_itemData())
+                    item_instance.grid(row=0, column=0)
+                    item_instance.update_row(value)
+                    self.frames[i] = item_instance
+                else:
+                    print('is none')
+
+
+    def get(self) -> Union[float, None]:
+        try:
+            return float(self.entry.get())
+        except ValueError:
+            return None
+
+    def set(self, value: float):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, str(float(value)))
+
+    def Number_of_items(self):
+        #json_data = json.loads(self.json_list)
+        num_items = len(self.Key_List)
+        return num_items
+    
+    def otro_get(self):
+        return self.items
+    
+'''class FlatList(ctk.CTkFrame):
+    def __init__(self, *args,
+                 width: int = 100,
+                 height: int = 100,
+                 json_list: dict = None,  # Use dict for JSON object
+                 Item: Optional[Callable] = None, # Default to None
                  **kwargs):
         
         super().__init__(*args, width=width, height=height, **kwargs)
@@ -261,192 +377,97 @@ class FlatList(ctk.CTkFrame):
     def Number_of_items(self):
         #json_data = json.loads(self.json_list)
         num_items = len(self.json_list)
+        return num_items'''
+
+'''class FlatList(ctk.CTkFrame):
+    def _init_(self, *args,
+                width: int = 100,
+                height: int = 100,
+                json_list: Union[list, dict] = None,  # Use dict for JSON object
+                Item: Optional[Callable] = None, # Default to None
+                background_color: str = '#FFFFFF', # Default to
+                adaptable: bool = False, #For adaptability of the width and height
+                Otros: Optional[any] = None,
+                **kwargs):
+        
+        super().__init__(*args, width=width, height=height, **kwargs)
+        # *variables
+        self.otros = Otros
+        self.width = width
+        self.height = height
+        self.json_list = json_list
+        self.Item = Item
+        self.si_list = True
+        self.frames = {}
+        self.items = []
+        self.prev = None
+        if (type(self.json_list) == dict):
+            self.Key_List = list(self.json_list.keys())
+            self.si_list = False
+        else:
+            self.Key_List = self.json_list
+        #self.Key_List = list(json_list.keys())
+        self.background_color = background_color
+        self.configure(fg_color='transparent')
+        
+        # *frame configuration
+        #self.configure(fg_color=("gray78", "gray28"))  # set frame color
+        
+        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height, fg_color='transparent')
+        #self.FrameList.configure(fg_color=("gray78", "gray28")) 
+        self.FrameList.configure(fg_color=self.background_color) 
+        
+        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
+        self.grid_columnconfigure(1, weight=1)  # entry expands
+
+        self.FrameList.grid(row=0, column=0)
+        
+        #self.crear()
+        # * frame scheme Input
+        #for i in range(self.Number_of_items()):
+        for i in range(len(self.Key_List)):
+            FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
+            FrameItem.grid(row=i, column=0 )
+            if self.Item is not None:
+                if self.si_list:
+                    key = i
+                else:
+                    key = self.Key_List[i]
+                #item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key),
+                #    width = self.width, height = self.height)
+                #print(callable(self.otros))
+                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
+                    width = self.width, height = self.height)
+                self.items.append(item_instance.get_itemData())
+                item_instance.grid(row = 0, column = 0)
+                item_instance.update_row(self.json_list[key])
+                self.frames[i] = item_instance
+            else:
+                print('is none')            
+        # *default value
+
+    def update_list(self, new_list):
+        self.json_list = new_list
+        for i in self.frames:
+            self.frames[i].update_row(new_list[i])
+
+    def get(self) -> Union[float, None]:
+        try:
+            return float(self.entry.get())
+        except ValueError:
+            return None
+
+    def set(self, value: float):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, str(float(value)))
+
+    def Number_of_items(self):
+        #json_data = json.loads(self.json_list)
+        num_items = len(self.Key_List)
         return num_items
     
-'''class DraggableLabel(ctk.CTkFrame):
-    def __init__(self, *args,
-                 x: int = 100,
-                 y: int = 100,
-                 image: Image = None,  # for a CTkimage object
-                 resize_width: int = None,
-                 resize_height: int = None,
-                 transform: bool = False,
-                 **kwargs):
-        
-        # Set default text to an empty string
-        #kwargs.setdefault("text", "")
-        #kwargs.setdefault("fg_color", "red")
-        #kwargs.setdefault("bg_color", "#FFFFff00")
-        super().__init__(*args, **kwargs)
-        self.image = image
-        self.image_width, self.image_height = self.image.size
-        self.image_tk = ctk.CTkImage(self.image, size=(self.image.size))
-        self.x = x
-        self.y = y
-        
-        if self.image is not None:
-            size = 5, 5
-            self.square_image = Image.new('RGB', size, 'black')
-            self.square = ctk.CTkImage(self.square_image, size= size)
-            
-            #* Draggable effect
-            self.ImageDraggable = ctk.CTkLabel(self, image= self.image_tk, text="", fg_color= "transparent", bg_color="transparent")
-            self.ImageDraggable.grid(row=1, column=1)
-            self.ImageDraggable.bind("<Button-1>", self.start_drag)
-            self.ImageDraggable.bind("<ButtonRelease-1>", self.stop_drag)
-            self.ImageDraggable.bind("<B1-Motion>", self.on_drag)
-
-            # * resize square
-            self.Psi = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Psi.grid(row=0,column=0)
-            self.Psi.bind("<Button-1>", self.start_drag)
-            self.Psi.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
-            self.Psi.bind("<ButtonRelease-1>", self.stop_drag)
-            self.pointreference = {"x": 0, "y": 0}
-
-            # Punto superior central
-            self.Psc = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Psc.grid(row=0,column=1)
-            self.Psc.bind("<Button-1>", self.start_drag)
-            self.Psc.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
-            self.Psc.bind("<ButtonRelease-1>", self.stop_drag)
-            
-            # Punto superior derecho
-            self.Psd = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Psd.grid(row=0,column=2)
-            self.Psd.bind("<Button-1>", self.start_drag)
-            self.Psd.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
-            self.Psd.bind("<ButtonRelease-1>", self.stop_drag)
-            self.pointreference = {"x": 0, "y": 0}
-
-            # Punto inferior izquierdo
-            self.Pii = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Pii.grid(row=2,column=0)
-            self.Pii.bind("<Button-1>", self.start_drag)
-            self.Pii.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
-            self.Pii.bind("<ButtonRelease-1>", self.stop_drag)
-            self.pointreference = {"x": 0, "y": 0}
-
-            # Punto inferior central
-            self.Pic = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Pic.grid(row=2,column=1)
-            self.Pic.bind("<Button-1>", self.start_drag)
-            self.Pic.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
-            self.Pic.bind("<ButtonRelease-1>", self.stop_drag)
-
-            # Punto inferior derecho
-            self.Pid = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Pid.grid(row=2,column=2)
-            self.Pid.bind("<Button-1>", self.start_drag)
-            self.Pid.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
-            self.Pid.bind("<ButtonRelease-1>", self.stop_drag)
-            self.pointreference = {"x": 0, "y": 0}
-
-            # Punto lateral izquierdo
-            self.Pli = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Pli.grid(row=1,column=0)
-            self.Pli.bind("<Button-1>", self.start_drag)
-            self.Pli.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
-            self.Pli.bind("<ButtonRelease-1>", self.stop_drag)
-
-            # Punto lateral derecho
-            self.Pld = ctk.CTkLabel(self, image= self.square, text="", width=5, height=5)
-            self.Pld.grid(row=1,column=2)
-            self.Pld.bind("<Button-1>", self.start_drag)
-            self.Pld.bind("<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=0))
-            self.Pld.bind("<ButtonRelease-1>", self.stop_drag)
-            self.drag_data = {"x": 0, "y": 0}
-
-            #print('el tamaño es ' + str(self.image_width) + str(self.image_height))
-
-    def start_drag(self, event):
-        self.drag_data["x"] = event.x
-        self.drag_data["y"] = event.y
-        self.pointreference["x"] = event.x
-        self.pointreference["y"] = event.y
-
-    def stop_drag(self, event):
-        self.drag_data = {"x": 0, "y": 0}
-        self.pointreference = {"x": 0, "y": 0}
-
-    def on_drag(self, event):
-        dx = event.x - self.drag_data["x"]
-        dy = event.y - self.drag_data["y"]
-        new_x = self.winfo_x() + dx
-        new_y = self.winfo_y() + dy
-        self.place(x=new_x, y=new_y)
-        self.drag_data["x"] = event.x
-        self.drag_data["y"] = event.y
-
-    def on_resize(self, event, move_x=0, move_y=0, sign = 1, anchor_x = 0, anchor_y = 0):
-        # *for the anchor
-        dx = event.x - self.drag_data["x"]
-        dy = event.y - self.drag_data["y"]
-        
-        if move_x != 0 and move_y != 0:
-            aspect_ratio = (self.image_width + (sign*dx))/ self.image_width
-            size_x = int(np.around(aspect_ratio * self.ImageDraggable.winfo_width()))
-            size_y = int(np.around(aspect_ratio * self.ImageDraggable.winfo_height()))
-        else:
-            drag_x = move_x * dx
-            drag_y = move_y * dy
-            size_x = self.ImageDraggable.winfo_width() + drag_x
-            size_y = self.ImageDraggable.winfo_height() + drag_y
-
-        new_x = self.winfo_x() + (anchor_x * dx)
-        new_y = self.winfo_y() + (anchor_y * dy)
-        self.place(x=new_x, y=new_y)
-
-        if size_x <=0:
-            size_x = 1
-        if size_y <=0:
-            size_y = 1
-        #* resizin the image
-        resized_image = self.image.resize((size_x, size_y), Image.ANTIALIAS)
-        self.image_tk = ImageTk.PhotoImage(resized_image)
-        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
-        self.drag_data["x"] = event.x
-        self.drag_data["y"] = event.y
-
-    def On_Resize(self, width = 0, height = 0):
-        size_x = self.ImageDraggable.winfo_width()
-        size_y = self.ImageDraggable.winfo_height()
-        if width != 0:
-            size_x = width
-        if height != 0:
-            size_y = height
-        resized_image = self.image.resize((size_x, size_y), Image.ANTIALIAS)
-        self.image_tk = ImageTk.PhotoImage(resized_image)
-        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
-
-    def On_Reposition(self, position_x = 0 , position_y = 0):
-        new_x = self.winfo_x()
-        new_y = self.winfo_y()
-        if position_x != 0:
-            new_x = position_x
-        if position_y != 0:
-            new_y = position_y
-        self.place(x=new_x, y=new_y)
-
-    def get_data(self):
-        return {"Width": self.ImageDraggable.winfo_width(),
-                "Height": self.ImageDraggable.winfo_height(),
-                "Rotate": 0,
-                "x_position": self.winfo_x(),
-                "y_position": self.winfo_y(),
-                "xCenter": True,
-                "yCenter": True}
-    
-    def On_rotate(self, rotate):
-        rotated_image = self.image.rotate(rotate, expand = True)
-        size_x, size_y = rotated_image.size
-        self.image_tk = ImageTk.PhotoImage(rotated_image)
-        self.ImageDraggable.configure(image=self.image_tk, width=size_x, height=size_y)
-
-def relative_position(anchor_x, anchor_y, x, y):
-    relative_x = x - anchor_x
-    relative_y = y - anchor_y
-    return relative_x, relative_y'''
+    def otro_get(self):
+        return self.items'''
 
 class DraggableLabel(ctk.CTkFrame):
     def __init__(self, *args,
@@ -666,6 +687,7 @@ class ImageContainer(tk.Frame):
                  Background_image_height: int = 200,
                  json_list: dict = None,  # Use dict for JSON object
                  function: callable = None,
+                 Hook: Optional[any]= None,
                  **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -676,6 +698,8 @@ class ImageContainer(tk.Frame):
         self.width = width
         self.height = height
         self.configure(width=self.width, height=self.height,)
+        self.function = function
+        self.Change_point_relative_to = Hook[0]
         #num_items = len(self.json_list)
 
         self.canvas = tk.Canvas(self, width = self.width, height = self.height, bg='#D9D9D9')
@@ -691,12 +715,13 @@ class ImageContainer(tk.Frame):
                 self.background_image = Image.new('RGBA',self.size_background, self.background_color)
                 self.Bg_image = ImageTk.PhotoImage(self.background_image)
                 self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image)
+                self.Change_point_relative_to([self.on_x, self.on_y])
            
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
                 y = Item['y_position']
-                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'])
+                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function)
                 self.image_objects.append(obj)
             
             elif Item['Type'] == 'text':
@@ -723,18 +748,10 @@ class ImageContainer(tk.Frame):
         image = Image.open(image_path)
         image_tk = ImageTk.PhotoImage(image)
         self.create_image(50, 50, image=image_tk)
-        #container = self.create_rectangle(10, 10, 190, 190, fill="white", outline="white", alpha=128)
+        
 
-        # Create an image item on the canvas
-        # Adjust the coordinates (x, y) to position the image within the container
-        #image_item = self.create_image(100, 100, image=image)
-
-    '''def capture_screenshot(x, y, width, height, save_path):
-        # Capture the screenshot of the specified region
-        screenshot = ImageGrab.grab(bbox=(x, y, x + width, y + height))
-        bg_screenshot = ImageTk.PhotoImage(screenshot)
-        return bg_screenshot
-    '''    #screenshot.save(save_path)
+    def Update_list(self, new_list):
+        self.json_list = new_list
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -742,7 +759,7 @@ class ObjectOnCanvas:
                  x, 
                  y, 
                  picture,
-                 function: callable = None):
+                 function: Optional[callable] = any):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -833,13 +850,13 @@ class ObjectOnCanvas:
         self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
         self.Rii = self.canvas.create_image(self.x - 8, self.y + self.Height - 8 , anchor="nw", image=self.RotarII)
         border_x, border_y = self.canvas.coords(self.Rii)
-        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
+        self.canvas.tag_bind(self.Rii,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
         #Rotar inferior derecho
         self.Rotate_pictureID = self.Rotate_picture
         self.RotarID = ImageTk.PhotoImage(self.Rotate_pictureID)
         self.Rid = self.canvas.create_image(self.x + self.Width - 8, self.y + self.Height - 8 , anchor="nw", image=self.RotarID)
         border_x, border_y = self.canvas.coords(self.Rid)
-        self.canvas.tag_bind(self.Rsd,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
+        self.canvas.tag_bind(self.Rid,"<B1-Motion>", lambda event: self.On_rotate(event, border_x = border_x, border_y = border_y ))
 
         self.rotated_reference = {"x": 0, "y":0}
         self.Show_points(state_resize = 'normal', state_rotate = 'hidden')
@@ -883,6 +900,8 @@ class ObjectOnCanvas:
 
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
+
+        self.function(self.get())
 
     def on_resize(self, event, move_x=0, move_y=0, sign = 1, anchor_x = 0, anchor_y = 0):
         # *for the anchor
@@ -951,6 +970,7 @@ class ObjectOnCanvas:
         self.y = self.y + new_y
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
+        self.function(self.get())
 
     def Change_state(self, event):
         self.state = not self.state
@@ -961,13 +981,7 @@ class ObjectOnCanvas:
             self.state_resize = 'normal'
             self.state_rotate = 'hidden'
         self.Show_points(state_resize = self.state_resize, state_rotate= self.state_rotate)
-        self.function({"Width": self.Width,
-                        "Height": self.Height,
-                        "Rotate": self.angle,
-                        "x_position": self.x,
-                        "y_position": self.y,
-                        "xCenter": False,
-                        "yCenter": False})
+        self.function(self.get())
     
     def Show_points(self, state_resize = 'normal', state_rotate = 'hidden'):
         self.canvas.itemconfigure(self.Psi, state=state_resize)
@@ -1002,7 +1016,7 @@ class ObjectOnCanvas:
         # Calculate the angle of rotation based on mouse movement
         #self.new_angle = np.arctan2(dy, dx)
         self.new_angle = Angle_between_vectors(vector1, Vector2)
-        print(Angle_between_vectors(vector1, Vector2))
+        #print(Angle_between_vectors(vector1, Vector2))
         # *To rotate de image 
         #Current_width, Current_height = self.image.size
         self.resized_image = self.picture.resize((self.Width, self.Height))
@@ -1064,10 +1078,11 @@ class ObjectOnCanvas:
         #self.angle = self.angle + self.new_angle
         self.rotated_reference["x"] = event.x
         self.rotated_reference["y"] = event.y
-        print("angle = ", self.angle)
+        self.angle = self.angle + np.degrees(self.new_angle)
+        #print("angle = ", self.angle)
+        self.function(self.get())
 
     def get(self):
-        
         return {"Width": self.Width,
                 "Height": self.Height,
                 "Rotate": self.angle,

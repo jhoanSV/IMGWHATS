@@ -18,47 +18,58 @@ def button_callback():
 
 def to_image_bar(lista):
     list_property_bar = lista
-    print(list_property_bar)
+    Up_bar.update_image_data(list_property_bar)
     
 def Buscar():
     '''Desplega el cuadro de busqueda para seleccionar imagenes de
        formato jpg, png y carpetas, descartando otros tipos de documentos 
     '''
-    global img_Tk
     app.filename = filedialog.askopenfilename(title='Buscar recurso')
-    img = Image.open(app.filename)
-    img_Tk = ImageTk.PhotoImage(img)
-    label2 = ctk.CTkLabel(app, image=img_Tk)
-    label2.grid(row=1, column=2, padx=20, pady=20)
+
+    def handle_click(event):
+        x, y = event.x, event.y
+        Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
+        add_image(app.filename, x, y)
+        Image_Container.Update_list(Actual_project)
+        ElementList.Update_list(Actual_project)
+
+    Image_Container.canvas.bind("<Button-1>", handle_click)
+
+def Change_relative_to(New_relative_to):
+    Relative_to = New_relative_to
+    #print(Relative_to)
 
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
-
 button = ctk.CTkButton(app, text="Subir", command=Buscar)
 button.grid(row=1, column=0, padx=10, pady=10)
 
 # *Barra de propiedades de formatos imagenes
-list_property_bar = {}
+list_property_bar = {"Width": 0,
+                    "Height": 0,
+                    "Rotate": 0,
+                    "x_position": 0,
+                    "y_position": 0,
+                    "xCenter": False,
+                    "yCenter": False}
 
-Up_bar = property_image_bar(app, json_list= {"Width": 200,
-                                            "Height": 150,
-                                            "Rotate": 6,
-                                            "x_position": 17,
-                                            "y_position": 7,
-                                            "xCenter": True,
-                                            "yCenter": True})
-Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
+Actual_project = image_properties_json['proyecto1']
+
+Relative_to = [350.0,50.0]
 
 
 #spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
 #spinbox_1.grid(row=2, column=0 ,padx=5, pady=5)
 
-ElementList = FlatList(app, json_list=image_properties_json['proyecto1'], Item = ItemElement, width=300)
+ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=300)
 ElementList.grid(row=3, column=1 ,padx=5, pady=5)
 
-Image_Container = ImageContainer(app, json_list=image_properties_json['proyecto1'], width= 1000, function = to_image_bar )
+Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
+
+Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = Relative_to)
+Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
 background_image = Image.new('RGB',size, 'white')
 #image_tk = ctk.CTkImage(background_image, size=background_image.size)
@@ -67,6 +78,24 @@ background_image = Image.new('RGB',size, 'white')
 #frameImage = DraggableLabel(app, image=background_image)
 #frameImage.place(x=300, rely=5)
 
+
+def capture_click_coordinates(event,x, y):
+    # Get the x and y coordinates of the click
+    x, y = event.x, event.y
+    #return (x,y)
+
+def add_image(path, x , y):
+    Actual_project.append({
+                        "Type": "image",
+                        "Name": path,
+                        "Width": 150,
+                        "Height": 150,
+                        "Rotate": 0,
+                        "x_position": x,
+                        "y_position": y,
+                        "xCenter": False,
+                        "yCenter": False
+                        })
 
 
 app.mainloop()
