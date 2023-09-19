@@ -72,15 +72,17 @@ class ErrorItem(ctk.CTkFrame):
         self.configure(fg_color='transparent', height=30, width =200)
         self.width = width
         self.height = height
+        self.name = Otros['Project_name']
+        self.delete = Otros['Hook']
         
-        self.el_label = ctk.CTkLabel(self, text='prueba', text_color='black', font=('', 18))
+        self.el_label = ctk.CTkLabel(self, text=self.name, text_color='black', font=('', 18))
         self.el_label.place(relx=0, rely=0)
 
         self.btn_quitar = ctk.CTkButton(self, text='X', text_color='white', font=('', 20),
-            fg_color='#BB1D1D', width=20)
+            fg_color='#BB1D1D', width=20, command=lambda: self.delete(self.name))
         self.btn_quitar.place(relx=1, rely=0, anchor='ne')
 
-    def get_data(self):        
+    def get_data(self):
         return #self.json_list, self.Project_name
     
     def get_itemData(self):

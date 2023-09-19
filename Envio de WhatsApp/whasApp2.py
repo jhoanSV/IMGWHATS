@@ -12,7 +12,6 @@ import openpyxl
 import random
 import os
 from typing import Optional
-import threading
 
 class Send_Wapp:
     def __init__(self,
@@ -70,12 +69,7 @@ class Send_Wapp:
         # Espera hasta que la variable cambie
         #WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div')))
         WebDriverWait(driver, 120).until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]')))
-        time.sleep(6)
-        print('holi, si sigue')
-        # Crear un hilo para la función que cambia self.enviar a True
-        '''enviar_thread = threading.Thread(target=self.cambiar_enviar)
-        enviar_thread.start()'''
-        
+        time.sleep(6)        
         
         # Todo: Wait for the WhatsApp Web interface to load
         wait = WebDriverWait(driver, 10)
@@ -106,22 +100,20 @@ class Send_Wapp:
                 search_input.send_keys('+57'+str(contacto[self.colCelular]))
                 time.sleep(3)
 
-                # ?Click on the chat to open it
-                #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="pane-side"]/div[1]/div/div')))
-                #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div')))
+                # ?Click on the chat to open it                
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
-                chat_element.click()
-
-                self.Add_error(contacto)
+                chat_element.click()               
 
                 time.sleep(5)
             except Exception as e:
+                self.Add_error(contacto, self.colDestino)
                 print('Ocurrio un error con '+ str(contacto[self.colDestino]) + ' al seleccionar contacto')
                 print(e)
                 #set_errors((contacto))
                 #oprime una flecha para cancelar el proceso de ingreso de número
                 arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
                 arrow_back.click()
+
                 continue
             
             if self.image_path == '':

@@ -274,10 +274,40 @@ class FlatList(ctk.CTkFrame):
                 print('is none')            
         # *default value
 
-    def update_list(self, new_list):
+    '''def update_list(self, new_list):
         self.json_list = new_list
         for i in self.frames:
-            self.frames[i].update_row(new_list[i])
+            self.frames[i].update_row(new_list[i])'''
+    def update_list(self, new_list):
+        self.json_list = new_list
+        
+        # Elimina las filas que ya no están presentes en la nueva lista
+        for i in range(len(self.json_list), len(self.frames)):
+            self.frames[i].destroy()
+            del self.frames[i]
+        
+        # Actualiza o crea las filas existentes en la nueva lista
+        for i in range(len(self.json_list)):
+            if self.si_list:
+                key = i
+            else:
+                self.Key_List = list(self.json_list.keys())#este es el cambio jsjs
+                key = self.Key_List[i]
+            value = self.json_list[key]
+            if i < len(self.frames):
+                self.frames[i].update_row(value)
+            else:
+                FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
+                FrameItem.grid(row=i, column=0)
+                if self.Item is not None:
+                    item_instance = self.Item(FrameItem, json_list=value, Otros={'Project_name': str(key), 'Hook': self.otros},
+                                            width=self.width, height=self.height)
+                    self.items.append(item_instance.get_itemData())
+                    item_instance.grid(row=0, column=0)
+                    item_instance.update_row(value)
+                    self.frames[i] = item_instance
+                else:
+                    print('is none')
 
     def get(self) -> Union[float, None]:
         try:

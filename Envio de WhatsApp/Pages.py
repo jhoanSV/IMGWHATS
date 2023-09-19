@@ -6,6 +6,7 @@ from Vcss import FlatList, El_Tab_view
 from components import ItemProject, Table, ErrorItem
 import whasApp2, whasApp
 import json
+import threading
 
 #*colores
 CGreen = "#1C9F80"
@@ -48,7 +49,8 @@ class Los_proyectos(ctk.CTkFrame):
             with open('./proyectos.json', 'r') as json_file:
                 self.projects_json = json.load(json_file)
             
-            self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject, width= 200, Otros=self.proj_selection)
+            self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject,
+                width= 200, Otros=self.proj_selection)
             self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
         except:# Exception as e:
             print("Ocurrió un error al leer el archivo de proyectos")
@@ -159,6 +161,7 @@ class Send(ctk.CTkFrame):
         self.data_proj = data_proj
         self.name_proj = None        
         self.obj_enviar = whasApp2.Send_Wapp()
+        self.lista_errores = {}
 
         #self.El_metodo = El_metodo
         
@@ -186,10 +189,9 @@ class Send(ctk.CTkFrame):
         self.entry_msj = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
             font=('', 18), border_width=0, corner_radius=0)
         self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.65, relheight=0.5, anchor='nw')
-
-        self.lista_errores = {'k1':'v1','k2':'v2','k3':'v3'}        
+        
         self.notes = FlatList(self, width=200, height=315, json_list=self.lista_errores,
-            Item=ErrorItem, background_color='#D9D9D9')
+            Item=ErrorItem, background_color='#D9D9D9', Otros=self.Del_error)
         self.notes.place(relx=0.73, rely=0.3)
         '''self.notes = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
             font=('', 18), border_width=0, corner_radius=0)
@@ -233,24 +235,9 @@ class Send(ctk.CTkFrame):
             variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
             colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error)
         
-        self.obj_enviar.envio_msj()
-        
-    def openX(self):
-
-        pregunta = tkinter.messagebox.askquestion(
-            "Precaución", "Por favor, esperar a que cargue completamente la página de whatsapp. Leer el QR y Luego oprimir el botón de Envío" +
-            "¿Volver a mostrar este mensaje?"
-        )
-
-        if pregunta == "yes":
-            print("Función para hacer que no se vuelva a mostrar el mensaje")
-
-        el_msj = self.entry_msj.get("0.0", "end")
-
-        print(self.data_proj)
-        whasApp.envio_msj(msj=el_msj, image_path=self.entry_media.get(), 
-            variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
-            colDestino=self.data_proj["colDestino"])
+        proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj)
+        proceso_thread.start()
+        #self.obj_enviar.envio_msj()
 
     def Save_proj(self):
         el_msj = str(self.entry_msj.get("0.0", "end"))
@@ -276,17 +263,14 @@ class Send(ctk.CTkFrame):
         else:
             return
     
-    def Add_error(self, contacto):
-        #self.lista_errores['xD'] = 'nose'
-        print(contacto)
+    def Add_error(self, contacto, indice):
+        #for i in range(len(self.lista_errores)):
+        #self.lista_errores[(num+1)] = contacto[indice]
+        self.lista_errores[contacto[indice]] = contacto
+        print(self.lista_errores[contacto[indice]])
+        self.notes.update_list(self.lista_errores)
 
-    def Update_textB(self):
-        #self.erros = None
-        self.errors = whasApp.get_errors()
-        print(self.errors)
-        if self.errors is not None:
-            self.notes.insert(tkinter.END, 'Errores: \n',)
-            for i in range(len(self.errors)):
-                #self.notes.insert(((i/10) + 0.0), self.errors[i])
-                self.notes.insert(tkinter.END, self.errors[i]+'\n',)
-
+    def Del_error(self, key):
+        if str(key) in self.lista_errores:
+            del self.lista_errores[str(key)]
+            self.notes.update_list(self.lista_errores)

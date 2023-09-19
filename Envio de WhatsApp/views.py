@@ -95,19 +95,5 @@ class view(ctk.CTk):
          #self.variables.update_table() que acutalice los checkboxes cuando sea un proyecto ya guardado
          self.switch_tab(tab)
 
-
-    '''def btn_tab_vars(self):#!Borrar, aparentemente no se están usando
-        self.main_tabV.toggle_frame_by_id(1)
-        self.btn_env.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
-        self.btn_vars.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
-
-    def btn_tab_envio(self):
-        #*Crea el el frame de variables
-        #tab_envio = Send(master=self.main_tabV)
-        #self.main_tabV.add_frame(num, tab_envio)
-        self.main_tabV.toggle_frame_by_id(2)
-        self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
-        self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)'''
-
 v = view()
 v.mainloop()
