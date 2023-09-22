@@ -161,10 +161,10 @@ class property_image_bar(ctk.CTkFrame):
         
         super().__init__(*args, **kwargs)
         self.json_list = json_list
-        self.hook = Hook
-        self.relative_x = self.hook[0]
-        self.relative_y = self.hook[1]
-        print(self.relative_x, self.relative_y)
+        self.Hook = Hook
+        self.relative_x, self.relative_y = self.Hook[0]
+        self.External_Move = self.Hook[1]
+        self.Id = self.json_list['Id']
         # *Barra de propiedades de formatos imagenes
         
         self.tools_image_frame = ctk.CTkFrame(self)
@@ -173,28 +173,28 @@ class property_image_bar(ctk.CTkFrame):
         self.label_x_position = ctk.CTkLabel(self.tools_image_frame, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
-        self.Input_x_position = InputNumber(self.tools_image_frame, width=50, step_size=1)
+        self.Input_x_position = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook = self.Update_image_move_x)
         self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
         self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
 
         self.label_y_position = ctk.CTkLabel(self.tools_image_frame, text= "Y:")
         self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
 
-        self.Input_y_position = InputNumber(self.tools_image_frame, width=50, step_size=1)
+        self.Input_y_position = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook = self.Update_image_move_y)
         self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
         self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
 
         self.label_width = ctk.CTkLabel(self.tools_image_frame, text= "W:")
         self.label_width.grid(row=0, column=4, padx=5, pady=5)
 
-        self.Input_width = InputNumber(self.tools_image_frame, width=50, step_size=1)
+        self.Input_width = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook= self.Update_image_size_x)
         self.Input_width.set(self.json_list['Width'])
         self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
 
         self.label_heid = ctk.CTkLabel(self.tools_image_frame, text= "H:")
         self.label_heid.grid(row=0, column=6, padx=5, pady=5)
 
-        self.Input_heid = InputNumber(self.tools_image_frame, width=50, step_size=1)
+        self.Input_heid = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook= self.Update_image_size_y)
         self.Input_heid.set(self.json_list['Height'])
         self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
@@ -213,6 +213,17 @@ class property_image_bar(ctk.CTkFrame):
         
         checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
 
+    def Update_image_move_x(self, value):
+        self.External_Move(self.Id, value, 'x')
+
+    def Update_image_move_y(self, value):
+        self.External_Move(self.Id, value, 'y')
+
+    def Update_image_size_x(self, value):
+        self.External_Move(self.Id, value, 'Width')
+
+    def Update_image_size_y(self, value):
+        self.External_Move(self.Id, value, 'Height')
 
     def update_image_data(self, updated_data):
         self.json_list = updated_data

@@ -107,6 +107,7 @@ class InputNumber(ctk.CTkFrame):
                  ciclic: bool = False,
                  min: int = 0,
                  max: int = 10,
+                 Hook: Optional[any] = None,
                  **kwargs):
         def tamaño(width):
             if width < 50:
@@ -121,7 +122,9 @@ class InputNumber(ctk.CTkFrame):
         self.min = min
         self.max = max
         self.configure(fg_color=("gray78", "gray28"))  # set frame color
+        self.Hook = Hook
         
+        self.Function = self.Hook
         self.FrameButons = ctk.CTkFrame(self)
         self.FrameButons.configure(fg_color=("gray78", "gray28")) 
 
@@ -168,6 +171,7 @@ class InputNumber(ctk.CTkFrame):
                 else:
                     self.entry.delete(0, "end")
                     self.entry.insert(0, value)
+                self.Function(value)
             except ValueError:
                 return
         elif self.ciclic == False:
@@ -175,6 +179,7 @@ class InputNumber(ctk.CTkFrame):
                 value = float(self.entry.get()) + (float(sign)*self.step_size)
                 self.entry.delete(0, "end")
                 self.entry.insert(0, value)
+                self.Function(value = value)
             except ValueError:
                 return
 
@@ -698,7 +703,7 @@ class ImageContainer(tk.Frame):
         self.width = width
         self.height = height
         self.configure(width=self.width, height=self.height,)
-        self.function = function
+        self.function = Hook[1]
         self.Change_point_relative_to = Hook[0]
         #num_items = len(self.json_list)
 
@@ -721,7 +726,7 @@ class ImageContainer(tk.Frame):
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
                 y = Item['y_position']
-                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function)
+                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'])
                 self.image_objects.append(obj)
             
             elif Item['Type'] == 'text':
@@ -752,6 +757,18 @@ class ImageContainer(tk.Frame):
 
     def Update_list(self, new_list):
         self.json_list = new_list
+        New_image = self.json_list[len(self.json_list)-1]
+        if New_image['Type'] == 'image':
+                self.picture = Image.open(New_image['Name'])
+                x = New_image['x_position']
+                y = New_image['y_position']
+                obj = ObjectOnCanvas(self.canvas, x, y, New_image['Name'], function = self.function, Id = New_image['Id'])
+                self.image_objects.append(obj)
+                
+    def External_Move(self, Id, value, axis):
+        #print('como estas, to estoy en imageContainer, con ID= ', Id)
+        for obj in self.image_objects:
+            obj.External_Move(Id, value, axis)
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -759,11 +776,14 @@ class ObjectOnCanvas:
                  x, 
                  y, 
                  picture,
-                 function: Optional[callable] = any):
+                 function: Optional[callable] = any,
+                 Id: Optional[int] = None,
+                 active: bool = False):
+        
         self.canvas = canvas
         self.x = x
         self.y = y
-        #self.image = picture
+        self.id = Id
         self.picture = Image.open(picture)
         self.image = ImageTk.PhotoImage(self.picture)
         self.Width = self.image.width()
@@ -771,6 +791,7 @@ class ObjectOnCanvas:
         self.state = True
         self.angle = 0
         self.function = function
+        self.active = active
 
         super().__init__()
         # *principal image
@@ -792,42 +813,58 @@ class ObjectOnCanvas:
         self.Psi = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Psi,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psi,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
-        self.canvas.tag_bind(self.Psi,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Psi, "<Enter>", lambda event, cursor='top_left_corner': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Psi,"<Leave>", self.Restore_cursor)
+
         #?Punto superior central
         self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Psc,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psc,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
         self.canvas.tag_bind(self.Psc,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Psc, "<Enter>", lambda event, cursor='sb_v_double_arrow': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Psc,"<Leave>", self.Restore_cursor)
         #?Punto superior derecho
         self.Psd = self.canvas.create_image(self.x + self.Width - 4,self.y, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Psd,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psd,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
         self.canvas.tag_bind(self.Psd,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Psd, "<Enter>", lambda event, cursor='top_right_corner': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Psd,"<Leave>", self.Restore_cursor)
         #?Punto inferior izquierdo
         self.Pii = self.canvas.create_image(self.x, self.y + self.Height - 4, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Pii,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pii,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
         self.canvas.tag_bind(self.Pii,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Pii, "<Enter>", lambda event, cursor='bottom_left_corner': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Pii,"<Leave>", self.Restore_cursor)
         #?Punto inferior central
         self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 4, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Pic,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pic,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
         self.canvas.tag_bind(self.Pic,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Pic, "<Enter>", lambda event, cursor='sb_v_double_arrow': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Pic,"<Leave>", self.Restore_cursor)
         #?Punto inferior derecho
         self.Pid = self.canvas.create_image(self.x + self.Width - 4,self.y + self.Height - 4, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Pid,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pid,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
         self.canvas.tag_bind(self.Pid,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Pid, "<Enter>", lambda event, cursor='bottom_right_corner': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Pid,"<Leave>", self.Restore_cursor)
         #?Punto lateral izquierdo
         self.Pli = self.canvas.create_image(self.x,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Pli,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pli,"<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
         self.canvas.tag_bind(self.Pli,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Pli, "<Enter>", lambda event, cursor='sb_h_double_arrow': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Pli,"<Leave>", self.Restore_cursor)
         #?Punto lateral derecho
         self.Pld = self.canvas.create_image(self.x + self.Width - 4,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
         self.canvas.tag_bind(self.Pld,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pld,"<B1-Motion>", lambda event: self.on_resize(event, anchor_x = 1, move_x=1, move_y=0))
         self.canvas.tag_bind(self.Pld,"<ButtonRelease-1>", self.stop_drag)
+        self.canvas.tag_bind(self.Pld, "<Enter>", lambda event, cursor='sb_h_double_arrow': self.Change_cursor(event, cursor))
+        self.canvas.tag_bind(self.Pld,"<Leave>", self.Restore_cursor)
         self.drag_data = {"x": 0, "y": 0}
 
         #* Outline for rotate
@@ -863,6 +900,34 @@ class ObjectOnCanvas:
         #centered point
         self.Cp = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2 , anchor="nw", image=self.square_point)
         self.canvas.itemconfigure(self.Cp, state='hidden')
+
+    def activate(self):
+        if self.active == False:
+            self.canvas.itemconfigure(self.Psi, state='hidden')
+            self.canvas.itemconfigure(self.Psc, state='hidden')
+            self.canvas.itemconfigure(self.Psd, state='hidden')
+            self.canvas.itemconfigure(self.Pii, state='hidden')
+            self.canvas.itemconfigure(self.Pic, state='hidden')
+            self.canvas.itemconfigure(self.Pid, state='hidden')
+            self.canvas.itemconfigure(self.Pli, state='hidden')
+            self.canvas.itemconfigure(self.Pld, state='hidden')
+            self.canvas.itemconfigure(self.Rsi, state='hidden')
+            self.canvas.itemconfigure(self.Rsd, state='hidden')
+            self.canvas.itemconfigure(self.Rii, state='hidden')
+            self.canvas.itemconfigure(self.Rid, state='hidden')
+        elif self.active == True:
+            self.canvas.itemconfigure(self.Psi, state='normal')
+            self.canvas.itemconfigure(self.Psc, state='normal')
+            self.canvas.itemconfigure(self.Psd, state='normal')
+            self.canvas.itemconfigure(self.Pii, state='normal')
+            self.canvas.itemconfigure(self.Pic, state='normal')
+            self.canvas.itemconfigure(self.Pid, state='normal')
+            self.canvas.itemconfigure(self.Pli, state='normal')
+            self.canvas.itemconfigure(self.Pld, state='normal')
+            self.canvas.itemconfigure(self.Rsi, state='normal')
+            self.canvas.itemconfigure(self.Rsd, state='normal')
+            self.canvas.itemconfigure(self.Rii, state='normal')
+            self.canvas.itemconfigure(self.Rid, state='normal')
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
@@ -964,7 +1029,6 @@ class ObjectOnCanvas:
         self.canvas.coords(self.Rii,self.x - 8, self.y + self.Height - 8)
         #Rotar inferior derecho
         self.canvas.coords(self.Rid,self.x + self.Width - 8, self.y + self.Height - 8)
-
 
         self.x = self.x + new_x
         self.y = self.y + new_y
@@ -1083,7 +1147,8 @@ class ObjectOnCanvas:
         self.function(self.get())
 
     def get(self):
-        return {"Width": self.Width,
+        return {"id": self.id,
+                "Width": self.Width,
                 "Height": self.Height,
                 "Rotate": self.angle,
                 "x_position": self.x,
@@ -1091,6 +1156,125 @@ class ObjectOnCanvas:
                 "xCenter": False,
                 "yCenter": False}
         
+
+    def Change_cursor(self, event, C_cursor):
+        # Cambiar el cursor del mouse a un cursor personalizado (por ejemplo, 'hand2')
+        self.canvas.config(cursor=C_cursor)
+
+    def Restore_cursor(self, event):
+        self.canvas.config(cursor="")
+
+    def External_Move(self,Id, value, axis):
+        if Id == self.id:
+            size_x = self.Width
+            size_y = self.Height
+            #* Move the image
+            if axis == 'x':
+                self.x = value
+            elif axis == 'y':
+                self.y = value
+            elif axis == 'Width':
+                size_x = int(value)
+            elif axis == 'Height':
+                size_y = int(value)
+
+            #* resizin the image
+
+            resized_image = self.picture.resize((size_x, size_y), Image.ANTIALIAS)
+            self.image = ImageTk.PhotoImage(resized_image)
+            self.canvas.itemconfig(self.canvas_obj, image=self.image)
+            self.Width = size_x
+            self.Height = size_y
+            
+            #* Move the image
+            #Principal image
+            self.canvas.coords(self.canvas_obj, self.x, self.y)
+            #? Move the reference points to resize the image
+            #Punto superior izquierdo
+            self.canvas.coords(self.Psi, self.x, self.y)
+            #Punto superior central
+            self.canvas.coords(self.Psc, self.x + round((self.Width/2))-2,self.y)
+            #Punto superior derecho
+            self.canvas.coords(self.Psd, self.x + self.Width - 4,self.y)
+            #Punto inferior izquierdo
+            self.canvas.coords(self.Pii, self.x, self.y + self.Height - 4)
+            #Punto inferior central
+            self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 4)
+            #Punto inferior derecho
+            self.canvas.coords(self.Pid, self.x + self.Width - 4,self.y + self.Height - 4)
+            #Punto lateral izquierdo
+            self.canvas.coords(self.Pli, self.x,self.y + round((self.Height/2))-2)
+            #Punto lateral derecho
+            self.canvas.coords(self.Pld, self.x + self.Width - 4,self.y + round((self.Height/2))-2)
+            #Centered point
+            self.canvas.coords(self.Cp, self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2)
+            
+            #? Move the reference points to rotate the image
+            #Rotar superior izquierdo
+            self.canvas.coords(self.Rsi,self.x - 8,self.y - 8)
+            #Rotar superior derecho
+            self.canvas.coords(self.Rsd,self.x + self.Width - 8, self.y - 8 )
+            #Rotar inferior izquierdo
+            self.canvas.coords(self.Rii,self.x - 8, self.y + self.Height - 8)
+            #Rotar inferior derecho
+            self.canvas.coords(self.Rid,self.x + self.Width - 8, self.y + self.Height - 8)
+
+            self.function(self.get())
+
+    def External_Resize(self, Id, value, orientation):
+        size_x = self.Width
+        size_y = self.Height
+        if Id == self.id:
+            if orientation == 'Width':
+                size_x = value
+            elif orientation == 'Height':
+                size_y = value
+
+        #* resizin the image
+        
+        resized_image = self.picture.resize((size_x, size_y), Image.ANTIALIAS)
+        self.image = ImageTk.PhotoImage(resized_image)
+        self.canvas.itemconfig(self.canvas_obj, image=self.image)
+        self.Width = size_x
+        self.Height = size_y
+        #* Move the image
+        #Principal image
+        self.canvas.coords(self.canvas_obj, self.x, self.y)
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, self.x, self.y)
+        #Punto superior central
+        self.canvas.coords(self.Psc, self.x + round((self.Width/2))-2,self.y)
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, self.x + self.Width - 4,self.y)
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, self.x, self.y + self.Height - 4)
+        #Punto inferior central
+        self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 4)
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, self.x + self.Width - 4,self.y + self.Height - 4)
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, self.x,self.y + round((self.Height/2))-2)
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, self.x + self.Width - 4,self.y + round((self.Height/2))-2)
+        #Centered point
+        self.canvas.coords(self.Cp, self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2)
+        
+        #? Move the reference points to rotate the image
+        #Rotar superior izquierdo
+        self.canvas.coords(self.Rsi,self.x - 8,self.y - 8)
+        #Rotar superior derecho
+        self.canvas.coords(self.Rsd,self.x + self.Width - 8, self.y - 8 )
+        #Rotar inferior izquierdo
+        self.canvas.coords(self.Rii,self.x - 8, self.y + self.Height - 8)
+        #Rotar inferior derecho
+        self.canvas.coords(self.Rid,self.x + self.Width - 8, self.y + self.Height - 8)
+
+        #self.x = self.x + new_x
+        #self.y = self.y + new_
+        self.function(self.get())
+                
+
 class TextBox:
     def __init__(self, canvas, x, y, Text, width, height):
         self.canvas = canvas

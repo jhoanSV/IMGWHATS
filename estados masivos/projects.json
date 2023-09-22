@@ -1,6 +1,7 @@
 {
     "proyecto1": [
         {
+            "Id": 0,
             "Type": "Background",
             "Name": "caminar.jpg",
             "Width": 300,
@@ -10,9 +11,11 @@
             "y_position": 0,
             "xCenter": true,
             "yCenter": true,
-            "BackgroundColor": "#FFFFFF"
+            "BackgroundColor": "#FFFFFF",
+            "active": false
         },
         {
+            "Id": 1,
             "Type": "image",
             "Name": "caminar.jpg",
             "Width": 300,
@@ -21,9 +24,11 @@
             "x_position": 0,
             "y_position": 0,
             "xCenter": true,
-            "yCenter": true
+            "yCenter": true,
+            "active": false
         },
         {
+            "Id": 2,
             "Type": "image",
             "Name": "001.png",
             "Width": 150,
@@ -32,9 +37,11 @@
             "x_position": 200,
             "y_position": 50,
             "xCenter": false,
-            "yCenter": false
+            "yCenter": false,
+            "active": true
         },
         {
+            "Id": 3,
             "Type": "text",
             "text": "Prueba del texto\nque vamos a poner @holi",
             "fontType": "Arial.ttf",
@@ -48,7 +55,8 @@
             "italic" : true,
             "fontSize" : 60,
             "boxWidth": 250,
-            "boxHeight": 100
+            "boxHeight": 100,
+            "active": false
         }
     ]
 }

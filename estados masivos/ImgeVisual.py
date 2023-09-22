@@ -30,6 +30,7 @@ def Buscar():
         x, y = event.x, event.y
         Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
         add_image(app.filename, x, y)
+        activate_element(len(Actual_project)-1)
         Image_Container.Update_list(Actual_project)
         ElementList.Update_list(Actual_project)
 
@@ -39,6 +40,9 @@ def Change_relative_to(New_relative_to):
     Relative_to = New_relative_to
     #print(Relative_to)
 
+def External_Move(Id, value, axis):
+    Image_Container.External_Move(Id, value, axis)
+
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
@@ -46,7 +50,8 @@ button = ctk.CTkButton(app, text="Subir", command=Buscar)
 button.grid(row=1, column=0, padx=10, pady=10)
 
 # *Barra de propiedades de formatos imagenes
-list_property_bar = {"Width": 0,
+list_property_bar = {"Id": 2,
+                    "Width": 0,
                     "Height": 0,
                     "Rotate": 0,
                     "x_position": 0,
@@ -56,7 +61,7 @@ list_property_bar = {"Width": 0,
 
 Actual_project = image_properties_json['proyecto1']
 
-Relative_to = [350.0,50.0]
+Relative_to = [0,0]
 
 
 #spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
@@ -68,7 +73,7 @@ ElementList.grid(row=3, column=1 ,padx=5, pady=5)
 Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 
-Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = Relative_to)
+Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move])
 Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
 background_image = Image.new('RGB',size, 'white')
@@ -86,6 +91,7 @@ def capture_click_coordinates(event,x, y):
 
 def add_image(path, x , y):
     Actual_project.append({
+                        "Id": len(Actual_project),
                         "Type": "image",
                         "Name": path,
                         "Width": 150,
@@ -94,8 +100,21 @@ def add_image(path, x , y):
                         "x_position": x,
                         "y_position": y,
                         "xCenter": False,
-                        "yCenter": False
+                        "yCenter": False,
+                        "active": True
                         })
+
+def activate_element(Id):
+    for element in Actual_project:
+        if element['Id'] == Id:
+            element['active'] = True
+        elif element['Id'] != Id:
+            element['active'] = False
+
+def comparing_elemts(List1, List2):
+    symmetric_diff = list(set(List1) ^ set(List2))
+
+    print("Symmetric Difference:", symmetric_diff)
 
 
 app.mainloop()
