@@ -30,6 +30,8 @@ class Send_Wapp:
         self.colDestino = colDestino
         self.excel_file_path = file_path
         self.Add_error = Hook
+        self.indices = []
+        self.excel_data = None
 
         #* Constantes de funcionalidad
         # Todo: URL of WhatsApp Web
@@ -45,8 +47,9 @@ class Send_Wapp:
         wb = openpyxl.load_workbook(self.excel_file_path)
         sheet = wb.active
         data = []
-        for row in sheet.iter_rows(min_row=2, values_only=True):
+        for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True)):
             data.append(row)
+            self.indices.append(i)
         return data
     
 
@@ -59,7 +62,7 @@ class Send_Wapp:
         self.excel_file_path = file_path
         self.Add_error = la_funcion
 
-    def envio_msj(self):#?Recibir excel_data, msj, col_num, col_destino, variables
+    def envio_msj(self, re=None):#?Recibir excel_data, msj, col_num, col_destino, variables
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan        
         driver = webdriver.Chrome(options=self.options, service=ChromeService(ChromeDriverManager().install()))
@@ -74,9 +77,14 @@ class Send_Wapp:
         # Todo: Wait for the WhatsApp Web interface to load
         wait = WebDriverWait(driver, 10)
         wait.until(EC.title_contains("WhatsApp"))
-        excel_data = self.read_excel_file()
-        print(excel_data)
-        for contacto in excel_data:
+        if re is not None:
+            #excel_data = re
+            self.indices = re
+        else:
+            self.excel_data = self.read_excel_file()
+        print(self.excel_data)
+        #for indice, contacto in enumerate(self.excel_data):
+        for indice in self.indices:
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
             text = self.msj
@@ -85,9 +93,10 @@ class Send_Wapp:
                 #?text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
                 # Todo: The next loop begins selecting each key/var, and if it exists in the message, change it
                 for i, key in enumerate(self.variables):
-                    text = text.replace(key, str(contacto[i]))
-                print("Vista previa del mensaje: ")
-                print(text)
+                    #text = text.replace(key, str(contacto[i]))
+                    text = text.replace(key, str(self.excel_data[indice][i]))
+                #print("Vista previa del mensaje: ")
+                #print(text)
                                 
                 # ?Search for the chat by phone number
                 #search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
@@ -97,20 +106,24 @@ class Send_Wapp:
                                                                                     
                 #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
                 #search_input.clear()
-                search_input.send_keys('+57'+str(contacto[self.colCelular]))
+                #search_input.send_keys('+57'+str(contacto[self.colCelular]))
+                search_input.send_keys('+57'+str(self.excel_data[indice][self.colCelular]))
                 time.sleep(3)
 
-                # ?Click on the chat to open it                
+                #? Click on the chat to open it
                 chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
                 chat_element.click()               
 
                 time.sleep(5)
-            except Exception as e:
-                self.Add_error(contacto, self.colDestino)
-                print('Ocurrio un error con '+ str(contacto[self.colDestino]) + ' al seleccionar contacto')
+            except Exception as e:                
+                print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' al seleccionar contacto')
                 print(e)
-                #set_errors((contacto))
-                #oprime una flecha para cancelar el proceso de ingreso de número
+                #set_errors((contacto))                
+                #self.Add_error(contacto.append(self.colDestino))
+                #? Envia a Send() un diccionario con contacto y su índice en excel_data
+                #self.Add_error({str(contacto[self.colDestino]):indice})
+                self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
+                #? oprime una flecha para cancelar el proceso de ingreso de número
                 arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
                 arrow_back.click()
 
@@ -119,29 +132,19 @@ class Send_Wapp:
             if self.image_path == '':
                 try:
                     #?Send the message with the number of the contact that we want to contact
-                    #Busca la kja de texto y le asigna el msj 
-                    message_input = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]/p')
+                    #Busca la kja de texto y le asigna el msj                 
+                    message_input = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]')
                     message_input.send_keys(text)
-                    #//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[2]/button/span
-                    #message_input.send_keys(Keys.ENTER)
-                    #send_button = driver.find_element(By.XPATH, '//span[@data-icon="send"]')
-                    #?da click en enviar
-                    send_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="send"]')))                        
-                    send_button.click()
+                    message_input.send_keys(Keys.ENTER)
                     time.sleep(2)
                     
                     #Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
-                except Exception as e:            
-                    print('Ocurrio un error con '+ str(contacto[self.colDestino]) + ' En envio 1')
-                    print(e)                
-                    '''
-                    # Click on the button to errace the 
-                    chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
-                    #chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="pane-side"]/div[1]/div/div/div[3]')))
-                    chat_element.click()
-                    '''
+                except Exception as e:
+                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio 1')
+                    print(e)
+                    self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                     continue
             elif self.image_path.endswith('.jpg') or self.image_path.endswith('.png'):
                 try:
@@ -156,7 +159,7 @@ class Send_Wapp:
                     time.sleep(6)
 
                     #To write the message that it will send with the image
-                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]')#'//div[@contenteditable="true"][@data-tab="6"]')
                     message_input.send_keys(text)
                     message_input.send_keys(Keys.ENTER)
                     time.sleep(5)
@@ -166,12 +169,8 @@ class Send_Wapp:
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                 except Exception as e:
-                    print('Ocurrio un error con '+ str(contacto[self.colDestino]) + ' En envio 2')
-                    # Click on the button to errace the
-                    '''
-                    chat_element = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="side"]/div[1]/div/div/span/button')))
-                    chat_element.click()
-                    '''
+                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio 2')
+                    self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                     continue
             elif self.image_path.endswith('.mp4'):
                 try:
@@ -187,18 +186,29 @@ class Send_Wapp:
 
                     #To write the message that it will send with the image
                     # //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span
-                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]/p')#'//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]/p')#'//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span')
+                     #                    Empresarial Business       //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
+                      #                               mio            //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
+                       #                              Paola          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]
+                        #                             sebas          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]
+                         #                                           //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
+                          #                                          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
+                           #                                         //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
+                            #                                        //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]                            
+                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')
                     message_input.send_keys(text)
                     message_input.send_keys(Keys.ENTER)
                     time.sleep(5)
 
-                    #fin de la prueba para seleccionar la imaen a mandar
                     #Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                 except Exception as e:
+                    input("xDxDxDxDError")
                     #print("An error occurred:", str(e))
-                    print('Ocurrio un error con '+ str(contacto[self.colDestino]))
+                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]))
+                    self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                     continue
             else:
                 try:
@@ -217,7 +227,7 @@ class Send_Wapp:
                     time.sleep(6)
 
                     #To write the message that it will send with the image
-                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
+                    message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]')#'//div[@contenteditable="true"][@data-tab="6"]')
                     message_input.send_keys(text)
                     message_input.send_keys(Keys.ENTER)
                     time.sleep(5)
@@ -227,5 +237,25 @@ class Send_Wapp:
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                 except Exception as e:
-                    print('Ocurrio un error con '+ str(contacto[self.colDestino]) + ' En envio 3')
+                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio 3')
+                    self.Add_error(self.excel_data[indice], self.colDestino)
                     continue
+        
+        #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+        close_button.click()
+
+        try:
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[9]/div')))
+        except:
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[(last()-1)]/div')))
+        close_button.click()
+        time.sleep(1)
+
+        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+        close_button.click()
+        time.sleep(7)
+
+        # Close the browser
+        driver.quit()

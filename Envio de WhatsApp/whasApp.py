@@ -320,8 +320,6 @@ def envio_msj(msj, image_path, variables, colCelular, colDestino):#?Recibir exce
     close_button.click()
     time.sleep(7)
 
-    #click to send the message
-
     # Close the browser
     driver.quit()
 

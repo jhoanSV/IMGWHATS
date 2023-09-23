@@ -161,7 +161,7 @@ class Send(ctk.CTkFrame):
         self.data_proj = data_proj
         self.name_proj = None        
         self.obj_enviar = whasApp2.Send_Wapp()
-        self.lista_errores = {}
+        self.lista_errores = []
 
         #self.El_metodo = El_metodo
         
@@ -205,6 +205,10 @@ class Send(ctk.CTkFrame):
             hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
         self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
 
+        self.Re_open_btn = ctk.CTkButton(self, text="ReAbrir Wasapo", corner_radius=0, fg_color=CGreen,
+            hover_color='#115e45', font=('', 18), command=lambda: self.re_open())
+        self.Re_open_btn.place(relx=0.73, rely=0.84, anchor='nw')
+
         '''self.show_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.obj_enviar.valida_envio())#self.Update_textB())#, state='disabled')
         self.show_btn.place(relx=0.35, rely=0.84, anchor='nw')'''
@@ -215,7 +219,7 @@ class Send(ctk.CTkFrame):
     
     def buscar_media(self):
         self.file_name = filedialog.askopenfilename(title='Seleccionar archivo multimedia', 
-            filetypes=(('Jpg', '*.jpg'), ('Png', '*.png'), ('Mp4', '*.mp4'), ('Todos los archivos', '*')))
+            filetypes=(('Multimedia', '*.jpg *.png *.mp4'), ('Todos los archivos', '*')))
         self.xl_path = self.file_name
         self.entry_media.delete(0, "end")  # Limpiar el contenido del Entry
         self.entry_media.insert(0, self.xl_path)
@@ -237,7 +241,21 @@ class Send(ctk.CTkFrame):
         
         proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj)
         proceso_thread.start()
-        #self.obj_enviar.envio_msj()
+    
+    def re_open(self):
+
+        if self.lista_errores == []:
+            print("No hay errores")
+            return
+        
+        indices = []
+        for err in self.lista_errores:
+            indices.append(next(iter(err)))
+
+        print(indices)
+
+        proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj(indices))
+        proceso_thread2.start()
 
     def Save_proj(self):
         el_msj = str(self.entry_msj.get("0.0", "end"))
@@ -263,14 +281,15 @@ class Send(ctk.CTkFrame):
         else:
             return
     
-    def Add_error(self, contacto, indice):
-        #for i in range(len(self.lista_errores)):
-        #self.lista_errores[(num+1)] = contacto[indice]
-        self.lista_errores[contacto[indice]] = contacto
-        print(self.lista_errores[contacto[indice]])
+    def Add_error(self, error):
+        #self.lista_errores[str(contacto[indice])] = contacto
+        self.lista_errores.append(error)
         self.notes.update_list(self.lista_errores)
 
     def Del_error(self, key):
-        if str(key) in self.lista_errores:
-            del self.lista_errores[str(key)]
-            self.notes.update_list(self.lista_errores)
+        print("lista")
+        print(self.lista_errores)
+        #if str(key) in self.lista_errores:
+        del self.lista_errores[int(key)]
+        self.notes.update_list(self.lista_errores)
+        print(self.lista_errores)
