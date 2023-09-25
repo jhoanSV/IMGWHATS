@@ -142,7 +142,7 @@ class Send_Wapp:
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                 except Exception as e:
-                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio 1')
+                    print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio')
                     print(e)
                     self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                     continue
@@ -184,18 +184,7 @@ class Send_Wapp:
                     attach_image_option.send_keys(self.image_path)
                     time.sleep(7)
 
-                    #To write the message that it will send with the image
-                    # //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span
-                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]/p')#'//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p')#'//div[@contenteditable="true"][@data-tab="6"]')
-                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div/p/span')
-                     #                    Empresarial Business       //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
-                      #                               mio            //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
-                       #                              Paola          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]
-                        #                             sebas          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]
-                         #                                           //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
-                          #                                          //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
-                           #                                         //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]
-                            #                                        //*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]/div[1]                            
+                    #To write the message that it will send with the image                    
                     message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')
                     message_input.send_keys(text)
                     message_input.send_keys(Keys.ENTER)
