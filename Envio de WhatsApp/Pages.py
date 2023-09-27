@@ -50,7 +50,7 @@ class Los_proyectos(ctk.CTkFrame):
                 self.projects_json = json.load(json_file)
             
             self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject,
-                width= 200, Otros=self.proj_selection)
+                width= 200, Otros=[self.proj_selection, self.proj_delete])
             self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
         except:# Exception as e:
             print("Ocurrió un error al leer el archivo de proyectos")
@@ -91,6 +91,10 @@ class Los_proyectos(ctk.CTkFrame):
         self.el_entry.delete(0, "end")
         self.el_entry.insert(0, rutXl)
         self.next(2, json)
+
+    def proj_delete(self, key):
+        del self.projects_json[key]
+        self.ListaDeProyectos.update_list(self.projects_json)
 
 class Vars(ctk.CTkFrame):
     def __init__(self,
@@ -197,7 +201,7 @@ class Send(ctk.CTkFrame):
             font=('', 18), border_width=0, corner_radius=0)
         self.notes.place(relx=0.73, rely=0.3, relwidth=0.22, relheight=0.5, anchor='nw')'''
 
-        self.Open_btn = ctk.CTkButton(self, text="Abrir Wasapo", corner_radius=0, fg_color=CGreen,
+        self.Open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
         self.Open_btn.place(relx=0.05, rely=0.84, anchor='nw')
 
@@ -205,7 +209,7 @@ class Send(ctk.CTkFrame):
             hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
         self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
 
-        self.Re_open_btn = ctk.CTkButton(self, text="ReAbrir Wasapo", corner_radius=0, fg_color=CGreen,
+        self.Re_open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.re_open())
         self.Re_open_btn.place(relx=0.73, rely=0.84, anchor='nw')
 

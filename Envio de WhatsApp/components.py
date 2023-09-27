@@ -26,7 +26,8 @@ class ItemProject(ctk.CTkFrame):
         self.width = width
         self.height = height
         self.Project_name = Otros["Project_name"]
-        self.On_press = Otros['Hook']
+        self.On_press = Otros['Hook'][0]
+        self.Delete = Otros['Hook'][1]
         self.configure(width=self.width, fg_color='transparent')
         self.pack()
 
@@ -44,9 +45,25 @@ class ItemProject(ctk.CTkFrame):
         self.Name_Label.pack(side='left', fill='x', anchor='w')
         self.Name_Label.bind("<Button-1>", self.start_drag)
 
+        self.btn_quitar = ctk.CTkButton(self.Mainframe, text='X', text_color='white', font=('', 20),
+            fg_color='#BB1D1D', width=20, command=lambda: self.borrar_proyecto())
+        self.btn_quitar.place(relx=1, rely=0, anchor='ne')
+
     def start_drag(self, event):
         if self.On_press:
             self.On_press(self.json_list['rutaXl'], self.json_list)
+
+    def borrar_proyecto(self):        
+
+        pregunta = tkinter.messagebox.askquestion(
+            "Precaución", "Se eliminará el proyecto \"" + str(self.Project_name) + "\" ¿Desea continuar con esta acción?"
+        )        
+
+        if pregunta == "yes":
+            print("Función para que se borre el proyecto")
+            self.Delete(self.Project_name)
+        else:
+            return
 
     def get_data(self):        
         return self.json_list, self.Project_name
@@ -54,7 +71,8 @@ class ItemProject(ctk.CTkFrame):
     def get_itemData(self):
         return
     
-    def update_row(self,  bla):
+    def update_row(self, val):
+        self.Name_Label.configure()
         return
 
 class ErrorItem(ctk.CTkFrame):
@@ -79,8 +97,6 @@ class ErrorItem(ctk.CTkFrame):
         self.el_label = ctk.CTkLabel(self, text=self.name, text_color='black', font=('', 18))
         self.el_label.place(relx=0, rely=0)
 
-        print("otros[project...]")
-        print(Otros['Project_name'])
         self.btn_quitar = ctk.CTkButton(self, text='X', text_color='white', font=('', 20),
             fg_color='#BB1D1D', width=20, command=lambda: self.delete(Otros['Project_name']))
         self.btn_quitar.place(relx=1, rely=0, anchor='ne')
