@@ -71,9 +71,9 @@ class ItemProject(ctk.CTkFrame):
     def get_itemData(self):
         return
     
-    def update_row(self, val):
-        self.Name_Label.configure()
-        return
+    def update_row(self, key ,val):        
+        self.Name_Label.configure(text=key)
+        self.json_list = val
 
 class ErrorItem(ctk.CTkFrame):
     def __init__(self, *args,
@@ -93,12 +93,13 @@ class ErrorItem(ctk.CTkFrame):
         llave = next(iter(json_list))
         self.name = json_list[llave]
         self.delete = Otros['Hook']
+        self.deleted = Otros['Project_name']
         
         self.el_label = ctk.CTkLabel(self, text=self.name, text_color='black', font=('', 18))
         self.el_label.place(relx=0, rely=0)
 
         self.btn_quitar = ctk.CTkButton(self, text='X', text_color='white', font=('', 20),
-            fg_color='#BB1D1D', width=20, command=lambda: self.delete(Otros['Project_name']))
+            fg_color='#BB1D1D', width=20, command=lambda: self.delete(self.deleted))
         self.btn_quitar.place(relx=1, rely=0, anchor='ne')
 
     def get_data(self):
@@ -107,10 +108,11 @@ class ErrorItem(ctk.CTkFrame):
     def get_itemData(self):
         return
     
-    def update_row(self, val):
-        key = next(iter(val))
-        texto = val[key]
+    def update_row(self, key, val):
+        llave = next(iter(val))
+        texto = val[llave]
         self.el_label.configure(text=texto)
+        self.deleted = key
         #self.name = texto
 
 class Table(ctk.CTkFrame):
@@ -239,7 +241,7 @@ class El_Item(ctk.CTkFrame):
     def update_des(self):
         self.change(self.numCol, 'Destino', self.cb2.get())
 
-    def update_row(self, n_list):
+    def update_row(self, key, n_list):
         self.json_list=n_list
         self.cel.set(self.json_list['Celular'])
         self.des.set(self.json_list['Destino'])

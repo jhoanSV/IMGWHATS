@@ -268,7 +268,7 @@ class FlatList(ctk.CTkFrame):
                     width = self.width, height = self.height)
                 self.items.append(item_instance.get_itemData())
                 item_instance.grid(row = 0, column = 0)
-                item_instance.update_row(self.json_list[key])
+                item_instance.update_row(key, self.json_list[key])
                 self.frames[i] = item_instance
             else:
                 print('is none')            
@@ -295,7 +295,7 @@ class FlatList(ctk.CTkFrame):
                 key = self.Key_List[i]
             value = self.json_list[key]
             if i < len(self.frames):
-                self.frames[i].update_row(value)
+                self.frames[i].update_row(key, value)
             else:
                 FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
                 FrameItem.grid(row=i, column=0)
@@ -304,7 +304,7 @@ class FlatList(ctk.CTkFrame):
                                             width=self.width, height=self.height)
                     self.items.append(item_instance.get_itemData())
                     item_instance.grid(row=0, column=0)
-                    item_instance.update_row(value)
+                    item_instance.update_row(key, value)
                     self.frames[i] = item_instance
                 else:
                     print('is none')

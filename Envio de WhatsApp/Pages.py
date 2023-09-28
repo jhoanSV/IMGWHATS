@@ -209,7 +209,7 @@ class Send(ctk.CTkFrame):
             hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
         self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
 
-        self.Re_open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
+        self.Re_open_btn = ctk.CTkButton(self, text="Reintentar Conflictos", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.re_open())
         self.Re_open_btn.place(relx=0.73, rely=0.84, anchor='nw')
 
@@ -258,7 +258,7 @@ class Send(ctk.CTkFrame):
 
         print(indices)
 
-        proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj(indices))
+        proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj, args=(indices))
         proceso_thread2.start()
 
     def Save_proj(self):
