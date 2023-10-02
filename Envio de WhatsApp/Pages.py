@@ -95,6 +95,9 @@ class Los_proyectos(ctk.CTkFrame):
     def proj_delete(self, key):
         del self.projects_json[key]
         self.ListaDeProyectos.update_list(self.projects_json)
+        
+        with open("./proyectos.json", "w") as json_file:
+            json.dump(self.projects_json, json_file, indent=4)
 
 class Vars(ctk.CTkFrame):
     def __init__(self,
@@ -166,8 +169,6 @@ class Send(ctk.CTkFrame):
         self.name_proj = None        
         self.obj_enviar = whasApp2.Send_Wapp()
         self.lista_errores = []
-
-        #self.El_metodo = El_metodo
         
         self.configure(fg_color='white')
 
@@ -184,22 +185,26 @@ class Send(ctk.CTkFrame):
 
         self.label2 = ctk.CTkLabel(self, text='Mensaje', text_color=CGreen,
             font=('', 20))
-        self.label2.place(relx=0.05, rely=0.25)
-
-        self.label3 = ctk.CTkLabel(self, text='Notas', text_color=CGreen,
-            font=('', 20))
-        self.label3.place(relx=0.73, rely=0.25)
+        self.label2.place(relx=0.05, rely=0.25)        
 
         self.entry_msj = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
             font=('', 18), border_width=0, corner_radius=0)
         self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.65, relheight=0.5, anchor='nw')
+
+        '''self.label3 = ctk.CTkLabel(self, text='Notas', text_color=CGreen,
+            font=('', 20))
+        self.label3.place(relx=0.73, rely=0.25)'''
         
-        self.notes = FlatList(self, width=200, height=315, json_list=self.lista_errores,
+        tabview1 = ctk.CTkTabview(master=self, width=230, height=325)
+        tabview1.place(relx=0.73, rely=0.3)
+
+        tabview1.add("Conflictos")  # add tab at the end
+        tabview1.add("Contactos a enviar")  # add tab at the end
+        tabview1.set("Contactos a enviar")  # set currently visible tab
+
+        self.notes = FlatList(tabview1.tab("Conflictos"), width=190, height=315, json_list=self.lista_errores,
             Item=ErrorItem, background_color='#D9D9D9', Otros=self.Del_error)
-        self.notes.place(relx=0.73, rely=0.3)
-        '''self.notes = ctk.CTkTextbox(self, fg_color="#D9D9D9", text_color='black',
-            font=('', 18), border_width=0, corner_radius=0)
-        self.notes.place(relx=0.73, rely=0.3, relwidth=0.22, relheight=0.5, anchor='nw')'''
+        self.notes.place(relx=0, rely=0, relwidth=1)
 
         self.Open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
@@ -212,10 +217,6 @@ class Send(ctk.CTkFrame):
         self.Re_open_btn = ctk.CTkButton(self, text="Reintentar Conflictos", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.re_open())
         self.Re_open_btn.place(relx=0.73, rely=0.84, anchor='nw')
-
-        '''self.show_btn = ctk.CTkButton(self, text="Enviar", corner_radius=0, fg_color=CGreen,
-            hover_color='#115e45', font=('', 18), command=lambda: self.obj_enviar.valida_envio())#self.Update_textB())#, state='disabled')
-        self.show_btn.place(relx=0.35, rely=0.84, anchor='nw')'''
 
         #Llena entrys
         if self.data_proj:
@@ -261,29 +262,57 @@ class Send(ctk.CTkFrame):
         proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj, args=(indices))
         proceso_thread2.start()
 
+    #*Función para Guardar un proyecto nuevo
     def Save_proj(self):
         el_msj = str(self.entry_msj.get("0.0", "end"))
         el_msj = el_msj[:-1]
         self.data_proj['msj'] = el_msj
         self.data_proj['recurso'] = self.entry_media.get()
         print(self.data_proj)
-        dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
-        self.name_proj = dialog.get_input()
-        
-        if self.name_proj:
-            try:
+        Guardado = False
+        while Guardado == False:
+            dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
+            self.name_proj = dialog.get_input()
+
+            if self.name_proj:
+
                 with open('./proyectos.json', 'r') as json_file:
                     projects_json = json.load(json_file)
-                
-                projects_json[str(self.name_proj)] = self.data_proj
 
-                with open("./proyectos.json", "w") as json_file:
-                    json.dump(projects_json, json_file, indent=4)
+                names = list(projects_json.keys())
 
-            except:# Exception as e:
-                print("Ocurrió un error al leer el archivo de proyectos")
-        else:
-            return
+                # Condicional para validar proyecto ya guardado
+                proyecto_encontrado = False  # Variable para rastrear si se encontró el proyecto
+
+                for name in names:
+                    temp_name = name.lower()
+                    if self.name_proj.lower() == temp_name:
+                        preguntaGuardado = tkinter.messagebox.askquestion("Precaución", "El proyecto " + self.name_proj +
+                            " ya existe" + "¿Desea reemplazar el proyecto existente?")
+
+                        if preguntaGuardado == "yes":
+                            # Borra el que ya existe primero, luego guarda el nuevo
+                            del projects_json[name]  # Elimina la clave existente
+                            projects_json[name] = self.data_proj  # Agrega el nuevo proyecto
+
+                            with open("./proyectos.json", "w") as json_file:
+                                json.dump(projects_json, json_file, indent=4)
+                            Guardado = True
+                            proyecto_encontrado = True
+                        else:
+                            break  # Sal del bucle si no se desea reemplazar
+                    else:
+                        continue
+
+                # Si no se encontró el proyecto, agrégalo
+                if not proyecto_encontrado:
+                    projects_json[str(self.name_proj)] = self.data_proj
+
+                    with open("./proyectos.json", "w") as json_file:
+                        json.dump(projects_json, json_file, indent=4)
+                    Guardado = True
+            else:
+                return
     
     def Add_error(self, error):
         #self.lista_errores[str(contacto[indice])] = contacto

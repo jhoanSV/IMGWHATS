@@ -42,10 +42,10 @@
         "colCelular": 3,
         "colDestino": 1
     },
-    "Prueba 2": {
+    "PruebaGuardado": {
         "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
-        "msj": "Hola, @Ferreteria tu codigo es @Cod tu factura es @Nfactura",
-        "recurso": "C:/Users/pc/Desktop/Video de WhatsApp 2023-08-18 a las 14.27.20.mp4",
+        "msj": "2",
+        "recurso": "",
         "variables": {
             "@Cod": 0,
             "@Ferreteria": 1,

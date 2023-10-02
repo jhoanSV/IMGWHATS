@@ -56,8 +56,9 @@ class ItemProject(ctk.CTkFrame):
     def borrar_proyecto(self):        
 
         pregunta = tkinter.messagebox.askquestion(
-            "Precaución", "Se eliminará el proyecto \"" + str(self.Project_name) + "\" ¿Desea continuar con esta acción?"
-        )        
+            "Precaución", "Se eliminará el proyecto \"" + str(self.Project_name) + "\". Esta acción no se puede" +
+            " revertir, ¿Desea continuar con esta acción?"
+        )
 
         if pregunta == "yes":
             print("Función para que se borre el proyecto")
@@ -74,6 +75,7 @@ class ItemProject(ctk.CTkFrame):
     def update_row(self, key ,val):        
         self.Name_Label.configure(text=key)
         self.json_list = val
+        self.Project_name = key
 
 class ErrorItem(ctk.CTkFrame):
     def __init__(self, *args,
