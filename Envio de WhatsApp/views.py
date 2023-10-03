@@ -16,8 +16,6 @@ class view(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.xl_path = None
-        #self.cols = ['Columnas encontradas','Variables','celular','Nombre Destinatario']
-        current = None
 
         self.geometry("1024x728+200+5")
         self.minsize(900,640)
@@ -26,7 +24,7 @@ class view(ctk.CTk):
         self.CGreen = "#1C9F80"
         self.CGreen_hov = "#115e45"
 
-        #*configuración de la ventana 
+        #*configuración de la ventana
         self.title("Wapp Sender")
         self.configure(fg_color = self.CGreen)
         

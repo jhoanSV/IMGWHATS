@@ -195,16 +195,22 @@ class Send(ctk.CTkFrame):
             font=('', 20))
         self.label3.place(relx=0.73, rely=0.25)'''
         
-        tabview1 = ctk.CTkTabview(master=self, width=230, height=325)
-        tabview1.place(relx=0.73, rely=0.3)
+        tabview1 = ctk.CTkTabview(master=self, fg_color='#D9D9D9')#, width=230, height=325
+        tabview1.place(relx=0.73, rely=0.3, relwidth=0.2, relheight=0.5)
 
         tabview1.add("Conflictos")  # add tab at the end
         tabview1.add("Contactos a enviar")  # add tab at the end
         tabview1.set("Contactos a enviar")  # set currently visible tab
 
-        self.notes = FlatList(tabview1.tab("Conflictos"), width=190, height=315, json_list=self.lista_errores,
+        self.notes = FlatList(tabview1.tab("Conflictos"), width=200, height=300, json_list=self.lista_errores,
             Item=ErrorItem, background_color='#D9D9D9', Otros=self.Del_error)
-        self.notes.place(relx=0, rely=0, relwidth=1)
+        self.notes.place(relx=0, rely=0)
+
+        self.cb_var = ctk.StringVar(value="Enviar a todos")
+        self.cb = ctk.CTkComboBox(tabview1.tab("Contactos a enviar"), values=["Enviar a todos", "option 2"],
+            variable=self.cb_var, command=lambda opcion: self.cb_function(opcion))
+        self.cb.place(relx=0, rely=0)
+        self.cb_var.set("Enviar a todos")
 
         self.Open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
@@ -326,3 +332,7 @@ class Send(ctk.CTkFrame):
         del self.lista_errores[int(key)]
         self.notes.update_list(self.lista_errores)
         print(self.lista_errores)
+    
+    def cb_function(self, opcion):
+        print("Se seleccionó una opción")
+        print(opcion)
