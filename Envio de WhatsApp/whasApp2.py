@@ -62,7 +62,7 @@ class Send_Wapp:
         self.excel_file_path = file_path
         self.Add_error = la_funcion
 
-    def envio_msj(self, re=None):#?Recibir excel_data, msj, col_num, col_destino, variables
+    def envio_msj(self, re=None):
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan        
         driver = webdriver.Chrome(options=self.options, service=ChromeService(ChromeDriverManager().install()))
@@ -77,13 +77,11 @@ class Send_Wapp:
         # Todo: Wait for the WhatsApp Web interface to load
         wait = WebDriverWait(driver, 10)
         wait.until(EC.title_contains("WhatsApp"))
+        self.excel_data = self.read_excel_file()
         if re is not None:
-            #excel_data = re
             self.indices = re
-        else:
-            self.excel_data = self.read_excel_file()
         print(self.excel_data)
-        #for indice, contacto in enumerate(self.excel_data):
+        
         for indice in self.indices:
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'

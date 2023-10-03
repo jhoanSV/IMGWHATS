@@ -2,11 +2,12 @@ import customtkinter as ctk
 import tkinter
 from tkinter import filedialog
 from typing import Tuple, Callable, Optional
-from Vcss import FlatList, El_Tab_view
+from Vcss import FlatList, InputNumber
 from components import ItemProject, Table, ErrorItem
 import whasApp2, whasApp
 import json
 import threading
+import numpy as np
 
 #*colores
 CGreen = "#1C9F80"
@@ -181,7 +182,23 @@ class Send(ctk.CTkFrame):
         self.search_btn.place(relx=0.05, rely=0.15, anchor='nw')
         self.entry_media = ctk.CTkEntry(self, placeholder_text="Foto/s, Video/s, carpeta", fg_color="#D9D9D9",
             text_color='black', font=('', 18), border_width=0, corner_radius=0)
-        self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.75, relheight=0.06, anchor='nw')
+        self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.5, relheight=0.06, anchor='nw')
+
+        self.el_menu = ctk.CTkLabel(self, fg_color="#D9D9D9", text="", text_color="#D9D9D9")
+        self.el_menu.place(relx=0.73, rely=0.05, relwidth=0.22, relheight=0.16)
+
+        self.cb_var = ctk.StringVar(value="Enviar a todos")
+        self.cb = ctk.CTkComboBox(self.el_menu, values=["Enviar a todos", "Personalizado"],
+            variable=self.cb_var, command=lambda opcion: self.cb_function(opcion))
+        self.cb.place(relx=0.5, rely=0, anchor="n")
+        self.cb_var.set("Enviar a todos")
+
+        self.desde_label = ctk.CTkLabel(self.el_menu, fg_color="transparent",
+            text='Contactos:', text_color='black', font=('', 12))
+        self.desde_input = InputNumber(self.el_menu, min=1, max=0, width=50)
+        self.hasta_label = ctk.CTkLabel(self.el_menu, fg_color="transparent",
+            text='a', text_color='black', font=('', 12))
+        self.hasta_input = InputNumber(self.el_menu, min=1, max=0, width=50)
 
         self.label2 = ctk.CTkLabel(self, text='Mensaje', text_color=CGreen,
             font=('', 20))
@@ -191,26 +208,13 @@ class Send(ctk.CTkFrame):
             font=('', 18), border_width=0, corner_radius=0)
         self.entry_msj.place(relx=0.05, rely=0.3, relwidth=0.65, relheight=0.5, anchor='nw')
 
-        '''self.label3 = ctk.CTkLabel(self, text='Notas', text_color=CGreen,
+        self.label3 = ctk.CTkLabel(self, text='Notas', text_color=CGreen,
             font=('', 20))
-        self.label3.place(relx=0.73, rely=0.25)'''
-        
-        tabview1 = ctk.CTkTabview(master=self, fg_color='#D9D9D9')#, width=230, height=325
-        tabview1.place(relx=0.73, rely=0.3, relwidth=0.2, relheight=0.5)
+        self.label3.place(relx=0.73, rely=0.25)
 
-        tabview1.add("Conflictos")  # add tab at the end
-        tabview1.add("Contactos a enviar")  # add tab at the end
-        tabview1.set("Contactos a enviar")  # set currently visible tab
-
-        self.notes = FlatList(tabview1.tab("Conflictos"), width=200, height=300, json_list=self.lista_errores,
+        self.notes = FlatList(self, width=200, height=310, json_list=self.lista_errores,
             Item=ErrorItem, background_color='#D9D9D9', Otros=self.Del_error)
-        self.notes.place(relx=0, rely=0)
-
-        self.cb_var = ctk.StringVar(value="Enviar a todos")
-        self.cb = ctk.CTkComboBox(tabview1.tab("Contactos a enviar"), values=["Enviar a todos", "option 2"],
-            variable=self.cb_var, command=lambda opcion: self.cb_function(opcion))
-        self.cb.place(relx=0, rely=0)
-        self.cb_var.set("Enviar a todos")
+        self.notes.place(relx=0.73, rely=0.3)
 
         self.Open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
@@ -250,7 +254,17 @@ class Send(ctk.CTkFrame):
             variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
             colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error)
         
-        proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj)
+        if self.cb_var.get() == "Enviar a todos":
+            #lista = None
+            proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj)
+        elif self.cb_var.get() == "Personalizado":
+            min = np.min([int(self.desde_input.get()-1), int(self.hasta_input.get()-1)])
+            max = np.max([int(self.desde_input.get()-1), int(self.hasta_input.get()-1)])
+            lista = [i for i in range(min, max+1)]
+            print(lista)
+            proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista,))
+
+        #proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista))
         proceso_thread.start()
     
     def re_open(self):
@@ -332,7 +346,16 @@ class Send(ctk.CTkFrame):
         del self.lista_errores[int(key)]
         self.notes.update_list(self.lista_errores)
         print(self.lista_errores)
-    
+
     def cb_function(self, opcion):
-        print("Se seleccionó una opción")
-        print(opcion)
+        if opcion == "Personalizado":
+            self.desde_label.place(relx=0, rely=0.62)
+            self.desde_input.place(relx=0.3, rely=0.48)
+            self.hasta_label.place(relx=0.64, rely=0.62)
+            self.hasta_input.place(relx=0.7, rely=0.48)
+
+        elif opcion == "Enviar a todos":
+            self.desde_input.place_forget()
+            self.desde_label.place_forget()
+            self.hasta_input.place_forget()
+            self.hasta_label.place_forget()
