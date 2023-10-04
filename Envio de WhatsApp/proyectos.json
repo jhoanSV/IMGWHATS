@@ -54,5 +54,19 @@
         },
         "colCelular": 2,
         "colDestino": 1
+    },
+    "Testeo": {
+        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
+        "msj": "@msj",
+        "recurso": "",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@Celular": 2,
+            "@Nfactura": 3,
+            "@msj": 4
+        },
+        "colCelular": 2,
+        "colDestino": 1
     }
 }

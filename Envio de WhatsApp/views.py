@@ -1,10 +1,6 @@
 import customtkinter as ctk
 import tkinter
-from tkinter import filedialog
-import whasApp
-import json
-from Vcss import FlatList, El_Tab_view
-from components import ItemProject, Table, El_Item
+from Vcss import El_Tab_view
 from Pages import Los_proyectos, Vars, Send
 
 class colorsitos:

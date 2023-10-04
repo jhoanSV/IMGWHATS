@@ -120,7 +120,6 @@ class Vars(ctk.CTkFrame):
         self.configure(fg_color='white')
         whasApp.set_xl(self.path)
         self.variables = {}
-        #self.lista = whasApp.read_first_row()
         self.lista = whasApp.lee_excel()
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
 
@@ -184,7 +183,7 @@ class Send(ctk.CTkFrame):
             text_color='black', font=('', 18), border_width=0, corner_radius=0)
         self.entry_media.place(relx=0.2, rely=0.15, relwidth=0.5, relheight=0.06, anchor='nw')
 
-        self.el_menu = ctk.CTkLabel(self, fg_color="#D9D9D9", text="", text_color="#D9D9D9")
+        self.el_menu = ctk.CTkLabel(self, fg_color="white", text="", text_color="white")
         self.el_menu.place(relx=0.73, rely=0.05, relwidth=0.22, relheight=0.16)
 
         self.cb_var = ctk.StringVar(value="Enviar a todos")
@@ -260,6 +259,7 @@ class Send(ctk.CTkFrame):
         elif self.cb_var.get() == "Personalizado":
             min = np.min([int(self.desde_input.get()-1), int(self.hasta_input.get()-1)])
             max = np.max([int(self.desde_input.get()-1), int(self.hasta_input.get()-1)])
+            if min < 0: min = 0
             lista = [i for i in range(min, max+1)]
             print(lista)
             proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista,))
@@ -298,7 +298,6 @@ class Send(ctk.CTkFrame):
 
                 with open('./proyectos.json', 'r') as json_file:
                     projects_json = json.load(json_file)
-
                 names = list(projects_json.keys())
 
                 # Condicional para validar proyecto ya guardado
