@@ -4,7 +4,7 @@ import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 from tkinter import filedialog
 from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer
-from Components import ItemElement, property_image_bar #ImageContainer
+from Components import ItemElement, property_image_bar, property_text_bar #ImageContainer
 
 size = width, height = 3000, 3000
 # *JSON image properties
@@ -18,7 +18,10 @@ def button_callback():
 
 def to_image_bar(lista):
     list_property_bar = lista
-    Up_bar.update_image_data(list_property_bar)
+    if list_property_bar['Type'] == 'image':
+        Up_bar.update_image_data(list_property_bar)
+    elif list_property_bar['Type'] == 'text':
+        Up_bar_text.update_text_data(list_property_bar)
     
 def Buscar():
     '''Desplega el cuadro de busqueda para seleccionar imagenes de
@@ -43,6 +46,12 @@ def Change_relative_to(New_relative_to):
 def External_Move(Id, value, axis):
     Image_Container.External_Move(Id, value, axis)
 
+def External_Rotate(Id, angle):
+    Image_Container.External_Rotate(Id, angle)
+
+def Change_anchor_text(Id, aling):
+    Image_Container.Change_anchor(Id, aling)
+
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
@@ -51,6 +60,7 @@ button.grid(row=1, column=0, padx=10, pady=10)
 
 # *Barra de propiedades de formatos imagenes
 list_property_bar = {"Id": 2,
+                    "Type": "image",
                     "Width": 0,
                     "Height": 0,
                     "Rotate": 0,
@@ -63,18 +73,33 @@ Actual_project = image_properties_json['proyecto1']
 
 Relative_to = [0,0]
 
+Background_data = {"Id": 0,
+                    "Type": "Background",
+                    "Name": "caminar.jpg",
+                    "Width": 300,
+                    "Height": 400,
+                    "Rotate": 0,
+                    "x_position": 0,
+                    "y_position": 0,
+                    "xCenter": True,
+                    "yCenter": True,
+                    "BackgroundColor": "#FFFFFF",
+                    "active": False}
 
 #spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
 #spinbox_1.grid(row=2, column=0 ,padx=5, pady=5)
 
-ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=300)
+ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=200)
 ElementList.grid(row=3, column=1 ,padx=5, pady=5)
 
 Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 
-Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move])
+Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move, Background_data, External_Rotate])
 Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
+
+Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text])
+Up_bar_text.grid(row=2, column=0 ,padx=5, pady=5)
 
 background_image = Image.new('RGB',size, 'white')
 #image_tk = ctk.CTkImage(background_image, size=background_image.size)

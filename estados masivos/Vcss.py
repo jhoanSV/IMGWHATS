@@ -1,11 +1,15 @@
 import customtkinter as ctk
 from typing import Union, Callable
 import re
-from PIL import ImageTk, Image, ImageGrab
+from PIL import ImageTk, Image, ImageGrab, ImageOps
 import json
 from typing import Optional
 import tkinter as tk
+import tkinter.font as tkFont
 import numpy as np
+from fontTools.ttLib import TTFont
+import os
+import matplotlib.font_manager
 
 class BoxNumber(ctk.CTkFrame):
     def __init__(self, *args,
@@ -277,7 +281,7 @@ class FlatList(ctk.CTkFrame):
                 item_instance.update_row(self.json_list[key])
                 self.frames[i] = item_instance
             else:
-                print('is none')            
+                print('is none')
         # *default value
 
     def Update_list(self, new_list):
@@ -329,150 +333,6 @@ class FlatList(ctk.CTkFrame):
     def otro_get(self):
         return self.items
     
-'''class FlatList(ctk.CTkFrame):
-    def __init__(self, *args,
-                 width: int = 100,
-                 height: int = 100,
-                 json_list: dict = None,  # Use dict for JSON object
-                 Item: Optional[Callable] = None, # Default to None
-                 **kwargs):
-        
-        super().__init__(*args, width=width, height=height, **kwargs)
-        # *variables
-        self.width = width
-        self.height = height
-        self.json_list = json_list
-        self.Item = Item
-        
-        # *frame configuration
-        self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        
-        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height)
-        self.FrameList.configure(fg_color=("gray78", "gray28")) 
-
-        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
-        self.grid_columnconfigure(1, weight=1)  # entry expands
-
-        self.FrameList.grid(row=0, column=0)
-        
-        # * frame scheme Input
-        for i in range(self.Number_of_items()):
-            FrameItem = ctk.CTkFrame(self.FrameList)
-            FrameItem.grid(row=i, column=0 )
-            
-            if self.Item is not None:
-                item_instance = self.Item(FrameItem, json_list= self.json_list[i])
-                item_instance.grid(row = 0, column = 0)
-            else:
-                print('is none')
-
-        # *default value
-
-
-    def get(self) -> Union[float, None]:
-        try:
-            return float(self.entry.get())
-        except ValueError:
-            return None
-
-    def set(self, value: float):
-        self.entry.delete(0, "end")
-        self.entry.insert(0, str(float(value)))
-
-    def Number_of_items(self):
-        #json_data = json.loads(self.json_list)
-        num_items = len(self.json_list)
-        return num_items'''
-
-'''class FlatList(ctk.CTkFrame):
-    def _init_(self, *args,
-                width: int = 100,
-                height: int = 100,
-                json_list: Union[list, dict] = None,  # Use dict for JSON object
-                Item: Optional[Callable] = None, # Default to None
-                background_color: str = '#FFFFFF', # Default to
-                adaptable: bool = False, #For adaptability of the width and height
-                Otros: Optional[any] = None,
-                **kwargs):
-        
-        super().__init__(*args, width=width, height=height, **kwargs)
-        # *variables
-        self.otros = Otros
-        self.width = width
-        self.height = height
-        self.json_list = json_list
-        self.Item = Item
-        self.si_list = True
-        self.frames = {}
-        self.items = []
-        self.prev = None
-        if (type(self.json_list) == dict):
-            self.Key_List = list(self.json_list.keys())
-            self.si_list = False
-        else:
-            self.Key_List = self.json_list
-        #self.Key_List = list(json_list.keys())
-        self.background_color = background_color
-        self.configure(fg_color='transparent')
-        
-        # *frame configuration
-        #self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        
-        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height, fg_color='transparent')
-        #self.FrameList.configure(fg_color=("gray78", "gray28")) 
-        self.FrameList.configure(fg_color=self.background_color) 
-        
-        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
-        self.grid_columnconfigure(1, weight=1)  # entry expands
-
-        self.FrameList.grid(row=0, column=0)
-        
-        #self.crear()
-        # * frame scheme Input
-        #for i in range(self.Number_of_items()):
-        for i in range(len(self.Key_List)):
-            FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
-            FrameItem.grid(row=i, column=0 )
-            if self.Item is not None:
-                if self.si_list:
-                    key = i
-                else:
-                    key = self.Key_List[i]
-                #item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key),
-                #    width = self.width, height = self.height)
-                #print(callable(self.otros))
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
-                    width = self.width, height = self.height)
-                self.items.append(item_instance.get_itemData())
-                item_instance.grid(row = 0, column = 0)
-                item_instance.update_row(self.json_list[key])
-                self.frames[i] = item_instance
-            else:
-                print('is none')            
-        # *default value
-
-    def update_list(self, new_list):
-        self.json_list = new_list
-        for i in self.frames:
-            self.frames[i].update_row(new_list[i])
-
-    def get(self) -> Union[float, None]:
-        try:
-            return float(self.entry.get())
-        except ValueError:
-            return None
-
-    def set(self, value: float):
-        self.entry.delete(0, "end")
-        self.entry.insert(0, str(float(value)))
-
-    def Number_of_items(self):
-        #json_data = json.loads(self.json_list)
-        num_items = len(self.Key_List)
-        return num_items
-    
-    def otro_get(self):
-        return self.items'''
 
 class DraggableLabel(ctk.CTkFrame):
     def __init__(self, *args,
@@ -710,6 +570,7 @@ class ImageContainer(tk.Frame):
         self.canvas = tk.Canvas(self, width = self.width, height = self.height, bg='#D9D9D9')
         self.canvas.pack()
         self.image_objects = []
+        self.text_objects = []
 
         for Item in  self.json_list:
             if Item['Type'] == 'Background':
@@ -732,7 +593,8 @@ class ImageContainer(tk.Frame):
             elif Item['Type'] == 'text':
                 x = Item['x_position']
                 y = Item['y_position']
-                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'])
+                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function)
+                self.text_objects.append(text)
 
     def update_image_size(self, *args):
         zoom_level = self.zoom_var.get()
@@ -769,6 +631,14 @@ class ImageContainer(tk.Frame):
         #print('como estas, to estoy en imageContainer, con ID= ', Id)
         for obj in self.image_objects:
             obj.External_Move(Id, value, axis)
+
+    def External_Rotate(self, Id, angle):
+        for obj in self.image_objects:
+            obj.External_Rotate(Id, angle)
+
+    def Change_anchor(self, Id, anchor):
+        for text in self.text_objects:
+            text.Change_aling(Id, anchor)
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -1148,6 +1018,7 @@ class ObjectOnCanvas:
 
     def get(self):
         return {"id": self.id,
+                "Type": 'image',
                 "Width": self.Width,
                 "Height": self.Height,
                 "Rotate": self.angle,
@@ -1221,80 +1092,120 @@ class ObjectOnCanvas:
 
             self.function(self.get())
 
-    def External_Resize(self, Id, value, orientation):
-        size_x = self.Width
-        size_y = self.Height
-        if Id == self.id:
-            if orientation == 'Width':
-                size_x = value
-            elif orientation == 'Height':
-                size_y = value
+    def External_Rotate(self, Id, angle):
+         if Id == self.id:
+            Cp_coords = self.canvas.coords(self.Cp)
+            self.new_angle = angle
+             # *To rotate de image 
+            #Current_width, Current_height = self.image.size
+            self.resized_image = self.picture.resize((self.Width, self.Height))
+            # Create a new RGBA image with a transparent background
+            self.new_image = Image.new('RGBA', self.resized_image.size, (0, 0, 0, 0))
+            # Create a mask for the resized image (fully opaque)
+            mask = Image.new('L', self.resized_image.size, 255)
+            # Paste the loaded JPG image onto the new RGBA image with a mask
+            self.new_image.paste(self.resized_image, (0, 0), mask)
+            # Rotate the new RGBA image
+            self.image_rotated = self.new_image.rotate(-self.new_angle, expand=True)
+            # new size of the rotated image
+            self.size = self.image_rotated.size
+            # Create the new RGBA image
+            self.new_rotated_image = self.image_rotated.resize(self.size, Image.ANTIALIAS)
+            # Convert the new rotated image to an ImageTk.PhotoImage
+            self.image = ImageTk.PhotoImage(self.new_rotated_image)
+            # Update the canvas object with the new image
+            self.canvas.itemconfig(self.canvas_obj, image=self.image)
 
-        #* resizin the image
-        
-        resized_image = self.picture.resize((size_x, size_y), Image.ANTIALIAS)
-        self.image = ImageTk.PhotoImage(resized_image)
-        self.canvas.itemconfig(self.canvas_obj, image=self.image)
-        self.Width = size_x
-        self.Height = size_y
-        #* Move the image
-        #Principal image
-        self.canvas.coords(self.canvas_obj, self.x, self.y)
-        #? Move the reference points to resize the image
-        #Punto superior izquierdo
-        self.canvas.coords(self.Psi, self.x, self.y)
-        #Punto superior central
-        self.canvas.coords(self.Psc, self.x + round((self.Width/2))-2,self.y)
-        #Punto superior derecho
-        self.canvas.coords(self.Psd, self.x + self.Width - 4,self.y)
-        #Punto inferior izquierdo
-        self.canvas.coords(self.Pii, self.x, self.y + self.Height - 4)
-        #Punto inferior central
-        self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 4)
-        #Punto inferior derecho
-        self.canvas.coords(self.Pid, self.x + self.Width - 4,self.y + self.Height - 4)
-        #Punto lateral izquierdo
-        self.canvas.coords(self.Pli, self.x,self.y + round((self.Height/2))-2)
-        #Punto lateral derecho
-        self.canvas.coords(self.Pld, self.x + self.Width - 4,self.y + round((self.Height/2))-2)
-        #Centered point
-        self.canvas.coords(self.Cp, self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2)
-        
-        #? Move the reference points to rotate the image
-        #Rotar superior izquierdo
-        self.canvas.coords(self.Rsi,self.x - 8,self.y - 8)
-        #Rotar superior derecho
-        self.canvas.coords(self.Rsd,self.x + self.Width - 8, self.y - 8 )
-        #Rotar inferior izquierdo
-        self.canvas.coords(self.Rii,self.x - 8, self.y + self.Height - 8)
-        #Rotar inferior derecho
-        self.canvas.coords(self.Rid,self.x + self.Width - 8, self.y + self.Height - 8)
+            #? Move the reference points to rotate the image
+            # Define the distances from the rotated image's center to its corners
+            diagonal_length = np.sqrt((self.Width / 2) ** 2 + (self.Height / 2) ** 2)
+            angle1 = Angle_between_vectors((1,0), (self.Width,self.Height))#np.arctan2(self.Width / 2,self.Height / 2)
+            angle2 = np.pi - angle1
+            angles = [
+                self.new_angle - angle1, #superior derecho
+                self.new_angle + angle1, #inferior derecho
+                self.new_angle - angle2, #superior izquierdo
+                self.new_angle + angle2, #inferior izquierdo
+            ]
 
-        #self.x = self.x + new_x
-        #self.y = self.y + new_
-        self.function(self.get())
+            for i, reference_point in enumerate([self.Rsd, self.Rid, self.Rsi, self.Rii]): #, self.Rsi, self.Rii
+                #* To move the rotate points around the image_obj
+                x = Cp_coords[0] + diagonal_length * np.cos(angles[i]) #self.canvas.coords(self.canvas_obj)[0] + self.Width/2 + diagonal_length * np.cos(angles[i])
+                y = Cp_coords[1] + diagonal_length * np.sin(angles[i]) #self.canvas.coords(self.canvas_obj)[1] + self.Height/2 + diagonal_length * np.sin(angles[i])
+                self.canvas.coords(reference_point, x - 8, y - 8)
+                #* to rotate the image face to the center of the image_obj
+                #?Rsd
+                self.Rotate_pictureSD = self.Rotate_picture.rotate(-self.new_angle + 90, expand=True)
+                self.RotarSD = ImageTk.PhotoImage(self.Rotate_pictureSD)
+                self.canvas.itemconfig(self.Rsd, image=self.RotarSD)
+                #?Rid
+                self.Rotate_pictureID = self.Rotate_picture.rotate(-self.new_angle, expand=True)
+                self.RotarID = ImageTk.PhotoImage(self.Rotate_pictureID)
+                self.canvas.itemconfig(self.Rid, image=self.RotarID)
+                #?Rsi
+                self.Rotate_pictureSI = self.Rotate_picture.rotate(-self.new_angle + 180, expand=True)
+                self.RotarSI = ImageTk.PhotoImage(self.Rotate_pictureSI)
+                self.canvas.itemconfig(self.Rsi, image=self.RotarSI)
+                #?Rii
+                self.Rotate_pictureII = self.Rotate_picture.rotate(-self.new_angle - 90, expand=True)
+                self.RotarII = ImageTk.PhotoImage(self.Rotate_pictureII)
+                self.canvas.itemconfig(self.Rii, image=self.RotarII)
+                New_dx = Cp_coords[0] - (self.size[0]/2)
+                New_dy = Cp_coords[1] - (self.size[1]/2)
+                self.canvas.coords(self.canvas_obj, New_dx, New_dy)
+
+            #self.angle = self.angle + self.new_angle
+            #self.rotated_reference["x"] = event.x
+            #self.rotated_reference["y"] = event.y
+            self.angle = self.new_angle
+            #print("angle = ", self.angle)
+            self.function(self.get())
                 
 
 class TextBox:
-    def __init__(self, canvas, x, y, Text, width, height):
+    def __init__(self,
+                canvas, 
+                x, 
+                y, 
+                Text, 
+                width, 
+                height,
+                font = 'Helvetica',
+                font_size = 15,
+                font_style = 'roman',
+                Id: Optional[int] = None,
+                Function: Optional[callable] = None):
         self.canvas = canvas
         self.x = x
         self.y = y
         self.text = Text
+        self.font = font
+        self.font_size = font_size
+        self.font_style = font_style
+        self.Original_text = self.text
         self.Width = width
         self.Height = height
         self.state = True
         self.angle = 0
         self.editing = False
         self.cursor_position = len(Text) - 1
-
+        self.Id = Id
+        self.Function = Function
+        self.text_showed = self.text.split("\n")
+        self.custom_font = tk.font.Font(family=self.font, size=self.font_size, slant=self.font_style)
+        self.text_lines=[]
         super().__init__()
         
         self.text_container = self.canvas.create_rectangle(self.x, self.y, self.x + self.Width, self.Height, outline="#F2F2F2", width=4)
+        i=0
+        for line in self.text_showed:
+            text_line = self.canvas.create_text(self.x, self.y + i*self.custom_font.metrics("linespace"), text= line, anchor='nw', fill="black", font=self.custom_font)
+            i= i+1
+            self.text_lines.append(text_line)
 
-        self.canvas_text = self.canvas.create_text(self.x, self.y, text=self.text, anchor='nw', fill="black", font=('Helvetica 15 bold'))
+        self.canvas_text = self.canvas.create_text(self.x, self.y, text=self.text, anchor='nw', fill="black", font=(self.font, self.font_size, self.font_style))
         # to allow rewrite the text
-        self.canvas.tag_bind(self.canvas_text,"<Double-Button-1>", self.DoubleClick)
+        self.canvas.tag_bind(self.text_container,"<Double-Button-1>", self.DoubleClick)
         # To rewrite the text
         self.canvas.bind("<KeyPress>", self.Re_write)
         self.canvas.bind("<BackSpace>", self.backspace)
@@ -1386,6 +1297,7 @@ class TextBox:
         # Update the current position
         self.x = new_x
         self.y = new_y
+        self.Function(self.get())
 
     def DoubleClick(self, event):
         self.editing = not self.editing
@@ -1506,6 +1418,197 @@ class TextBox:
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
 
+    
+    def change_text(self, Type, Text):
+        if Type == 'font':
+            self.font = Text
+        elif Type == 'size':
+            self.font_size = Text
+        elif Type == 'style':
+            self.font_style = Text
+
+        self.canvas.itemconfig(self.canvas_text, font=(self.font, self.font_size, self.font_style))
+
+    def size_of_text(self, text):
+        bounds = self.canvas.bbox(text)  # returns a tuple like (x1, y1, x2, y2)
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+        return (width, height)
+     
+    def Change_aling(self, Id, aling):
+        if Id == self.Id:
+            #self.canvas.itemconfig(self.canvas_text, anchor= aling)
+            i=0
+            for line in self.text_lines:
+                if aling == 'left':
+                    new_x = self.x
+                elif aling == 'center':
+                    new_x = self.x + (self.Width - self.size_of_text(line)[0])/2
+                elif aling == 'right':
+                    new_x = self.x + self.Width - self.size_of_text(line)[0]
+                self.canvas.coords(line, new_x, self.y + i * self.custom_font.metrics("linespace"))
+                print(new_x)
+                i=i+1
+
+    def get(self):
+        return {"Id": 3,
+                "Type": "text",
+                "text": self.text,
+                "fontType": self.font,
+                "color": "(0, 0, 0, 1)",
+                "x_position": 0,
+                "y_position": 0,
+                "xCenter": False,
+                "yCenter": False,
+                "align" : self.font_style,
+                "bold" : False,
+                "italic" : False,
+                "fontSize" : self.font_size,
+                "boxWidth": 250,
+                "boxHeight": 100,
+                "active": True}
+
+class Icon_button(tk.Label):
+    def __init__(self, *args,
+                 Icon_image = './Default/color_font.png',
+                 Function: Optional[callable] = any,
+                 press_color = '#F2CB05',
+                 hover_color = '#F2F2F2',
+                 initial_color = '#FFFFFF',
+                 icon_color='#000000',  # Default icon color is black
+                 **kwargs):
+        
+        self.Icon = Icon_image
+        self.Function = Function
+        self.press_color = press_color
+        self.hover_color = hover_color
+        self.initial_color = initial_color
+        self.icon_color = icon_color
+        
+        self.icon_image = Image.open(self.Icon)
+        self.icon_image = self.icon_image.resize((15, 15), Image.ANTIALIAS)
+        '''# Recolor the icon with the specified icon_color
+        if self.icon_color:
+            self.icon_image = self.recolor_image(self.icon_color)'''
+
+        self.icon_image = ImageTk.PhotoImage(self.icon_image)
+        
+        super().__init__(*args, **kwargs);
+        self.config(bg = self.initial_color, image=self.icon_image)
+        self.bind("<Enter>", self.on_hover)
+        self.bind("<Leave>", self.on_leave)
+        self.bind("<Button-1>", self.on_press)
+        #self.bind("<ButtonRelease-1>", self.on_press)
+    
+    def on_hover(self, event):
+        self.configure(bg=self.hover_color)
+
+    def on_leave(self, event):
+        self.configure(bg=self.initial_color)
+
+    def on_press(self, event):
+        self.Function()
+        self.configure(bg=self.press_color)
+    
+    '''def on_leave_press(self, event):
+        #self.callable_press
+        self.configure(bg=self.initial_color)
+        #print("dejo de precionar")'''
+    
+    def recolor_image(self, color):
+        image = ImageOps.colorize(self.icon_image.convert("L"), black="black", white=color)
+        return image
+
+
+class CustomComboBox(tk.Frame):
+    def __init__(self, master, values, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self.master = master
+        self.values = values
+        self.selected_value = tk.StringVar()
+        self.is_listbox_visible = False
+
+        # Entry widget to display the selected value
+        self.entry = tk.Entry(self, textvariable=self.selected_value)
+        self.entry.grid(row=0, column=0, padx=0, pady=0)
+        self.entry_width = self.entry.winfo_width()
+        # Button to open the dropdown
+        self.dropdown_button = Icon_button(self, Icon_image='./Default/left_text.png', Function= self.toggle_dropdown)
+        self.dropdown_button.grid(row=0, column=1, padx=0, pady=0)
+
+        # Listbox to display the dropdown items (hidden initially)
+        self.listbox = FlatList(self, json_list=self.values, Item = ItemCombobox, Otros = self.on_select)
+        # Usar place en lugar de grid para posicionar el listbox
+        self.listbox.place(in_=self, x=self.winfo_x() + 2, y=self.winfo_y() + self.winfo_height() + 2)
+        self.listbox.grid_remove()
+        
+        '''self.listbox.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
+        self.listbox.grid_remove()'''
+
+        '''self.listbox = tk.Listbox(self)
+        for item in self.values:
+            self.listbox.insert(tk.END, item)
+        self.listbox.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+        self.listbox.grid_remove()
+
+        # Bind events
+        self.listbox.bind('<<ListboxSelect>>', self.on_select)'''
+        self.entry.bind("<FocusIn>", self.toggle_dropdown)
+        self.entry.bind("<FocusOut>", self.toggle_dropdown)
+
+    def toggle_dropdown(self, event=None):
+        if self.is_listbox_visible:
+            print('deberia mostrar')
+            self.listbox.grid()
+            self.listbox.place(in_=self, x=self.winfo_x() + 2, y=self.winfo_y() + self.winfo_height() + 2)
+            self.listbox.lift()
+        else:
+            print('deberia ocultar')
+            self.listbox.grid_remove()
+            #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
+        self.is_listbox_visible = not self.is_listbox_visible
+        
+    def on_select(self, selected_value):
+        self.selected_value.set(selected_value)
+        self.toggle_dropdown()
+
+class ItemCombobox(tk.Label):
+    def __init__(self, *args,
+                 width: int = 100,
+                 command: Callable = None,
+                 json_list: dict = None,
+                 on_press: Optional[callable] = None,
+                 Otros: Optional[any] = None,
+                 **kwargs):
+        
+        super().__init__(*args, **kwargs)
+        self.command = command
+        self.json_list = json_list
+        self.otros = Otros
+        self.Function = self.otros['Hook']
+        self.font_style = tkFont.Font(family=json_list, size=7, weight="bold")
+        self.config(background='#FFFFFF')
+        self.config(text=json_list, font=self.font_style ,height=1)
+        self.bind('<Button-1>', self.on_click)
+        self.bind("<Enter>", self.on_hover)
+        self.bind("<Leave>", self.on_leave)
+
+    def on_click(self, event):
+        if self.Function is not None:
+            self.Function(self.json_list) is None
+            
+    def on_hover(self, event):
+        self.config(background='#2EA7FF')
+
+    def on_leave(self, event):
+        self.config(background='#FFFFFF')
+
+    def get_itemData(self):
+        return
+    
+    def update_row(self, n_list):
+        self.json_list = n_list
+        return
 
 def Angle_between_vectors(vector1, vector2):
     # Calculate the angle in radians
@@ -1523,4 +1626,12 @@ def sum_angles(angle_1, angle_2):
     elif total_degrees >= 360.0:
         total_degrees -= 360.0
     return total_degrees
+
+def List_of_fonts(font_directory):
+    # Get a list of all available font names
+    font_names = [f.name for f in matplotlib.font_manager.fontManager.ttflist]
+
+    # Filter out font names with spaces
+    valid_font_names = [name for name in font_names if ' ' not in name]
+    return font_names
 
