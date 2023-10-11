@@ -12,7 +12,8 @@
             "xCenter": true,
             "yCenter": true,
             "BackgroundColor": "#FFFFFF",
-            "active": false
+            "active": false,
+            "order": 0
         },
         {
             "Id": 1,
@@ -25,7 +26,8 @@
             "y_position": 0,
             "xCenter": true,
             "yCenter": true,
-            "active": false
+            "active": false,
+            "order": 1
         },
         {
             "Id": 2,
@@ -38,7 +40,8 @@
             "y_position": 50,
             "xCenter": false,
             "yCenter": false,
-            "active": true
+            "active": true,
+            "order": 3
         },
         {
             "Id": 3,
@@ -56,7 +59,8 @@
             "fontSize" : 60,
             "boxWidth": 250,
             "boxHeight": 100,
-            "active": false
+            "active": false,
+            "order": 4
         }
     ]
 }

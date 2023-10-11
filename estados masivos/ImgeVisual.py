@@ -52,6 +52,9 @@ def External_Rotate(Id, angle):
 def Change_anchor_text(Id, aling):
     Image_Container.Change_anchor(Id, aling)
 
+def Change_color_font(Id):
+    Image_Container.Change_color_font(Id)
+
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
@@ -98,7 +101,7 @@ Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move, Background_data, External_Rotate])
 Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
-Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text])
+Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font])
 Up_bar_text.grid(row=2, column=0 ,padx=5, pady=5)
 
 background_image = Image.new('RGB',size, 'white')

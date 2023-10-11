@@ -632,6 +632,9 @@ class ImageContainer(tk.Frame):
         for obj in self.image_objects:
             obj.External_Move(Id, value, axis)
 
+        for text in self.text_objects:
+            text.External_Move(Id, value, axis)
+
     def External_Rotate(self, Id, angle):
         for obj in self.image_objects:
             obj.External_Rotate(Id, angle)
@@ -639,6 +642,12 @@ class ImageContainer(tk.Frame):
     def Change_anchor(self, Id, anchor):
         for text in self.text_objects:
             text.Change_aling(Id, anchor)
+
+    def Change_color_font(self, Id):
+        for text in self.text_objects:
+            text.Change_color_font(Id)
+    
+    
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -1190,6 +1199,7 @@ class TextBox:
         self.editing = False
         self.cursor_position = len(Text) - 1
         self.Id = Id
+        self.aling = 'left'
         self.Function = Function
         self.text_showed = self.text.split("\n")
         self.custom_font = tk.font.Font(family=self.font, size=self.font_size, slant=self.font_style)
@@ -1281,6 +1291,18 @@ class TextBox:
         new_x = self.x + dx
         new_y = self.y + dy
         # Move the text
+        i=0
+        for line in self.text_lines:
+            if self.aling == 'left':
+                New_x = self.x + dx
+            elif self.aling == 'center':
+                New_x = self.x + (self.Width - self.size_of_text(line)[0])/2 +dx
+            elif self.aling == 'right':
+                New_x = self.x + self.Width - self.size_of_text(line)[0] + dx
+            self.canvas.coords(line, New_x, self.y + i * self.custom_font.metrics("linespace") + dy)
+            i=i+1
+
+
         self.canvas.move(self.canvas_text, dx, dy)
         self.canvas.move(self.text_container, dx, dy)
         self.canvas.move(self.Psi, dx, dy)
@@ -1393,6 +1415,18 @@ class TextBox:
         new_y2 = new_y + size_y
         self.Width = size_x
         self.Height = size_y
+
+        i=0
+        for line in self.text_lines:
+            if self.aling == 'left':
+                new_x = self.x
+            elif self.aling == 'center':
+                new_x = self.x + (self.Width - self.size_of_text(line)[0])/2
+            elif self.aling == 'right':
+                new_x = self.x + self.Width - self.size_of_text(line)[0]
+            self.canvas.coords(line, new_x, self.y + i * self.custom_font.metrics("linespace"))
+            i=i+1
+
         self.canvas.coords(self.text_container, new_x, new_y, new_x2, new_y2)
         self.canvas.coords(self.canvas_text, new_x, new_y)
         #? Move the reference points to resize the image
@@ -1417,7 +1451,8 @@ class TextBox:
         self.y = self.y + anchor_y * dy
         self.drag_data["x"] = event.x
         self.drag_data["y"] = event.y
-
+        
+        self.Function(self.get())
     
     def change_text(self, Type, Text):
         if Type == 'font':
@@ -1426,7 +1461,6 @@ class TextBox:
             self.font_size = Text
         elif Type == 'style':
             self.font_style = Text
-
         self.canvas.itemconfig(self.canvas_text, font=(self.font, self.font_size, self.font_style))
 
     def size_of_text(self, text):
@@ -1438,6 +1472,7 @@ class TextBox:
     def Change_aling(self, Id, aling):
         if Id == self.Id:
             #self.canvas.itemconfig(self.canvas_text, anchor= aling)
+            self.aling = aling
             i=0
             for line in self.text_lines:
                 if aling == 'left':
@@ -1456,17 +1491,77 @@ class TextBox:
                 "text": self.text,
                 "fontType": self.font,
                 "color": "(0, 0, 0, 1)",
-                "x_position": 0,
-                "y_position": 0,
+                "x_position": self.x,
+                "y_position": self.y,
                 "xCenter": False,
                 "yCenter": False,
                 "align" : self.font_style,
                 "bold" : False,
                 "italic" : False,
                 "fontSize" : self.font_size,
-                "boxWidth": 250,
-                "boxHeight": 100,
+                "boxWidth": self.Width,
+                "boxHeight": self.Height,
                 "active": True}
+    
+    def External_Move(self,Id, value, axis):
+        if Id == self.Id:
+            size_x = self.Width
+            size_y = self.Height
+            
+            #* Move the image
+            if axis == 'x':
+                self.x = value
+            elif axis == 'y':
+                self.y = value
+            elif axis == 'Width':
+                size_x = int(value)
+            elif axis == 'Height':
+                size_y = int(value)
+
+        self.Width = size_x
+        self.Height = size_y
+        i=0
+        for line in self.text_lines:
+            if self.aling == 'left':
+                new_x = self.x
+            elif self.aling == 'center':
+                new_x = self.x + (self.Width - self.size_of_text(line)[0])/2
+            elif self.aling == 'right':
+                new_x = self.x + self.Width - self.size_of_text(line)[0]
+            self.canvas.coords(line, new_x, self.y + i * self.custom_font.metrics("linespace"))
+            i=i+1
+        
+        self.canvas.coords(self.text_container, self.x, self.y, self.x + self.Width, self.y + self.Height)
+        self.canvas.coords(self.canvas_text, self.x, self.y)
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, self.x - 2, self.y - 2)
+        #Punto superior central
+        self.canvas.coords(self.Psc, self.x + round((self.Width/2)) - 2, self.y - 2)
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, self.x + self.Width - 2,self.y - 2)
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, self.x - 2, self.y + self.Height - 2)
+        #Punto inferior central
+        self.canvas.coords(self.Pic, self.x + round((self.Width/2))-2, self.y + self.Height - 2)
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, self.x + self.Width - 2,self.y + self.Height - 2)
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, self.x - 2,self.y + round((self.Height/2))-2)
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, self.x + self.Width - 2,self.y + round((self.Height/2))-2)
+        print(value)
+        self.Function(self.get())
+
+    def Change_color_font(self, Id):
+        # variable to store hexadecimal code of color
+        if Id == self.Id:
+            color_code = tk.colorchooser.askcolor(title ="Choose color")
+            print(color_code[1])
+            self.canvas.itemconfig(self.canvas_text, fill=color_code[1])
+            for line in self.text_lines:
+                self.canvas.itemconfig(line, fill=color_code[1])
+
 
 class Icon_button(tk.Label):
     def __init__(self, *args,

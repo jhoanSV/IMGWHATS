@@ -265,34 +265,36 @@ class property_text_bar(ctk.CTkFrame):
         self.Id = self.json_list['Id']
         self.relative_x, self.relative_y = self.Hook[0]
         self.Change_anchor_text = self.Hook[1]
+        self.External_Move = self.Hook[2]
+        self.Change_color_font = self.Hook[3]
         self.Fonts_list = List_of_fonts('C:\Windows\Fonts')
         #print(self.Fonts_list)
 
         self.label_x_position = ctk.CTkLabel(self, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
-        self.Input_x_position = InputNumber(self, width=50, step_size=1)
+        self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_x)
         self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
         self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
 
         self.label_y_position = ctk.CTkLabel(self, text= "Y:")
         self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
 
-        self.Input_y_position = InputNumber(self, width=50, step_size=1)
+        self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_y)
         self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
         self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
 
         self.label_width = ctk.CTkLabel(self, text= "W:")
         self.label_width.grid(row=0, column=4, padx=5, pady=5)
 
-        self.Input_width = InputNumber(self, width=50, step_size=1)
+        self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_x)
         self.Input_width.set(self.json_list['Width'])
         self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
 
         self.label_heid = ctk.CTkLabel(self, text= "H:")
         self.label_heid.grid(row=0, column=6, padx=5, pady=5)
 
-        self.Input_heid = InputNumber(self, width=50, step_size=1)
+        self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_y)
         self.Input_heid.set(self.json_list['Height'])
         self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
@@ -302,7 +304,7 @@ class property_text_bar(ctk.CTkFrame):
         self.Cb_Font_size = ctk.CTkComboBox(self, values=['8','9','10','11','12','14','16','18','20','22','24','26','28','36','48','72'])
         self.Cb_Font_size.grid(row=0, column=9, padx=5, pady=5)
 
-        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.anchor_left )
+        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color )
         self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
 
         self.Bt_left_text = Icon_button(self, Icon_image = './Default/left_text.png', Function= self.anchor_left)
@@ -327,11 +329,31 @@ class property_text_bar(ctk.CTkFrame):
 
     def update_text_data(self, updated_data):
         if updated_data['Type'] == 'text':
-            print('intenta actualizar')
             self.json_list = updated_data
             self.Id = self.json_list['Id']
+            self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
+            self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
+            self.Input_width.set(self.json_list['boxWidth'])
+            self.Input_heid.set(self.json_list['boxHeight'])
+
+    def Update_text_move_x(self, value):
+        if self.json_list['Type'] == 'text':
+            self.External_Move(self.Id, value, 'x')
+
+    def Update_text_move_y(self, value):
+        if self.json_list['Type'] == 'text':
+            self.External_Move(self.Id, value, 'y')
+
+    def Update_text_size_x(self, value):
+        if self.json_list['Type'] == 'text':
+            self.External_Move(self.Id, value, 'Width')
+
+    def Update_text_size_y(self, value):
+        if self.json_list['Type'] == 'text':
+            self.External_Move(self.Id, value, 'Height')
 
     def choose_color(self):
         # variable to store hexadecimal code of color
-        color_code = tk.colorchooser.askcolor(title ="Choose color")
-        print(color_code)
+        self.Change_color_font(self.Id)
+        #color_code = tk.colorchooser.askcolor(title ="Choose color")
+        #print(color_code[1])
