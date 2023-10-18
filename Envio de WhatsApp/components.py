@@ -1,10 +1,8 @@
 from typing import Optional, Tuple, Callable
 import customtkinter as ctk
 import tkinter
-from tkinter import filedialog
-from PIL import Image, ImageTk
+from PIL import Image
 from Vcss import FlatList
-import json
 
 class Wapp_Nav_bar(ctk.CTkFrame):
     def __init__():

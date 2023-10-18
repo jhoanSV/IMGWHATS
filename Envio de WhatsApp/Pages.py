@@ -53,8 +53,9 @@ class Los_proyectos(ctk.CTkFrame):
             self.ListaDeProyectos = FlatList(self.frame_iz, json_list=self.projects_json, Item=ItemProject,
                 width= 200, Otros=[self.proj_selection, self.proj_delete])
             self.ListaDeProyectos.pack(side=tkinter.LEFT, expand=True)
-        except:# Exception as e:
+        except Exception as e:
             print("Ocurrió un error al leer el archivo de proyectos")
+            print(e)
 
         #panel derecho
         self.frame_der = ctk.CTkFrame(self, fg_color = 'transparent', border_width=0,
@@ -291,8 +292,9 @@ class Send(ctk.CTkFrame):
         print(self.data_proj)
         Guardado = False
         while Guardado == False:
-            dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
-            self.name_proj = dialog.get_input()
+            #dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
+            self.name_proj = tkinter.simpledialog.askstring("Guardar", "Ingrese un nombre para el proyecto:")
+            # = dialog.get()
 
             if self.name_proj:
 

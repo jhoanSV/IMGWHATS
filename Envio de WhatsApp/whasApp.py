@@ -1,6 +1,4 @@
-import json
 import time
-import tkinter as tk
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
