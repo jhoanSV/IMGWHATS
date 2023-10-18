@@ -24,7 +24,7 @@ class view(ctk.CTk):
         self.title("Wapp Sender")
         self.configure(fg_color = self.CGreen)
         #self.icono = tkinter.PhotoImage(file="./Images/IcoWappSender.ico")
-        self.iconbitmap(default="./Images/IcoWappSender.ico")
+        self.iconbitmap(default="./Images/WappIcon.ico")
         
         #*root - contenedor verde principal
         self.main_container = ctk.CTkFrame(self, corner_radius=8, fg_color=self.CGreen)

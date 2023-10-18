@@ -280,7 +280,7 @@ class Send(ctk.CTkFrame):
 
         print(indices)
 
-        proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj, args=(indices))
+        proceso_thread2 = threading.Thread(target=self.obj_enviar.envio_msj, args=(indices,))
         proceso_thread2.start()
 
     #*Función para Guardar un proyecto nuevo

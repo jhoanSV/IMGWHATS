@@ -82,8 +82,7 @@ class Send_Wapp:
         wait = WebDriverWait(driver, 10,ignored_exceptions=ignored_exceptions)
         wait.until(EC.title_contains("WhatsApp"))
         self.excel_data = self.read_excel_file()
-        if re is not None:
-            self.indices = re
+        if re is not None: self.indices = re #si "re" no es None, o se le envió un valor, toma el lugar de self.indices
         print(self.excel_data)
         print(self.indices)
         
