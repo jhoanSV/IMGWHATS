@@ -267,6 +267,8 @@ class Send(ctk.CTkFrame):
 
         #proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista))
         proceso_thread.start()
+
+        print("Terminó el envío")
     
     def re_open(self):
 

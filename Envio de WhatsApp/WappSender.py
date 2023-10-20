@@ -14,7 +14,7 @@ class view(ctk.CTk):
         self.xl_path = None
 
         self.geometry("1024x728+200+5")
-        self.minsize(900,640)        
+        self.minsize(900,640)
 
         #*Colores
         self.CGreen = "#1C9F80"

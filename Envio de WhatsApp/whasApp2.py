@@ -78,16 +78,15 @@ class Send_Wapp:
         time.sleep(6)        
         
         # Todo: Wait for the WhatsApp Web interface to load
-        ignored_exceptions=(NoSuchElementException,StaleElementReferenceException,)
-        wait = WebDriverWait(driver, 10,ignored_exceptions=ignored_exceptions)
+        wait = WebDriverWait(driver, 10)
         wait.until(EC.title_contains("WhatsApp"))
         self.excel_data = self.read_excel_file()
         if re is not None: self.indices = re #si "re" no es None, o se le envió un valor, toma el lugar de self.indices
         print(self.excel_data)
-        print(self.indices)
+        print(self.indices)        
         
         for indice in self.indices:
-            enviado = False
+            #enviado = False
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
             text = self.msj            
@@ -98,6 +97,7 @@ class Send_Wapp:
                 for i, key in enumerate(self.variables):
                     #text = text.replace(key, str(contacto[i]))
                     text = text.replace(key, str(self.excel_data[indice][i]))
+                lineas = text.split("\n")
                 #print("Vista previa del mensaje: ")
                 #print(text)
                                 
@@ -109,7 +109,6 @@ class Send_Wapp:
                                                                                     
                 #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
                 #search_input.clear()
-                #search_input.send_keys('+57'+str(contacto[self.colCelular]))
                 search_input.send_keys('+57'+str(self.excel_data[indice][self.colCelular]))
                 time.sleep(3)
 
@@ -135,15 +134,22 @@ class Send_Wapp:
             if self.image_path == '':
                 try:
                     #?Send the message with the number of the contact that we want to contact
-                    #Busca la kja de texto y le asigna el msj                 
+                    #*Busca la kja de texto y le asigna el msj                 
                     #message_input = driver.find_element(By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]')
                     message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[1]')))
-                    message_input.send_keys(text)
+                    #message_input.send_keys(text.rstrip())#.rstrip para eliminar el "Enter" que tienen los strings al final
+                    if (len(lineas) > 1):
+                        for l, lines in enumerate(lineas):
+                            message_input.send_keys(lineas[l].rstrip())
+                            message_input.send_keys(Keys.SHIFT, Keys.ENTER)
+                    else:
+                        message_input.send_keys(text.rstrip())
+                    
                     message_input.send_keys(Keys.ENTER)
                     time.sleep(2)
                     #enviado = True
                     
-                    #Give a random number from 2 and 8 to send the next message.
+                    #*Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                     
@@ -156,28 +162,31 @@ class Send_Wapp:
                     continue
             elif self.image_path.endswith('.jpg') or self.image_path.endswith('.png'):
                 try:
-                    #esta es la parte para enviar la imagen
+                    #*esta es la parte para enviar la imagen
                     attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
                     attachment_button.click()
                     time.sleep(1)
 
-                    #prueba para seleccionar la imagen
+                    #*selecciona la imagen
                     attach_image_option = wait.until(EC.presence_of_element_located((By.XPATH, '//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]')))
                     attach_image_option.send_keys(self.image_path)
                     time.sleep(6)
 
-                    #To write the message that it will send with the image
-                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]')#'//div[@contenteditable="true"][@data-tab="6"]')
-                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')
-                    #message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')))
-                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]//div[@role="textbox"]')))
-                                                                  #//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]
-                    message_input.send_keys(text)
-                    #input("errorhptaaaaaaaaaaaaaaaaaaaaa")
-                    #message_input.send_keys(Keys.ENTER)
+                    #*escribe el mensaje
+                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]//div[@role="textbox"]')))                    
+                    
+                    if (len(lineas) > 1):
+                        for l, lines in enumerate(lineas):
+                            message_input.send_keys(lineas[l].rstrip())
+                            message_input.send_keys(Keys.SHIFT, Keys.ENTER)
+                    else:
+                        message_input.send_keys(text.rstrip())
+                    
+                    message_input.send_keys(Keys.ENTER)
+                    #input("errorhptaaaaaaaaaaaaaaaaaaaaa")                    
                     time.sleep(5)
 
-                    #Give a random number from 2 and 8 to send the next message.
+                    #*Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
                 except Exception as e:                    
@@ -200,7 +209,14 @@ class Send_Wapp:
                     #To write the message that it will send with the image                    
                     #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')
                     message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')))
-                    message_input.send_keys(text)
+                    if (len(lineas) > 1):
+                        for l, lines in enumerate(lineas):
+                            message_input.send_keys(lineas[l].rstrip())
+                            message_input.send_keys(Keys.SHIFT, Keys.ENTER)
+                    else:
+                        message_input.send_keys(text.rstrip())
+                    
+                    message_input.send_keys(Keys.ENTER)
                     time.sleep(5)
 
                     #Give a random number from 2 and 8 to send the next message.
