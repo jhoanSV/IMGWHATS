@@ -216,11 +216,11 @@ class Send(ctk.CTkFrame):
             Item=ErrorItem, background_color='#D9D9D9', Otros=self.Del_error)
         self.notes.place(relx=0.73, rely=0.3)
 
-        self.Open_btn = ctk.CTkButton(self, text="Abrir WhatsApp", corner_radius=0, fg_color=CGreen,
+        self.Open_btn = ctk.CTkButton(self, text="Empezar envio", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.open())
         self.Open_btn.place(relx=0.05, rely=0.84, anchor='nw')
 
-        self.Save_btn = ctk.CTkButton(self, text="Guardar", corner_radius=0, fg_color=CGreen,
+        self.Save_btn = ctk.CTkButton(self, text="Guardar proyecto", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.Save_proj())
         self.Save_btn.place(relx=0.2, rely=0.84, anchor='nw')
 
@@ -248,11 +248,13 @@ class Send(ctk.CTkFrame):
 
     def open(self):
 
+        self.Open_btn.configure(text="Enviando...")
         el_msj = self.entry_msj.get("0.0", "end")
 
         self.obj_enviar.update_vars(msj=el_msj, image_path=self.entry_media.get(), 
             variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
-            colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error)
+            colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error,
+            la_funcion2= self.show_end)
         
         if self.cb_var.get() == "Enviar a todos":
             #lista = None
@@ -264,11 +266,8 @@ class Send(ctk.CTkFrame):
             lista = [i for i in range(min, max+1)]
             print(lista)
             proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista,))
-
-        #proceso_thread = threading.Thread(target=self.obj_enviar.envio_msj, args=(lista))
+        
         proceso_thread.start()
-
-        print("Terminó el envío")
     
     def re_open(self):
 
@@ -276,6 +275,7 @@ class Send(ctk.CTkFrame):
             print("No hay errores")
             return
         
+        self.Re_open_btn.configure(text="Enviando...")
         indices = []
         for err in self.lista_errores:
             indices.append(next(iter(err)))
@@ -294,9 +294,7 @@ class Send(ctk.CTkFrame):
         print(self.data_proj)
         Guardado = False
         while Guardado == False:
-            #dialog = ctk.CTkInputDialog(title="Guardar", text="Ingrese un nombre para el proyecto:")
             self.name_proj = tkinter.simpledialog.askstring("Guardar", "Ingrese un nombre para el proyecto:")
-            # = dialog.get()
 
             if self.name_proj:
 
@@ -304,7 +302,7 @@ class Send(ctk.CTkFrame):
                     projects_json = json.load(json_file)
                 names = list(projects_json.keys())
 
-                # Condicional para validar proyecto ya guardado
+                #* Condicional para validar proyecto ya guardado
                 proyecto_encontrado = False  # Variable para rastrear si se encontró el proyecto
 
                 for name in names:
@@ -314,7 +312,7 @@ class Send(ctk.CTkFrame):
                             " ya existe" + "¿Desea reemplazar el proyecto existente?")
 
                         if preguntaGuardado == "yes":
-                            # Borra el que ya existe primero, luego guarda el nuevo
+                            #* Borra el que ya existe primero, luego guarda el nuevo
                             del projects_json[name]  # Elimina la clave existente
                             projects_json[name] = self.data_proj  # Agrega el nuevo proyecto
 
@@ -323,11 +321,11 @@ class Send(ctk.CTkFrame):
                             Guardado = True
                             proyecto_encontrado = True
                         else:
-                            break  # Sal del bucle si no se desea reemplazar
+                            break  #* Sal del bucle si no se desea reemplazar
                     else:
                         continue
 
-                # Si no se encontró el proyecto, agrégalo
+                #* Si no se encontró el proyecto, agrégalo
                 if not proyecto_encontrado:
                     projects_json[str(self.name_proj)] = self.data_proj
 
@@ -343,12 +341,8 @@ class Send(ctk.CTkFrame):
         self.notes.update_list(self.lista_errores)
 
     def Del_error(self, key):
-        print("lista")
-        print(self.lista_errores)
-        #if str(key) in self.lista_errores:
         del self.lista_errores[int(key)]
         self.notes.update_list(self.lista_errores)
-        print(self.lista_errores)
 
     def cb_function(self, opcion):
         if opcion == "Personalizado":
@@ -362,3 +356,9 @@ class Send(ctk.CTkFrame):
             self.desde_label.place_forget()
             self.hasta_input.place_forget()
             self.hasta_label.place_forget()
+
+    def show_end(self, msjs, errs):
+        self.Open_btn.configure(text="Empezar envio")
+        self.Re_open_btn.configure(text="Reintentar Conflictos")
+        tkinter.messagebox.showinfo(message="Se enviaron exitosamente " + str(msjs) + " mensajes. " + 
+            "Resultaron " + str(errs) + " errores", title="¡Envio terminado!")

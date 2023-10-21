@@ -56,7 +56,7 @@ class Send_Wapp:
         return data
     
 
-    def update_vars(self, msj, image_path, variables, colCelular, colDestino, file_path, la_funcion):
+    def update_vars(self, msj, image_path, variables, colCelular, colDestino, file_path, la_funcion, la_funcion2):
         self.msj = msj
         self.image_path = image_path
         self.variables = variables
@@ -64,8 +64,12 @@ class Send_Wapp:
         self.colDestino = colDestino
         self.excel_file_path = file_path
         self.Add_error = la_funcion
+        self.show_end = la_funcion2
 
     def envio_msj(self, re=None):
+        
+        self.enviados = 0
+        self.errados = 0
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan        
         driver = webdriver.Chrome(options=self.options, service=ChromeService(ChromeDriverManager().install()))
@@ -128,7 +132,7 @@ class Send_Wapp:
                 #? oprime una flecha para cancelar el proceso de ingreso de número
                 arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
                 arrow_back.click()
-
+                self.errados += 1
                 continue
             
             if self.image_path == '':
@@ -152,9 +156,11 @@ class Send_Wapp:
                     #*Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
+                    self.enviados += 1
                     
                     #if not enviado: self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                 except Exception as e:
+                    self.errados += 1
                     print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio')
                     print(e)
                     #if not enviado: self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
@@ -189,7 +195,9 @@ class Send_Wapp:
                     #*Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
-                except Exception as e:                    
+                    self.enviados += 1
+                except Exception as e:
+                    self.errados += 1
                     print(e)
                     print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' En envio 2')
                     self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
@@ -222,8 +230,10 @@ class Send_Wapp:
                     #Give a random number from 2 and 8 to send the next message.
                     random_number = random.randint(2, 8)
                     time.sleep(random_number)
+                    self.enviados += 1
                 except Exception as e:
                     #print("An error occurred:", str(e))
+                    self.errados += 1
                     print(e)
                     print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + 'Envio Video')
                     self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
@@ -278,3 +288,4 @@ class Send_Wapp:
 
         # Close the browser
         driver.quit()
+        self.show_end(self.enviados, self.errados)

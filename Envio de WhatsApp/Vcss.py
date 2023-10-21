@@ -407,5 +407,6 @@ class El_Tab_view(ctk.CTkFrame):
                 El_Tab_view.current = El_Tab_view.frames[frame_id]
                 El_Tab_view.current.pack(in_=self, side='top', fill='both', expand=True, padx=0, pady=0)
             
+    #*Función para agregarle un tg_frame a un frame del tab_view ya creado
     def add_frame(self, tab_key, tg_frame):
         El_Tab_view.frames[tab_key] = tg_frame
