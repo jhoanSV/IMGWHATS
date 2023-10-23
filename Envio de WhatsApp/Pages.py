@@ -90,9 +90,12 @@ class Los_proyectos(ctk.CTkFrame):
         self.el_entry.insert(0, self.xl_path)
 
     def proj_selection(self, rutXl, json):
+        #*Cuando seleccione un proyecto existente llena el_entry con el excel guardado
+        #json tiene el diccionario guardado en proyectos
         self.el_entry.delete(0, "end")
         self.el_entry.insert(0, rutXl)
-        self.next(2, json)
+        #*Aca se envia directamente al frame de envio "2", este next es del principal
+        self.next(2, data_proj_send=json, data_proj_var=json)
 
     def proj_delete(self, key):
         del self.projects_json[key]
@@ -111,10 +114,12 @@ class Vars(ctk.CTkFrame):
                  corner_radius: int | str | None = 0,
                  fg_color: str | Tuple[str, str] | None = None,
                  path: str=None,
+                 data_proj_var: Optional[dict] = None,
                  **kwargs):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                 fg_color=fg_color, **kwargs)
 
+        self.data_proj = data_proj_var
         self.switch = El_metodo
         self.El_path = path
         self.path = r''+self.El_path
@@ -122,7 +127,12 @@ class Vars(ctk.CTkFrame):
         whasApp.set_xl(self.path)
         self.variables = {}
         self.lista = whasApp.lee_excel()
+        if self.data_proj:
+            self.update_data(self.data_proj)
+            print(self.lista)
+        
         self.La_tablajs = Table(self, t_lista=self.lista, width=908)
+        self.La_tablajs.pack(side="top")
 
         self.sig_btn = ctk.CTkButton(self, text="Siguiente", corner_radius=0, fg_color=CGreen,
             hover_color='#115e45', font=('', 18), command=lambda: self.sig())
@@ -149,9 +159,9 @@ class Vars(ctk.CTkFrame):
         
         self.switch(2, self.temp)
 
-    #def update_table(self):
-     #   self.La_tablajs.update()
-                
+    def update_data(self, data):
+        self.lista[data['colCelular']]['Celular'] = 1
+        self.lista[data['colDestino']]['Destino'] = 1
 
 class Send(ctk.CTkFrame):
     def __init__(self,
@@ -161,12 +171,12 @@ class Send(ctk.CTkFrame):
                  height: int = 200,
                  corner_radius: int | str | None = 0,
                  fg_color: str | Tuple[str, str] | None = None,
-                 data_proj: Optional[dict] = None,
+                 data_proj_send: Optional[dict] = None,
                  **kwargs):
         super().__init__(master, *args, width=width, height=height, corner_radius=corner_radius,
                 fg_color=fg_color, **kwargs)
         
-        self.data_proj = data_proj
+        self.data_proj = data_proj_send
         self.name_proj = None        
         self.obj_enviar = whasApp2.Send_Wapp()
         self.lista_errores = []

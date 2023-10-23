@@ -49,6 +49,7 @@ class ItemProject(ctk.CTkFrame):
 
     def start_drag(self, event):
         if self.On_press:
+            #*On_press es la funcion de los proyectos
             self.On_press(self.json_list['rutaXl'], self.json_list)
 
     def borrar_proyecto(self):        
@@ -118,8 +119,8 @@ class ErrorItem(ctk.CTkFrame):
 class Table(ctk.CTkFrame):
     def __init__(self, 
                  master: any, 
-                 width: int = 200, 
-                 height: int = 200, 
+                 width: int = 0,
+                 height: int = 0,
                  corner_radius: int | str | None = None, 
                  border_width: int | str | None = None,
                  bg_color: str | Tuple[str, str] = "transparent", 
@@ -130,24 +131,28 @@ class Table(ctk.CTkFrame):
                  **kwargs):
         super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, **kwargs)
         self.la_var = la_var
-        #self.width = width
         self.t_lista = t_lista #Aquí llega el diccionario de datos de la tabla
-
-        self.pack(padx=55, pady=55, fill='x', expand=False, anchor='n')
+        
+        #self.pack(padx=55, pady=55, fill='x', expand=False, anchor='n')
+        self.pack(padx=55, pady=55, expand=False, anchor='n')
 
         #*Crea cabecera de tabla----------------------------------
-        self.t_head = ctk.CTkFrame(self, fg_color='white', height=40)
-        self.t_head.pack(fill='x')
-        self.cols = ['Columnas encontradas','celular','Nombre Destinatario']
+        self.t_head = ctk.CTkFrame(self, fg_color='gray', height=40)
+        self.t_head.pack()
+        
+        self.cols = ['Columnas encontradas','celular','Nombre\nDestinatario']
         #Crea las 4 columnas de la cabecera
-        self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0], width=320)
-        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=86)
-        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
+        #self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0], width=320)
+        #self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=86)
+        #self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
 
         #*Crea cuerpo o filas de tabla-----------------------------
 
-        self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
-        self.t_body.pack(side='bottom', fill='both')
+        #self.body = ctk.CTkFrame(self, fg_color='gray', height=40)
+        #self.body.pack(side='bottom', fill='both')
+
+        #self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
+        #self.t_body.pack(side='bottom', fill='both')
 
     def change(self, numbCol, nomCol, val):
         for i in range(len(self.t_lista)):
@@ -188,10 +193,6 @@ class El_Item(ctk.CTkFrame):
         self.nom_col = self.json_list['Columnas excel']
         self.numCol = Otros['Project_name']
         self.change = Otros['Hook']
-        #self.entry_text = tkinter.StringVar()
-        #self.entry_text.set(json_list['Variables'])
-        #self.cel = tkinter.IntVar()
-        #self.des = tkinter.IntVar()
         self.cel = tkinter.IntVar()#json_list['Celular']
         self.cel.set(self.json_list['Celular'])
         self.des = tkinter.IntVar()
@@ -205,13 +206,6 @@ class El_Item(ctk.CTkFrame):
         self.lf.pack(side='left', fill='x', expand=True, anchor='n')
         self.l = ctk.CTkLabel(self.lf, text=self.nom_col, text_color='black', font=('', 12), fg_color='transparent')
         self.l.place(relx=0.05, rely=0.05)
-
-        #* Entry para la variable
-        '''self.ef = ctk.CTkFrame(self, fg_color='white', width=310, height=40, corner_radius=0, border_width=1)
-        self.ef.pack(side='left', fill='x', expand=True, anchor='n')
-        self.e = ctk.CTkEntry(self.ef, fg_color="#D9D9D9", font=('', 12), textvariable=self.entry_text,
-            text_color='black', height=40)
-        self.e.place(relx=0, rely=0, anchor='nw')'''
 
         #* Checkbox1
         self.r1f = ctk.CTkFrame(self, fg_color='white', width=86, height=40, corner_radius=0, border_width=1)
@@ -253,15 +247,3 @@ class El_Item(ctk.CTkFrame):
 
 
     #def update(self):
-
-class CheckboxGroup:
-    def __init__(self, master, checkbox_groups):
-        self.var = tkinter.IntVar()
-        self.checkbox = ctk.CTkCheckBox(master, text='', variable=self.var, command=self.update_checkboxes, width=20)
-        self.checkbox.pack()
-        self.checkbox_groups = checkbox_groups
-
-    def update_checkboxes(self):
-        for checkbox_group in self.checkbox_groups:
-            if checkbox_group is not self:
-                checkbox_group.var.set(0)

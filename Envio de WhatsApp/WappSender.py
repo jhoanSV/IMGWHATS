@@ -39,7 +39,7 @@ class view(ctk.CTk):
 
         self.btn_arch = ctk.CTkButton(self.Nav_bar2, text="Volver", text_color='white', corner_radius=0,
             fg_color=self.CGreen, hover_color=self.CGreen_hov, font=('', 18), width=140,
-            command=lambda: self.switch_tab(0))#!Arreglar esto
+            command=lambda: self.switch_tab(1))
         self.btn_arch.place(x=0, rely=1, anchor='sw')
 
         self.btn_arch = ctk.CTkButton(self.Nav_bar, text="Archivo", text_color='white', corner_radius=0,
@@ -64,50 +64,48 @@ class view(ctk.CTk):
 
     #funciones de vista
 
-    def siguiente(self, tab, data_proj=None):
-            try:
-                #*Crea el frame de variables                
-                self.variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(), El_metodo=self.reload_switch)
-                self.main_tabV.add_frame(1, self.variables)
-                self.envio = Send(master=self.main_tabV, data_proj=data_proj)
-                self.main_tabV.add_frame(2, self.envio)
-                #self.main_tabV.toggle_frame_by_id(tab)
-                self.switch_tab(tab)
-                self.Nav_bar.pack(side='top', fill='x', expand=False)
-                self.main_tabV.pack_configure(padx=0, pady=0)
-            except Exception as e:
+    def siguiente(self, tab, data_proj_send=None, data_proj_var=None):
+            print("xD?")
+            #try:
+                #*Crea el frame de variables
+            self.variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(),
+                El_metodo=self.reload_switch, data_proj_var=data_proj_var)
+            self.main_tabV.add_frame(1, self.variables)
+            self.envio = Send(master=self.main_tabV, data_proj_send=data_proj_send)
+            self.main_tabV.add_frame(2, self.envio)
+            self.switch_tab(tab)
+            self.Nav_bar.pack(side='top', fill='x', expand=False)
+            self.main_tabV.pack_configure(padx=0, pady=0)
+            #except Exception as e:
                 #*crea un label para avisar del error
-                error = 'Ha ocurrido un error. Es posible que el archivo no sea compatible'
-                self.warn_file = ctk.CTkLabel(self.proyectos.frame_der,text=error,text_color="black",font=('', 20))
-                self.warn_file.place(relx=0.9, rely=0.8, anchor='se')
+            error = 'Ha ocurrido un error'
+            self.warn_file = ctk.CTkLabel(self.proyectos.frame_der,text=error,text_color="black",font=('', 20))
+            self.warn_file.place(relx=0.9, rely=0.8, anchor='se')
 
     def switch_tab(self, tab):
         self.main_tabV.toggle_frame_by_id(tab)
         if tab == 0:
-            self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
-            self.btn_env.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
-            self.btn_arch.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
             self.main_tabV.pack_configure(padx=55, pady=55)
+            self.Nav_bar.pack_forget()
+            self.Nav_bar2.pack(side='top', fill='x', expand=False)
         elif tab == 1:
+            self.Nav_bar2.pack_forget()
+            self.Nav_bar.pack(side='top', fill='x', expand=False)
             self.btn_arch.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
             self.btn_env.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
             self.btn_vars.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
-            self.btn_arch.place(x=0, rely=1, anchor='sw')
-            self.btn_vars.place(x=140, rely=1, anchor='sw')
-            self.btn_env.place(x=280, rely=1, anchor='sw')
             self.main_tabV.pack_configure(padx=0, pady=0)
         elif tab == 2:
+            self.Nav_bar2.pack_forget()
+            self.Nav_bar.pack(side='top', fill='x', expand=False)
             self.btn_arch.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
             self.btn_vars.configure(fg_color=self.CGreen, hover_color=self.CGreen_hov, text_color='white')
             self.btn_env.configure(fg_color='white', hover_color='white', text_color=self.CGreen)
-            self.btn_arch.place(x=0, rely=1, anchor='sw')
-            self.btn_vars.place(x=140, rely=1, anchor='sw')
-            self.btn_env.place(x=280, rely=1, anchor='sw')
             self.main_tabV.pack_configure(padx=0, pady=0)
     
     def reload_switch(self, tab, new_dataP):
          self.envio.update_data(new_dataP)
-         #self.variables.update_table() que acutalice los checkboxes cuando sea un proyecto ya guardado
+         print(new_dataP)
          self.switch_tab(tab)
 
 v = view()
