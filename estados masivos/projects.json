@@ -13,7 +13,7 @@
             "yCenter": true,
             "BackgroundColor": "#FFFFFF",
             "active": false,
-            "order": 0
+            "tags": 0
         },
         {
             "Id": 1,
@@ -27,7 +27,7 @@
             "xCenter": true,
             "yCenter": true,
             "active": false,
-            "order": 1
+            "tags": 1
         },
         {
             "Id": 2,
@@ -41,11 +41,12 @@
             "xCenter": false,
             "yCenter": false,
             "active": true,
-            "order": 3
+            "tags": 2
         },
         {
             "Id": 3,
             "Type": "text",
+            "Name": "caminar.jpg",
             "text": "Prueba del texto\nque vamos a poner @holi",
             "fontType": "Arial.ttf",
             "color": "(0, 0, 0, 1)",
@@ -60,7 +61,7 @@
             "boxWidth": 250,
             "boxHeight": 100,
             "active": false,
-            "order": 4
+            "tags": 3
         }
     ]
 }

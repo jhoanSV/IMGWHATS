@@ -55,6 +55,49 @@ def Change_anchor_text(Id, aling):
 def Change_color_font(Id):
     Image_Container.Change_color_font(Id)
 
+def tag_lower(Id):
+    Image_Container.tag_lower(Id)
+    back_one_elements(Id)
+
+def tag_uper(Id):
+    Image_Container.tag_Uper(Id)
+    advance_one_elements(Id)
+
+def change_text(Id, Type, Text):
+    Image_Container.change_text(Id, Type, Text)
+
+def back_one_elements(Id):
+    try:
+        index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'] not in (0, 1))
+        if index > 0:
+            Actual_project[index - 1], Actual_project[index] = Actual_project[index], Actual_project[index - 1]
+            Actual_project[index - 1]['tags'], Actual_project[index]['tags'] = Actual_project[index]['tags'], Actual_project[index - 1]['tags']
+            Image_Container.advance_one_element(index-1)
+            ElementList.Update_list(Actual_project)
+            #print(Actual_project)
+        else:
+            print("Cannot move the element further back.")
+    except StopIteration:
+        print(f"Element with Id {Id} not found in Actual_project.")
+
+def advance_one_elements(Id):
+    try:
+        index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'] not in (0, len(Actual_project)-1))
+        if index > 0:
+            Actual_project[index], Actual_project[index + 1] = Actual_project[index + 1], Actual_project[index]
+            Actual_project[index]['tags'], Actual_project[index + 1]['tags'] = Actual_project[index + 1]['tags'], Actual_project[index]['tags']
+            Image_Container.advance_one_element(index)
+            ElementList.Update_list(Actual_project)
+            #print(Actual_project)
+        else:
+            print("Cannot move the element further back.")
+    except StopIteration:
+        print(f"Element with Id {Id} not found in Actual_project.")
+
+def go_back_one(Id):
+    index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'])
+
+
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
@@ -92,16 +135,16 @@ Background_data = {"Id": 0,
 #spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
 #spinbox_1.grid(row=2, column=0 ,padx=5, pady=5)
 
-ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=200)
+ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
 ElementList.grid(row=3, column=1 ,padx=5, pady=5)
 
 Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 
-Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move, Background_data, External_Rotate])
+Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move, Background_data, External_Rotate, tag_lower, tag_uper])
 Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
-Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font])
+Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font, change_text])
 Up_bar_text.grid(row=2, column=0 ,padx=5, pady=5)
 
 background_image = Image.new('RGB',size, 'white')
@@ -138,6 +181,8 @@ def activate_element(Id):
             element['active'] = True
         elif element['Id'] != Id:
             element['active'] = False
+
+
 
 def comparing_elemts(List1, List2):
     symmetric_diff = list(set(List1) ^ set(List2))

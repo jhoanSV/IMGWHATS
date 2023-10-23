@@ -217,10 +217,10 @@ class InputNumber(ctk.CTkFrame):
             self.entry.delete(0, "end")
             self.entry.insert(0, str(float(0)))
     
-class FlatList(ctk.CTkFrame):
+class FlatList(ctk.CTkScrollableFrame):
     def __init__(self, *args,
                  width: int = 100,
-                 height: int = 100,
+                 height: int = 50,
                  json_list: dict = None,  # Use dict for JSON object
                  Item: Optional[Callable] = None, # Default to None
                  background_color: str = '#FFFFFF', # Default to
@@ -247,37 +247,21 @@ class FlatList(ctk.CTkFrame):
         #self.Key_List = list(json_list.keys())
         self.background_color = background_color
         self.configure(fg_color='transparent')
-        
-        # *frame configuration
-        #self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        
-        self.FrameList = ctk.CTkScrollableFrame(self, width=width, height=height, fg_color='transparent')
-        #self.FrameList.configure(fg_color=("gray78", "gray28")) 
-        self.FrameList.configure(fg_color=self.background_color) 
-        
-        self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
-        self.grid_columnconfigure(1, weight=1)  # entry expands
-
-        self.FrameList.grid(row=0, column=0)
-        
-        #self.crear()
+        self.configure(corner_radius=0)
+        self.columnconfigure(0, weight=1)
         # * frame scheme Input
         #for i in range(self.Number_of_items()):
         for i in range(len(self.Key_List)):
-            FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
-            FrameItem.grid(row=i, column=0 )
             if self.Item is not None:
                 if self.si_list:
                     key = i
                 else:
                     key = self.Key_List[i]
-                #item_instance = self.Item(FrameItem, json_list= self.json_list[key], Project_name = str(key),
-                #    width = self.width, height = self.height)
-                #print(callable(self.otros))
-                item_instance = self.Item(FrameItem, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
-                    width = self.width, height = self.height)
+    
+                item_instance = self.Item(self, json_list= self.json_list[key], Otros={'Project_name': str(key), 'Hook': self.otros},
+                    width = self.width)
                 self.items.append(item_instance.get_itemData())
-                item_instance.grid(row = 0, column = 0)
+                item_instance.grid(row = i, column = 0, sticky='ew')
                 item_instance.update_row(self.json_list[key])
                 self.frames[i] = item_instance
             else:
@@ -308,7 +292,7 @@ class FlatList(ctk.CTkFrame):
                     item_instance = self.Item(FrameItem, json_list=value, Otros={'Project_name': str(key), 'Hook': self.otros},
                                             width=self.width, height=self.height)
                     self.items.append(item_instance.get_itemData())
-                    item_instance.grid(row=0, column=0)
+                    item_instance.grid(row=0, column=0, sticky='ew')
                     item_instance.update_row(value)
                     self.frames[i] = item_instance
                 else:
@@ -571,6 +555,7 @@ class ImageContainer(tk.Frame):
         self.canvas.pack()
         self.image_objects = []
         self.text_objects = []
+        self.objects = []
 
         for Item in  self.json_list:
             if Item['Type'] == 'Background':
@@ -580,7 +565,7 @@ class ImageContainer(tk.Frame):
                 self.on_y = (self.height - Item['Height'])/2
                 self.background_image = Image.new('RGBA',self.size_background, self.background_color)
                 self.Bg_image = ImageTk.PhotoImage(self.background_image)
-                self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image)
+                self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image, tags= 't0')
                 self.Change_point_relative_to([self.on_x, self.on_y])
            
             elif Item['Type'] == 'image':
@@ -589,12 +574,14 @@ class ImageContainer(tk.Frame):
                 y = Item['y_position']
                 obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'])
                 self.image_objects.append(obj)
+                self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
             
             elif Item['Type'] == 'text':
                 x = Item['x_position']
                 y = Item['y_position']
                 text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function)
                 self.text_objects.append(text)
+                #self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
 
     def update_image_size(self, *args):
         zoom_level = self.zoom_var.get()
@@ -646,8 +633,44 @@ class ImageContainer(tk.Frame):
     def Change_color_font(self, Id):
         for text in self.text_objects:
             text.Change_color_font(Id)
-    
-    
+    # Function to swap the positions of image2 and image3
+    def tag_lower(self, Id):
+        self.canvas.tag_lower('t' + str(Id))
+        self.canvas.tag_lower('t0')
+        print(Id)# Move image3 to the bottom
+
+    def tag_Uper(self, Id):
+        self.canvas.tag_raise('t' + str(Id))
+        print(Id)
+
+    def advance_one_element(self, index):
+        #Find the index of the element to swtch
+        #index = next(i for i, element in enumerate(self.json_list) if element['Id'] == Id and element['Id'] not in (0, len(self.json_list)-1))
+        #see if the next element to switch is in the uper half f the list
+        if index + 1 > len(self.json_list):
+            print('es mayor a la mitad')
+            #Identify the Id of the element to switch
+            Id_to_switch = self.json_list[index]['Id']
+            #Send te element to the last position
+            self.canvas.tag_raise('t' + str(Id_to_switch))
+            #then every element in the other position after the element to switch is sended at the last position
+            for i in range(index + 1, len(self.json_list)):
+                Id_to_switch = self.json_list[index + 1]['Id']
+                self.canvas.tag_raise('t' + str(Id_to_switch))
+        elif index + 1 <= len(self.json_list):
+            print('es menor a la mitad')
+            #Identify the Id of the element to switch
+            Id_to_switch = self.json_list[index]['Id']
+            #Send te element to the first position
+            self.tag_lower(Id_to_switch)
+            #then every element in the other position after the element to switch is sended at the first position
+            for i in range(index + 1, len(self.json_list)):
+                Id_to_switch = self.json_list[index - 1]['Id']
+                self.tag_lower(Id_to_switch)
+
+    def change_text(self, Id, Type, Text):
+        for text in self.text_objects:
+            text.change_text(Id, Type, Text)
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -676,7 +699,7 @@ class ObjectOnCanvas:
         # *principal image
         #self.angleRsi = Angle_between_vectors(np.array([0,1]), np.array([-self.Width/2,self.Height/2]))
         # Create an image over the canvas
-        self.canvas_obj = self.canvas.create_image(self.x, self.y, anchor="nw", image=self.image)
+        self.canvas_obj = self.canvas.create_image(self.x, self.y, anchor="nw", image=self.image,  tags=str('t' + str(self.id)))
         # Agregar un evento de clic al objeto en el lienzo
         self.canvas.tag_bind(self.canvas_obj,"<Double-Button-1>", self.Change_state)
         self.canvas.tag_bind(self.canvas_obj,"<Button-1>", self.start_drag)
@@ -689,56 +712,56 @@ class ObjectOnCanvas:
         self.square_point = ImageTk.PhotoImage(self.Square)
 
         #?Punto superior izquierdo
-        self.Psi = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.square_point)
+        self.Psi = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Psi,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psi,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
         self.canvas.tag_bind(self.Psi, "<Enter>", lambda event, cursor='top_left_corner': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Psi,"<Leave>", self.Restore_cursor)
 
         #?Punto superior central
-        self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y, anchor="nw", image=self.square_point)
+        self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Psc,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psc,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
         self.canvas.tag_bind(self.Psc,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Psc, "<Enter>", lambda event, cursor='sb_v_double_arrow': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Psc,"<Leave>", self.Restore_cursor)
         #?Punto superior derecho
-        self.Psd = self.canvas.create_image(self.x + self.Width - 4,self.y, anchor="nw", image=self.square_point)
+        self.Psd = self.canvas.create_image(self.x + self.Width - 4,self.y, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Psd,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psd,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
         self.canvas.tag_bind(self.Psd,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Psd, "<Enter>", lambda event, cursor='top_right_corner': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Psd,"<Leave>", self.Restore_cursor)
         #?Punto inferior izquierdo
-        self.Pii = self.canvas.create_image(self.x, self.y + self.Height - 4, anchor="nw", image=self.square_point)
+        self.Pii = self.canvas.create_image(self.x, self.y + self.Height - 4, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Pii,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pii,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
         self.canvas.tag_bind(self.Pii,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Pii, "<Enter>", lambda event, cursor='bottom_left_corner': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Pii,"<Leave>", self.Restore_cursor)
         #?Punto inferior central
-        self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 4, anchor="nw", image=self.square_point)
+        self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 4, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Pic,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pic,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
         self.canvas.tag_bind(self.Pic,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Pic, "<Enter>", lambda event, cursor='sb_v_double_arrow': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Pic,"<Leave>", self.Restore_cursor)
         #?Punto inferior derecho
-        self.Pid = self.canvas.create_image(self.x + self.Width - 4,self.y + self.Height - 4, anchor="nw", image=self.square_point)
+        self.Pid = self.canvas.create_image(self.x + self.Width - 4,self.y + self.Height - 4, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Pid,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pid,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
         self.canvas.tag_bind(self.Pid,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Pid, "<Enter>", lambda event, cursor='bottom_right_corner': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Pid,"<Leave>", self.Restore_cursor)
         #?Punto lateral izquierdo
-        self.Pli = self.canvas.create_image(self.x,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
+        self.Pli = self.canvas.create_image(self.x,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Pli,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pli,"<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
         self.canvas.tag_bind(self.Pli,"<ButtonRelease-1>", self.stop_drag)
         self.canvas.tag_bind(self.Pli, "<Enter>", lambda event, cursor='sb_h_double_arrow': self.Change_cursor(event, cursor))
         self.canvas.tag_bind(self.Pli,"<Leave>", self.Restore_cursor)
         #?Punto lateral derecho
-        self.Pld = self.canvas.create_image(self.x + self.Width - 4,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point)
+        self.Pld = self.canvas.create_image(self.x + self.Width - 4,self.y + round((self.Height/2))-2, anchor="nw", image=self.square_point, tags=str('t' + str(self.id)))
         self.canvas.tag_bind(self.Pld,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pld,"<B1-Motion>", lambda event: self.on_resize(event, anchor_x = 1, move_x=1, move_y=0))
         self.canvas.tag_bind(self.Pld,"<ButtonRelease-1>", self.stop_drag)
@@ -1026,7 +1049,7 @@ class ObjectOnCanvas:
         self.function(self.get())
 
     def get(self):
-        return {"id": self.id,
+        return {"Id": self.id,
                 "Type": 'image',
                 "Width": self.Width,
                 "Height": self.Height,
@@ -1202,20 +1225,23 @@ class TextBox:
         self.aling = 'left'
         self.Function = Function
         self.text_showed = self.text.split("\n")
+        self.cursor = [0, 0]
+
         self.custom_font = tk.font.Font(family=self.font, size=self.font_size, slant=self.font_style)
         self.text_lines=[]
         super().__init__()
         
-        self.text_container = self.canvas.create_rectangle(self.x, self.y, self.x + self.Width, self.Height, outline="#F2F2F2", width=4)
+        self.text_container = self.canvas.create_rectangle(self.x, self.y, self.x + self.Width, self.Height, outline="#F2F2F2", width=4, tags=str('t' + str(self.Id)))
         i=0
         for line in self.text_showed:
-            text_line = self.canvas.create_text(self.x, self.y + i*self.custom_font.metrics("linespace"), text= line, anchor='nw', fill="black", font=self.custom_font)
+            text_line = self.canvas.create_text(self.x, self.y + i*self.custom_font.metrics("linespace"), text= line, anchor='nw', fill="black", font=self.custom_font,  tags=str('t' + str(self.Id)))
             i= i+1
             self.text_lines.append(text_line)
 
-        self.canvas_text = self.canvas.create_text(self.x, self.y, text=self.text, anchor='nw', fill="black", font=(self.font, self.font_size, self.font_style))
+        self.canvas_text = self.canvas.create_text(self.x, self.y, text=self.text, anchor='nw', fill="black", font=(self.font, self.font_size, self.font_style),  tags=str('t' + str(self.Id)))
         # to allow rewrite the text
         self.canvas.tag_bind(self.text_container,"<Double-Button-1>", self.DoubleClick)
+        self.canvas.tag_bind(self.canvas_text,"<Double-Button-1>", self.DoubleClick)
         # To rewrite the text
         self.canvas.bind("<KeyPress>", self.Re_write)
         self.canvas.bind("<BackSpace>", self.backspace)
@@ -1235,42 +1261,42 @@ class TextBox:
         self.V_line = Image.new('RGBA',(4,8), '#000000')
         self.V_line_point = ImageTk.PhotoImage(self.V_line)
         #?Punto superior izquierdo
-        self.Psi = self.canvas.create_image(self.x - 2,self.y - 2, anchor="nw", image=self.square_point)
+        self.Psi = self.canvas.create_image(self.x - 2,self.y - 2, anchor="nw", image=self.square_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Psi,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psi,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1,  anchor_x = 1, anchor_y = 1))
         self.canvas.tag_bind(self.Psi,"<ButtonRelease-1>", self.stop_drag)
         #?Punto superior central
-        self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y - 2 , anchor="nw", image=self.H_line_point)
+        self.Psc = self.canvas.create_image(self.x + round((self.Width/2))-2,self.y - 2 , anchor="nw", image=self.H_line_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Psc,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psc,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=-1, anchor_y = 1))
         self.canvas.tag_bind(self.Psc,"<ButtonRelease-1>", self.stop_drag)
         #?Punto superior derecho
-        self.Psd = self.canvas.create_image(self.x + self.Width - 2,self.y - 2, anchor="nw", image=self.square_point)
+        self.Psd = self.canvas.create_image(self.x + self.Width - 2,self.y - 2, anchor="nw", image=self.square_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Psd,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Psd,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, anchor_y = 1))
         self.canvas.tag_bind(self.Psd,"<ButtonRelease-1>", self.stop_drag)
         #?Punto inferior izquierdo
-        self.Pii = self.canvas.create_image(self.x - 2, self.y + self.Height - 2, anchor="nw", image=self.square_point)
+        self.Pii = self.canvas.create_image(self.x - 2, self.y + self.Height - 2, anchor="nw", image=self.square_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Pii,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pii,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1, sign = -1, anchor_x = 1 ))
         self.canvas.tag_bind(self.Pii,"<ButtonRelease-1>", self.stop_drag)
         #?Punto inferior central
-        self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 2, anchor="nw", image=self.H_line_point)
+        self.Pic = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + self.Height - 2, anchor="nw", image=self.H_line_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Pic,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pic,"<B1-Motion>", lambda event: self.on_resize(event, move_x=0, move_y=1))
         self.canvas.tag_bind(self.Pic,"<ButtonRelease-1>", self.stop_drag)
         #?Punto inferior derecho
-        self.Pid = self.canvas.create_image(self.x + self.Width - 2,self.y + self.Height - 2, anchor="nw", image=self.square_point)
+        self.Pid = self.canvas.create_image(self.x + self.Width - 2,self.y + self.Height - 2, anchor="nw", image=self.square_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Pid,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pid,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=1))
         self.canvas.tag_bind(self.Pid,"<ButtonRelease-1>", self.stop_drag)
         #?Punto lateral izquierdo
-        self.Pli = self.canvas.create_image(self.x - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point)
+        self.Pli = self.canvas.create_image(self.x - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Pli,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pli,"<B1-Motion>", lambda event: self.on_resize(event, move_x=-1, move_y=0, anchor_x=1))
         self.canvas.tag_bind(self.Pli,"<ButtonRelease-1>", self.stop_drag)
         #?Punto lateral derecho
-        self.Pld = self.canvas.create_image(self.x + self.Width - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point)
+        self.Pld = self.canvas.create_image(self.x + self.Width - 2, self.y + round((self.Height/2))-2, anchor="nw", image=self.V_line_point,  tags=str('t' + str(self.Id)))
         self.canvas.tag_bind(self.Pld,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.Pld,"<B1-Motion>", lambda event: self.on_resize(event, move_x=1, move_y=0))
         self.canvas.tag_bind(self.Pld,"<ButtonRelease-1>", self.stop_drag)
@@ -1303,7 +1329,7 @@ class TextBox:
             i=i+1
 
 
-        self.canvas.move(self.canvas_text, dx, dy)
+        #self.canvas.move(self.canvas_text, dx, dy)
         self.canvas.move(self.text_container, dx, dy)
         self.canvas.move(self.Psi, dx, dy)
         self.canvas.move(self.Psd, dx, dy)
@@ -1325,6 +1351,7 @@ class TextBox:
         self.editing = not self.editing
         self.canvas.focus_set()
         current_focus = self.canvas.focus_get()
+        print('entro al dobleclick')
         if self.editing:
             self.text = self.text + '|'
             self.cursor_position += 1
@@ -1333,6 +1360,21 @@ class TextBox:
             self.text = self.text[:self.cursor_position] + self.text[self.cursor_position + 1:]
             self.canvas.itemconfig(self.canvas_text, text=self.text)
             self.cursor_position = len(self.text)
+
+        if self.editing:
+            last_text = self.canvas.itemcget(self.text_lines[-1], 'text') + '|'
+            self.cursor[1] += 1
+            self.canvas.itemconfig(self.text_lines[-1], text=last_text)
+            self.cursor = [self.text_lines[-1], len(last_text)]
+            print(self.cursor)
+        elif self.editing == False:
+            last_text = self.canvas.itemcget(self.cursor[0], 'text')
+            last_text = last_text[:self.cursor[1]] + last_text[self.cursor[1] + 1:]
+            self.canvas.itemconfig(self.text_lines[self.cursor[1]], text=last_text)
+            #self.canvas.itemconfig(self.canvas_text, text=self.text)
+            self.cursor[1] = len(last_text)
+
+
         '''if current_focus == self.canvas:
             print("The canvas has keyboard focus.")
         else:
@@ -1368,6 +1410,23 @@ class TextBox:
             self.text = self.text[:self.cursor_position] + "|" + self.text[self.cursor_position:]
             self.canvas.itemconfig(self.canvas_text, text=self.text)
 
+        if self.editing and self.cursor != [self.text_lines[0], 0]:
+            text = self.canvas.itemcget(self.cursor[0], 'text')
+            if self.cursor == [self.text_lines[-1], len(text)]:
+                text = text[:self.cursor[1]-1]
+            else:
+                text = text[:self.cursor[1]] + text[self.cursor[1] + 1:]
+            #print('entro al left')
+            self.cursor[1] -= 1
+            if self.cursor[1] < 0:
+                self.canvas.itemconfig(self.cursor[0], text=text[0:])
+                self.cursor[0] = self.cursor[0]-1
+                text = self.canvas.itemcget(self.cursor[0], 'text')
+                self.cursor[1] = len(text)
+            print(self.cursor[0] in self.text_lines)
+            text = text[:self.cursor[1]] + "|" + text[self.cursor[1]:]
+            self.canvas.itemconfig(self.cursor[0], text=text)
+
     def move_cursor_right(self, event):
         if self.editing and self.cursor_position < len(self.text):
             self.text = self.text[:self.cursor_position] + self.text[self.cursor_position+1:]
@@ -1375,6 +1434,14 @@ class TextBox:
             self.text = self.text[:self.cursor_position] + "|" + self.text[self.cursor_position:]
             self.canvas.itemconfig(self.canvas_text, text=self.text)
 
+        text = self.canvas.itemcget(self.cursor[0], 'text')
+        if self.editing and self.cursor[1] < len(text):
+            text = text[:self.cursor[1]] + text[self.cursor[1]+1:]
+            self.cursor[1] += 1
+            text = text[:self.cursor[1]] + "|" + text[self.cursor[1]:]
+            self.canvas.itemconfig(self.cursor[0], text=text)
+            print('cursor right =',self.cursor[1] )
+        
     def backspace(self, event):
         if self.editing and self.cursor_position > 0:
             self.text = self.text[:self.cursor_position - 1] + self.text[self.cursor_position:]
@@ -1454,14 +1521,17 @@ class TextBox:
         
         self.Function(self.get())
     
-    def change_text(self, Type, Text):
-        if Type == 'font':
-            self.font = Text
-        elif Type == 'size':
-            self.font_size = Text
-        elif Type == 'style':
-            self.font_style = Text
-        self.canvas.itemconfig(self.canvas_text, font=(self.font, self.font_size, self.font_style))
+    def change_text(self, Id, Type, Text):
+        if Id == self.Id:
+            if Type == 'font':
+                self.font = Text
+            elif Type == 'size':
+                self.font_size = Text
+            elif Type == 'style':
+                self.font_style = Text
+            #self.canvas.itemconfig(self.canvas_text, font=(self.font, self.font_size, self.font_style))
+            for line in self.text_lines:
+                self.canvas.itemconfig(line, font=(self.font, self.font_size, self.font_style))
 
     def size_of_text(self, text):
         bounds = self.canvas.bbox(text)  # returns a tuple like (x1, y1, x2, y2)
@@ -1482,7 +1552,7 @@ class TextBox:
                 elif aling == 'right':
                     new_x = self.x + self.Width - self.size_of_text(line)[0]
                 self.canvas.coords(line, new_x, self.y + i * self.custom_font.metrics("linespace"))
-                print(new_x)
+                #print(new_x)
                 i=i+1
 
     def get(self):
@@ -1532,7 +1602,7 @@ class TextBox:
             i=i+1
         
         self.canvas.coords(self.text_container, self.x, self.y, self.x + self.Width, self.y + self.Height)
-        self.canvas.coords(self.canvas_text, self.x, self.y)
+        #self.canvas.coords(self.canvas_text, self.x, self.y)
         #? Move the reference points to resize the image
         #Punto superior izquierdo
         self.canvas.coords(self.Psi, self.x - 2, self.y - 2)
@@ -1616,56 +1686,110 @@ class Icon_button(tk.Label):
 
 
 class CustomComboBox(tk.Frame):
-    def __init__(self, master, values, *args, **kwargs):
+    def __init__(self, master, values, 
+                 width: int = 50,
+                 height: int = 20,
+                 Function: Optional[callable] = None,
+                 Hook: Optional[any] = None,
+                 *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.master = master
         self.values = values
+        self.width = width
+        self.height = height
+        self.Function = Function
         self.selected_value = tk.StringVar()
         self.is_listbox_visible = False
 
         # Entry widget to display the selected value
         self.entry = tk.Entry(self, textvariable=self.selected_value)
+        #self.entry.configure(width=self.width-self.height)
         self.entry.grid(row=0, column=0, padx=0, pady=0)
         self.entry_width = self.entry.winfo_width()
+        self.entry_height = self.entry.winfo_height()
         # Button to open the dropdown
-        self.dropdown_button = Icon_button(self, Icon_image='./Default/left_text.png', Function= self.toggle_dropdown)
+        self.dropdown_button = Icon_button(self, Icon_image='./Default/down-arrow.png', Function= self.toggle_dropdown)
         self.dropdown_button.grid(row=0, column=1, padx=0, pady=0)
-
         # Listbox to display the dropdown items (hidden initially)
-        self.listbox = FlatList(self, json_list=self.values, Item = ItemCombobox, Otros = self.on_select)
-        # Usar place en lugar de grid para posicionar el listbox
-        self.listbox.place(in_=self, x=self.winfo_x() + 2, y=self.winfo_y() + self.winfo_height() + 2)
-        self.listbox.grid_remove()
+        self.dropdown_window = tk.Toplevel(self.master)
         
-        '''self.listbox.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
-        self.listbox.grid_remove()'''
-
-        '''self.listbox = tk.Listbox(self)
-        for item in self.values:
-            self.listbox.insert(tk.END, item)
-        self.listbox.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
-        self.listbox.grid_remove()
+        #self.listbox = FlatList(self.master, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
+        self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
+        #self.dropdown_window = tk.Toplevel(self.master)
+        #self.listbox.grid(row=1, column=0, padx=0, pady=0)
+        #self.listbox.grid_remove()
+        # Usar place en lugar de grid para posicionar el listbox
+        #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry_height + 20)
+        #self.listbox.place_forget()
+        #self.toggle_dropdown
 
         # Bind events
-        self.listbox.bind('<<ListboxSelect>>', self.on_select)'''
+        '''self.listbox.bind('<<ListboxSelect>>', self.on_select)'''
         self.entry.bind("<FocusIn>", self.toggle_dropdown)
         self.entry.bind("<FocusOut>", self.toggle_dropdown)
-
     def toggle_dropdown(self, event=None):
         if self.is_listbox_visible:
             print('deberia mostrar')
-            self.listbox.grid()
-            self.listbox.place(in_=self, x=self.winfo_x() + 2, y=self.winfo_y() + self.winfo_height() + 2)
-            self.listbox.lift()
+            self.show_dropdown()
         else:
             print('deberia ocultar')
-            self.listbox.grid_remove()
-            #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
+            self.hide_dropdown()
+
         self.is_listbox_visible = not self.is_listbox_visible
-        
+    
+    def show_dropdown(self):
+        x, y, _, _ = self.entry.bbox("insert")
+        x_on_screen = self.entry.winfo_rootx() + x
+        y_on_screen = self.entry.winfo_rooty() + y + self.entry_height
+        print(x_on_screen, y_on_screen)
+        if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
+            #self.dropdown.place(x=x_on_screen, y=y_on_screen)
+            self.dropdown_window.overrideredirect(True)
+            self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.height}")
+            #self.dropdown_window.geometry("+%d+%d" % (x_on_screen, y_on_screen))
+        else:
+            self.dropdown_window = tk.Toplevel(self.master)
+            self.dropdown_window.overrideredirect(True)
+            self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item=ItemCombobox, width=120, Otros=self.on_select)
+            self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.height}")
+        #self.listbox.place(x=x_on_screen, y=y_on_screen)
+        self.listbox.grid(row=0, column=0, padx=0, pady=0)
+
+    def hide_dropdown(self):
+        if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
+            self.dropdown_window.destroy()
+    
     def on_select(self, selected_value):
         self.selected_value.set(selected_value)
-        self.toggle_dropdown()
+        self.Function(selected_value)
+        self.hide_dropdown()
+
+    '''def toggle_dropdown(self, event=None):
+        try:
+            if self.is_listbox_visible:
+                print('deberia mostrar')
+                dropdown_window = tk.Toplevel(self.master)
+                #self.listbox.grid(row=1, column=0, padx=0, pady=0)
+                #self.listbox.lift()
+                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry_height + 20)
+                #self.listbox.lift()
+                x, y, _, _ = self.entry.bbox("insert")
+                x_on_screen = self.entry.winfo_rootx()
+                y_on_screen = self.entry.winfo_rooty()
+                dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.entry_height}")
+                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry.winfo_height() + 2)
+                # Populate the dropdown window with the Listbox widget
+                self.listbox.pack(in_=dropdown_window)
+            else:
+                print('deberia ocultar')
+                #self.listbox.grid_remove()
+                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
+                self.listbox.place_forget()
+        except Exception as e:
+            # Manejar otras excepciones genéricas
+            print(f"¡Error! Ocurrió una excepción: {e}")
+        self.is_listbox_visible = not self.is_listbox_visible'''
+        
 
 class ItemCombobox(tk.Label):
     def __init__(self, *args,

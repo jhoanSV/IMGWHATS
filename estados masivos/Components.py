@@ -78,7 +78,7 @@ class ImageContainer(ctk.CTkCanvas):
 
    
 class ItemElement(ctk.CTkFrame):
-    def __init__(self, *args,
+    def __init__(self, master, *args,
                  width: int = 100,
                  command: Callable = None,
                  images: str = "Default/No_image.jpg",
@@ -87,24 +87,29 @@ class ItemElement(ctk.CTkFrame):
                  Otros: Optional[any] = None,
                  **kwargs):
         
-        super().__init__(*args, **kwargs)
+        super().__init__(master, *args, **kwargs)
         # *variables
+        self.width = width
+        self.master = master
         self.command = command
         self.images = images
         self.json_list = json_list
+        self.Hook = Otros['Hook']
         self.smallImage = ctk.CTkImage(Image.open('caminar.jpg'), size=(30,30))
         self.smallMove = ctk.CTkImage(light_image=Image.open("Default/bars_dark.png"), dark_image=Image.open("Default/bars_dark.png"), size=(30, 30))
-
+        self.back_one_elements, self.advance_one_elements = self.Hook[0],  self.Hook[1]
 
         # *frame configuration
         self.configure(fg_color=("gray78", "gray28"))  # set frame color
-        self.configure(width=80, height=50)
-
+        self.configure(width=self.width, height=50)
+        #self.configure(fill=False)
         self.FrameButons = ctk.CTkFrame(self)
         self.FrameButons.configure(fg_color=("gray78", "gray28")) 
 
+        self.grid(sticky='ew')
         self.grid_columnconfigure((0, 2), weight=0)  # buttons don't expand
         self.grid_columnconfigure(1, weight=1)  # entry expands
+        self.grid_columnconfigure(2, weight=3)  # entry expands
 
         self.FrameButons.grid(row=0, column=0)
         
@@ -117,22 +122,30 @@ class ItemElement(ctk.CTkFrame):
         self.frameImage.grid(row=0, column=1, padx=1, pady=1)
 
         self.frameInfomation = ctk.CTkFrame(self.FrameButons)
-        self.frameInfomation.grid(row=0, column=2, padx=1, pady=1)
+        self.frameInfomation.grid(row=0, column=2, padx=1, pady=1, sticky='ew')
         
-        if self.json_list['Type'] == 'image':
-            self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Name: " + os.path.basename(self.json_list['Name']))
-            self.Name_Label.grid(row=0, column=0, padx=0, pady=0)
+        self.Name_image = ctk.CTkLabel(self.frameInfomation, text= "Name: " + os.path.basename(self.json_list['Name']))
+        self.Name_image.grid(row=0, column=0, padx=0, pady=0)
 
-            self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
-            self.Name_Label.grid(row=1, column=0, padx=0, pady=0)
-            # *default value
-        elif self.json_list['Type'] == 'Background':
-            self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
-            self.Name_Label.grid(row=0, column=0, padx=0, pady=0)
-        elif self.json_list['Type'] == 'text':
-            self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
-            self.Name_Label.grid(row=0, column=0, padx=0, pady=0)
+        self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
+        self.Name_Label.grid(row=1, column=0, padx=0, pady=0)
 
+        self.frameChangeOrder = ctk.CTkFrame(self.FrameButons)
+        self.frameChangeOrder.grid(row=0, column=3, padx=1, pady=1)
+
+        self.Bt_uper_order = Icon_button(self.frameChangeOrder, Icon_image = './Default/up-arrow.png', Function= self.tag_lower)
+        self.Bt_uper_order.grid(row=0, column=0, padx=0, pady=0)
+
+        self.Bt_change_order = Icon_button(self.frameChangeOrder, Icon_image = './Default/down-arrow.png', Function= self.tag_uper)
+        self.Bt_change_order.grid(row=1, column=0, padx=0, pady=0)
+
+    def tag_uper(self):
+        if self.json_list['Type'] != 'Background':
+            self.advance_one_elements(self.json_list['Id'])
+
+    def tag_lower(self):
+        if self.json_list['Type'] != 'Background':
+            self.back_one_elements(self.json_list['Id'])
 
     def get(self) -> Union[float, None]:
         try:
@@ -150,23 +163,35 @@ class ItemElement(ctk.CTkFrame):
     
     def update_row(self, n_list):
         self.json_list = n_list
-        return
+        self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
+        self.Name_Label.configure(text= "Type: " + self.json_list['Type'])
+        '''if self.json_list['Type'] == 'image':
+            self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
+            self.Name_Label.configure(text= "Type: " + self.json_list['Type'])
+            # *default value
+        elif self.json_list['Type'] == 'Background':
+            self.Name_Label.configure("Type: " + self.json_list['Type'])
+        elif self.json_list['Type'] == 'text':
+            self.Name_Label.configure("Type: " + self.json_list['Type'])'''
 
 class property_image_bar(ctk.CTkFrame):
-    def __init__(self, *args,
+    def __init__(self, master, *args,
                  width: int = 100,
                  command: Callable = None,
                  json_list: dict = None,
                  Hook: Optional[any] = None,
                  **kwargs):
         
-        super().__init__(*args, **kwargs)
+        super().__init__(master, *args, **kwargs)
+        self.master = master
         self.json_list = json_list
         self.Hook = Hook
         self.relative_x, self.relative_y = self.Hook[0]
         self.External_Move = self.Hook[1]
         self.background_data = self.Hook[2]
         self.External_Rotate = self.Hook[3]
+        self.tags_lower = self.Hook[4]
+        self.tags_uper = self.Hook[5]
         self.Id = self.json_list['Id']
         # *Barra de propiedades de formatos imagenes
         
@@ -209,12 +234,13 @@ class property_image_bar(ctk.CTkFrame):
         self.Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
 
         checkbox_xCentro = ctk.CTkCheckBox(self.tools_image_frame, text= "xCentro:")
-        #checkbox_xCentro.
         checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
 
         checkbox_yCentro = ctk.CTkCheckBox(self.tools_image_frame, text= "yCentro:")
-        
         checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
+
+        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.tag_uper )
+        self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
 
     def Update_image_move_x(self, value):
         if self.json_list['Type'] == 'image':
@@ -240,6 +266,16 @@ class property_image_bar(ctk.CTkFrame):
     def Update_rotate(self, value):
         if self.json_list['Type'] == 'image':
             self.External_Rotate(self.Id, value)
+
+    def tag_lower(self):
+        if self.json_list['Type'] == 'image':
+            #print('entro al tag lower', self.Id)
+            self.tags_lower(self.Id)
+
+    def tag_uper(self):
+        if self.json_list['Type'] == 'image':
+            #print('entro al tag lower', self.Id)
+            self.tags_uper(self.Id)
     
     def update_image_data(self, updated_data):
         if self.json_list['Type'] == 'image':
@@ -249,17 +285,19 @@ class property_image_bar(ctk.CTkFrame):
             self.Input_width.set(self.json_list['Width'])
             self.Input_heid.set(self.json_list['Height'])
             self.Input_rotate.set(self.json_list['Rotate'])
+            self.Id = self.json_list['Id']
         #print('se actualizo la data')
 
 class property_text_bar(ctk.CTkFrame):
-    def __init__(self, *args,
+    def __init__(self, master, *args,
                  width: int = 100,
                  command: Callable = None,
                  json_list: dict = None,
                  Hook: Optional[any] = None,
                  **kwargs):
         
-        super().__init__(*args, **kwargs)
+        super().__init__(master, *args, **kwargs)
+        self.master = master
         self.json_list = json_list
         self.Hook = Hook
         self.Id = self.json_list['Id']
@@ -267,6 +305,7 @@ class property_text_bar(ctk.CTkFrame):
         self.Change_anchor_text = self.Hook[1]
         self.External_Move = self.Hook[2]
         self.Change_color_font = self.Hook[3]
+        self.change_text = self.Hook[4]
         self.Fonts_list = List_of_fonts('C:\Windows\Fonts')
         #print(self.Fonts_list)
 
@@ -298,7 +337,7 @@ class property_text_bar(ctk.CTkFrame):
         self.Input_heid.set(self.json_list['Height'])
         self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
-        self.Cb_Font_text = CustomComboBox(self, values=self.Fonts_list)
+        self.Cb_Font_text = CustomComboBox(self, values=self.Fonts_list, Function= self.Change_font)
         self.Cb_Font_text.grid(row=0, column=8, padx=5, pady=5)
         
         self.Cb_Font_size = ctk.CTkComboBox(self, values=['8','9','10','11','12','14','16','18','20','22','24','26','28','36','48','72'])
@@ -357,3 +396,6 @@ class property_text_bar(ctk.CTkFrame):
         self.Change_color_font(self.Id)
         #color_code = tk.colorchooser.askcolor(title ="Choose color")
         #print(color_code[1])
+
+    def Change_font(self, text):
+        self.change_text(self.Id, 'font', text)
