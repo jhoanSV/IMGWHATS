@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service as ChromeService
+from subprocess import CREATE_NO_WINDOW
 from webdriver_manager.chrome import ChromeDriverManager
 import openpyxl
 import random
@@ -71,8 +72,10 @@ class Send_Wapp:
         self.enviados = 0
         self.errados = 0
         # Todo: Initialize Chrome driver with options
-        # Open WhatsApp Web and wait for QR code scan        
-        driver = webdriver.Chrome(options=self.options, service=ChromeService(ChromeDriverManager().install()))
+        # Open WhatsApp Web and wait for QR code scan
+        chrome_service = ChromeService(ChromeDriverManager().install())
+        chrome_service.creation_flags = CREATE_NO_WINDOW
+        driver = webdriver.Chrome(options=self.options, service=chrome_service)
         driver.get(self.whatsapp_web_url)
         '''print("Scan the QR code and press enter")
         input()'''

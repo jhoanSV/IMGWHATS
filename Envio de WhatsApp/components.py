@@ -137,22 +137,23 @@ class Table(ctk.CTkFrame):
         self.pack(padx=55, pady=55, expand=False, anchor='n')
 
         #*Crea cabecera de tabla----------------------------------
-        self.t_head = ctk.CTkFrame(self, fg_color='gray', height=40)
-        self.t_head.pack()
+        self.t_head = ctk.CTkFrame(self, fg_color='white', height=40)
+        self.t_head.pack(fill='x', padx=7)
         
         self.cols = ['Columnas encontradas','celular','Nombre\nDestinatario']
         #Crea las 4 columnas de la cabecera
-        #self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0], width=320)
-        #self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=86)
-        #self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
+        self.f1, self.l1 = self.create_frame_and_label(self.t_head, text=self.cols[0], width=320)
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[1], width=86)
+        self.f2, self.l2 = self.create_frame_and_label(self.t_head, text=self.cols[2], width=132)
 
         #*Crea cuerpo o filas de tabla-----------------------------
 
-        #self.body = ctk.CTkFrame(self, fg_color='gray', height=40)
-        #self.body.pack(side='bottom', fill='both')
+        #self.body = ctk.CTkFrame(self, fg_color='white', height=40)
+        #self.body.pack()
 
-        #self.t_body = FlatList(self, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
-        #self.t_body.pack(side='bottom', fill='both')
+        #self.t_body = FlatList(self.body, width=908, height=500, json_list=self.t_lista, Item=El_Item, Otros=self.change)
+        self.t_body = FlatList(self, width=800, height=300, json_list=self.t_lista, Item=El_Item, Otros=self.change)
+        self.t_body.pack(side='bottom', fill='both')
 
     def change(self, numbCol, nomCol, val):
         for i in range(len(self.t_lista)):
@@ -197,7 +198,7 @@ class El_Item(ctk.CTkFrame):
         self.cel.set(self.json_list['Celular'])
         self.des = tkinter.IntVar()
         self.des.set(self.json_list['Destino'])
-        self.configure(fg_color='green')
+        self.configure(fg_color='white')
         self.pack(fill='x')
 
 
@@ -210,17 +211,13 @@ class El_Item(ctk.CTkFrame):
         #* Checkbox1
         self.r1f = ctk.CTkFrame(self, fg_color='white', width=86, height=40, corner_radius=0, border_width=1)
         self.r1f.pack(side='left', fill='x', expand=True, anchor='n')
-        #self.checkbox1.configure(master=self.r1f)
-        #self.checkbox1.place(relx=0.5, rely=0.5, anchor='center')
         self.cb1 = ctk.CTkCheckBox(self.r1f, variable=self.cel, onvalue=1, offvalue=0, width=20, text='',
             command=lambda: self.update_cel())
         self.cb1.place(relx=0.5, rely=0.5, anchor='center')
         
         #* Checkbox2
         self.r2f = ctk.CTkFrame(self, fg_color='white', width=132, height=40, corner_radius=0, border_width=1)
-        self.r2f.pack(side='left', fill='x', expand=True, anchor='n')        
-        #self.checkbox2.configure(master=self.r1f)
-        #self.checkbox2.place(relx=0.5, rely=0.5, anchor='center')
+        self.r2f.pack(side='left', fill='x', expand=True, anchor='n')
         self.cb2 = ctk.CTkCheckBox(self.r2f, variable=self.des, onvalue=1, offvalue=0, width=20, text='',
             command=lambda: self.update_des())
         self.cb2.place(relx=0.5, rely=0.5, anchor='center')

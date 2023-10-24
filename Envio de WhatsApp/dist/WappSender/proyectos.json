@@ -1,0 +1,32 @@
+{
+    "Pedidos ruta": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/Numero_mensaje_whatsapp.xlsx",
+        "msj": "\u00a1Hola @Ferreteria!\u00a1Quer\u00eda recordarte que tu pedido n\u00famero @Nfactura est\u00e1 en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo\u00a0que\u00a0necesites.",
+        "recurso": "",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@responsable": 2,
+            "@Celular": 3,
+            "@Valor factura": 4,
+            "@Nfactura": 5
+        },
+        "colCelular": 3,
+        "colDestino": 1
+    },
+    "Tip semanal": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/Numero_mensaje_whatsapp.xlsx",
+        "msj": "\u00a1Hola! Es hora de nuestro tip semanal. Esta semana, vamos a hablar sobre la importancia de tener con tu numero de negocio WhatsApp Business ya que es esencial para tu negocio. Podr\u00e1s mantener una comunicaci\u00f3n m\u00e1s eficiente con tus clientes, brindar respuestas r\u00e1pidas, mostrar tu cat\u00e1logo de productos y mucho m\u00e1s. \u00a1Es una manera efectiva de hacer crecer tu negocio! Si necesitas ayuda para configurarlo, no dudes en contactarnos.\u00a1No te lo pierdas! Ferredistribuciones Sierra, tus Aliados estrat\u00e9gicos.",
+        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/TIP SEMANA 3.mp4",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@responsable": 2,
+            "@Celular": 3,
+            "@Valor factura": 4,
+            "@Nfactura": 5
+        },
+        "colCelular": 3,
+        "colDestino": 1
+    }
+}

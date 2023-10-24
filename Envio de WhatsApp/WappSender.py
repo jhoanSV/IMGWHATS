@@ -65,22 +65,21 @@ class view(ctk.CTk):
     #funciones de vista
 
     def siguiente(self, tab, data_proj_send=None, data_proj_var=None):
-            print("xD?")
-            #try:
+            try:
                 #*Crea el frame de variables
-            self.variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(),
-                El_metodo=self.reload_switch, data_proj_var=data_proj_var)
-            self.main_tabV.add_frame(1, self.variables)
-            self.envio = Send(master=self.main_tabV, data_proj_send=data_proj_send)
-            self.main_tabV.add_frame(2, self.envio)
-            self.switch_tab(tab)
-            self.Nav_bar.pack(side='top', fill='x', expand=False)
-            self.main_tabV.pack_configure(padx=0, pady=0)
-            #except Exception as e:
+                self.variables  = Vars(master=self.main_tabV, path = self.proyectos.el_entry.get(),
+                    El_metodo=self.reload_switch, data_proj_var=data_proj_var)
+                self.main_tabV.add_frame(1, self.variables)
+                self.envio = Send(master=self.main_tabV, data_proj_send=data_proj_send)
+                self.main_tabV.add_frame(2, self.envio)
+                self.switch_tab(tab)
+                self.Nav_bar.pack(side='top', fill='x', expand=False)
+                self.main_tabV.pack_configure(padx=0, pady=0)
+            except Exception as e:
                 #*crea un label para avisar del error
-            error = 'Ha ocurrido un error'
-            self.warn_file = ctk.CTkLabel(self.proyectos.frame_der,text=error,text_color="black",font=('', 20))
-            self.warn_file.place(relx=0.9, rely=0.8, anchor='se')
+                error = 'Ha ocurrido un error'
+                self.warn_file = ctk.CTkLabel(self.proyectos.frame_der,text=error,text_color="black",font=('', 20))
+                self.warn_file.place(relx=0.9, rely=0.8, anchor='se')
 
     def switch_tab(self, tab):
         self.main_tabV.toggle_frame_by_id(tab)
