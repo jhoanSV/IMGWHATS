@@ -3,27 +3,37 @@ import customtkinter as ctk
 import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 from tkinter import filedialog
-from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer
-from Components import ItemElement, property_image_bar, property_text_bar #ImageContainer
+from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer, updown_menu
+from Components import ItemElement, property_image_bar, property_text_bar, Vincular_excel
 
 size = width, height = 3000, 3000
 # *JSON image properties
 with open('./projects.json', 'r') as json_file:
     image_properties_json = json.load(json_file)
 
+#*variables
+
+
+def llamar_vincular_excel():
+    vincular_exc = Vincular_excel(app)
+
 
 def button_callback():
-    
     print("button pressed")
 
 def to_image_bar(lista):
     list_property_bar = lista
     if list_property_bar['Type'] == 'image':
         Up_bar.update_image_data(list_property_bar)
+        Up_bar_text.grid_forget()
+        Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
     elif list_property_bar['Type'] == 'text':
         Up_bar_text.update_text_data(list_property_bar)
+        Up_bar.grid_forget()
+        Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+    #change_upBar()
     
-def Buscar():
+def New_image():
     '''Desplega el cuadro de busqueda para seleccionar imagenes de
        formato jpg, png y carpetas, descartando otros tipos de documentos 
     '''
@@ -33,6 +43,34 @@ def Buscar():
         x, y = event.x, event.y
         Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
         add_image(app.filename, x, y)
+        activate_element(len(Actual_project)-1)
+        Image_Container.Update_list(Actual_project)
+        ElementList.Update_list(Actual_project)
+
+    Image_Container.canvas.bind("<Button-1>", handle_click)
+
+def New_folder():
+    '''Desplega el cuadro de busqueda para seleccionar imagenes de
+       formato jpg, png y carpetas, descartando otros tipos de documentos 
+    '''
+    app.filename = filedialog.askopenfilename(title='Buscar recurso')
+
+    def handle_click(event):
+        x, y = event.x, event.y
+        Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
+        Actual_project.append({
+                        "Id": len(Actual_project),
+                        "Type": "Folder",
+                        "Name": app.filename,
+                        "Width": 150,
+                        "Height": 150,
+                        "Rotate": 0,
+                        "x_position": x,
+                        "y_position": y,
+                        "xCenter": False,
+                        "yCenter": False,
+                        "active": True
+                        })
         activate_element(len(Actual_project)-1)
         Image_Container.Update_list(Actual_project)
         ElementList.Update_list(Actual_project)
@@ -97,12 +135,21 @@ def advance_one_elements(Id):
 def go_back_one(Id):
     index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'])
 
+def change_upBar():
+    '''This function changes the up bar of each element that is currently appearing in the canvas'''
+    if list_property_bar['Type'] == 'image':
+        Up_bar_text.grid_forget()
+        Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
+
+    elif list_property_bar['Type'] == 'text':
+        Up_bar.grid_forget()
+        Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+
 
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
-button = ctk.CTkButton(app, text="Subir", command=Buscar)
-button.grid(row=1, column=0, padx=10, pady=10)
+
 
 # *Barra de propiedades de formatos imagenes
 list_property_bar = {"Id": 2,
@@ -132,20 +179,33 @@ Background_data = {"Id": 0,
                     "BackgroundColor": "#FFFFFF",
                     "active": False}
 
-#spinbox_1 = ItemElement(app, json_list=image_properties_json['proyecto1'])
-#spinbox_1.grid(row=2, column=0 ,padx=5, pady=5)
+
+Tool_bar = ctk.CTkFrame(app)
+Tool_bar.grid(row=0, column=0 ,padx=0, pady=0, sticky="nsew")
+
+Menu_file = updown_menu(Tool_bar, json_list=['Guardar', 'Guardar como'], text= 'Archivo' )
+Menu_file.grid(row=0, column=0 ,padx=0, pady=0)
+
+Menu_add = updown_menu(Tool_bar, json_list=['Image', 'Folder', 'Text'], text= 'Importar' )
+Menu_add.grid(row=0, column=1 ,padx=0, pady=0)
+
+Menu_add = updown_menu(Tool_bar, json_list=['Vincular a excel'], text= 'Vincular' )
+Menu_add.grid(row=0, column=2 ,padx=0, pady=0)
 
 ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
 ElementList.grid(row=3, column=1 ,padx=5, pady=5)
+
+B_seleccionar_excel = ctk.CTkButton(app, text='vincular excel', command= llamar_vincular_excel)
+B_seleccionar_excel.grid(row=0, column=1 ,padx=0, pady=0)
 
 Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
 Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
 
 Up_bar = property_image_bar(app, json_list= list_property_bar, Hook = [Relative_to, External_Move, Background_data, External_Rotate, tag_lower, tag_uper])
-Up_bar.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
+Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
 Up_bar_text = property_text_bar(app, json_list= list_property_bar, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font, change_text])
-Up_bar_text.grid(row=2, column=0 ,padx=5, pady=5)
+Up_bar_text.grid(row=2, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 
 background_image = Image.new('RGB',size, 'white')
 #image_tk = ctk.CTkImage(background_image, size=background_image.size)

@@ -286,7 +286,7 @@ class FlatList(ctk.CTkScrollableFrame):
             if i < len(self.frames):
                 self.frames[i].update_row(value)
             else:
-                FrameItem = ctk.CTkFrame(self.FrameList, fg_color='transparent')
+                FrameItem = ctk.CTkFrame(self, fg_color='transparent')
                 FrameItem.grid(row=i, column=0)
                 if self.Item is not None:
                     item_instance = self.Item(FrameItem, json_list=value, Otros={'Project_name': str(key), 'Hook': self.otros},
@@ -607,7 +607,7 @@ class ImageContainer(tk.Frame):
     def Update_list(self, new_list):
         self.json_list = new_list
         New_image = self.json_list[len(self.json_list)-1]
-        if New_image['Type'] == 'image':
+        if New_image['Type'] == 'image' or New_image['Type'] == 'Folder':
                 self.picture = Image.open(New_image['Name'])
                 x = New_image['x_position']
                 y = New_image['y_position']
@@ -1242,6 +1242,8 @@ class TextBox:
         # to allow rewrite the text
         self.canvas.tag_bind(self.text_container,"<Double-Button-1>", self.DoubleClick)
         self.canvas.tag_bind(self.canvas_text,"<Double-Button-1>", self.DoubleClick)
+        for line in self.text_lines:
+            self.canvas.tag_bind(line ,"<Double-Button-1>", self.DoubleClick)
         # To rewrite the text
         self.canvas.bind("<KeyPress>", self.Re_write)
         self.canvas.bind("<BackSpace>", self.backspace)
@@ -1251,6 +1253,11 @@ class TextBox:
         self.canvas.tag_bind(self.canvas_text,"<Button-1>", self.start_drag)
         self.canvas.tag_bind(self.canvas_text,"<B1-Motion>", self.on_drag)
         self.canvas.tag_bind(self.canvas_text,"<ButtonRelease-1>", self.stop_drag)
+        # To move the text
+        for line in self.text_lines:
+            self.canvas.tag_bind(line,"<Button-1>", self.start_drag)
+            self.canvas.tag_bind(line,"<B1-Motion>", self.on_drag)
+            self.canvas.tag_bind(line,"<ButtonRelease-1>", self.stop_drag)
         # Bind the key press event to the canvas
         #self.canvas.tag_bind(self.canvas_text,"<KeyPress>", self.Re_write)
 
@@ -1363,9 +1370,9 @@ class TextBox:
 
         if self.editing:
             last_text = self.canvas.itemcget(self.text_lines[-1], 'text') + '|'
-            self.cursor[1] += 1
+            #self.cursor[1] += 1
             self.canvas.itemconfig(self.text_lines[-1], text=last_text)
-            self.cursor = [self.text_lines[-1], len(last_text)]
+            self.cursor = [self.text_lines[-1], len(last_text)-1]
             print(self.cursor)
         elif self.editing == False:
             last_text = self.canvas.itemcget(self.cursor[0], 'text')
@@ -1373,12 +1380,6 @@ class TextBox:
             self.canvas.itemconfig(self.text_lines[self.cursor[1]], text=last_text)
             #self.canvas.itemconfig(self.canvas_text, text=self.text)
             self.cursor[1] = len(last_text)
-
-
-        '''if current_focus == self.canvas:
-            print("The canvas has keyboard focus.")
-        else:
-            print("Another widget has keyboard focus:", current_focus)'''
 
     def Re_write(self, event):
         current_focus = self.canvas.focus_get()
@@ -1398,6 +1399,12 @@ class TextBox:
         
                 self.cursor_position += 1
                 self.canvas.itemconfig(self.canvas_text, text=self.text)
+
+            if key:
+                text = self.canvas.itemcget(self.cursor[0], 'text')
+                text = text[:self.cursor[1]] + key + text[self.cursor[1]:]
+                self.canvas.itemconfig(self.cursor[0], text=text)
+                self.cursor[1] += 1
                 
 
     def move_cursor_left(self, event):
@@ -1423,9 +1430,11 @@ class TextBox:
                 self.cursor[0] = self.cursor[0]-1
                 text = self.canvas.itemcget(self.cursor[0], 'text')
                 self.cursor[1] = len(text)
-            print(self.cursor[0] in self.text_lines)
+            #print(self.cursor[0] in self.text_lines)
             text = text[:self.cursor[1]] + "|" + text[self.cursor[1]:]
             self.canvas.itemconfig(self.cursor[0], text=text)
+            print('cursor left =',self.cursor[1] )
+
 
     def move_cursor_right(self, event):
         if self.editing and self.cursor_position < len(self.text):
@@ -1435,18 +1444,35 @@ class TextBox:
             self.canvas.itemconfig(self.canvas_text, text=self.text)
 
         text = self.canvas.itemcget(self.cursor[0], 'text')
-        if self.editing and self.cursor[1] < len(text):
-            text = text[:self.cursor[1]] + text[self.cursor[1]+1:]
+        if self.editing and self.cursor != [self.text_lines[-1], len(text)]:
             self.cursor[1] += 1
-            text = text[:self.cursor[1]] + "|" + text[self.cursor[1]:]
-            self.canvas.itemconfig(self.cursor[0], text=text)
-            print('cursor right =',self.cursor[1] )
+            if self.editing and self.cursor[1] < len(text):
+                text = text[:self.cursor[1]-1] + text[self.cursor[1]:]
+                text = text[:self.cursor[1]] + "|" + text[self.cursor[1]:]
+                self.canvas.itemconfig(self.cursor[0], text=text)
+                print('cursor right =',self.cursor[1] )
+            elif self.cursor[1] == len(text):
+                text = text[:len(text)-1]
+                self.canvas.itemconfig(self.cursor[0], text=text)
+                self.cursor[0] += 1
+                self.cursor[1] = 0
+                text = "|" + self.canvas.itemcget(self.cursor[0], 'text')
+                self.canvas.itemconfig(self.cursor[0], text=text)
+                print('cursor right =',self.cursor[1] )
         
     def backspace(self, event):
         if self.editing and self.cursor_position > 0:
             self.text = self.text[:self.cursor_position - 1] + self.text[self.cursor_position:]
             self.cursor_position -= 1
             self.canvas.itemconfig(self.canvas_text, text=self.text)
+
+        text = self.canvas.itemcget(self.cursor[0], 'text')
+        if self.editing and self.cursor[1] > 0:
+            text = text[:self.cursor[1] - 1] + text[self.cursor[1]:]
+            self.cursor[1] -= 1
+            print(self.cursor[1])
+            self.canvas.itemconfig(self.cursor[0], text=text)
+
 
     def size_text(self):
         bounds = self.canvas.bbox(self.canvas_text)  # returns a tuple like (x1, y1, x2, y2)
@@ -1700,7 +1726,7 @@ class CustomComboBox(tk.Frame):
         self.Function = Function
         self.selected_value = tk.StringVar()
         self.is_listbox_visible = False
-
+        
         # Entry widget to display the selected value
         self.entry = tk.Entry(self, textvariable=self.selected_value)
         #self.entry.configure(width=self.width-self.height)
@@ -1711,10 +1737,10 @@ class CustomComboBox(tk.Frame):
         self.dropdown_button = Icon_button(self, Icon_image='./Default/down-arrow.png', Function= self.toggle_dropdown)
         self.dropdown_button.grid(row=0, column=1, padx=0, pady=0)
         # Listbox to display the dropdown items (hidden initially)
-        self.dropdown_window = tk.Toplevel(self.master)
+        #self.dropdown_window = tk.Toplevel(self.master)
         
         #self.listbox = FlatList(self.master, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
-        self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
+        #self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
         #self.dropdown_window = tk.Toplevel(self.master)
         #self.listbox.grid(row=1, column=0, padx=0, pady=0)
         #self.listbox.grid_remove()
@@ -1742,18 +1768,18 @@ class CustomComboBox(tk.Frame):
         x_on_screen = self.entry.winfo_rootx() + x
         y_on_screen = self.entry.winfo_rooty() + y + self.entry_height
         print(x_on_screen, y_on_screen)
-        if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
+        '''if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
             #self.dropdown.place(x=x_on_screen, y=y_on_screen)
             self.dropdown_window.overrideredirect(True)
             self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.height}")
             #self.dropdown_window.geometry("+%d+%d" % (x_on_screen, y_on_screen))
-        else:
+        else:'''
+        if self.is_listbox_visible == True:
             self.dropdown_window = tk.Toplevel(self.master)
             self.dropdown_window.overrideredirect(True)
             self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item=ItemCombobox, width=120, Otros=self.on_select)
             self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.height}")
-        #self.listbox.place(x=x_on_screen, y=y_on_screen)
-        self.listbox.grid(row=0, column=0, padx=0, pady=0)
+            self.listbox.grid(row=0, column=0, padx=0, pady=0)
 
     def hide_dropdown(self):
         if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
@@ -1764,31 +1790,8 @@ class CustomComboBox(tk.Frame):
         self.Function(selected_value)
         self.hide_dropdown()
 
-    '''def toggle_dropdown(self, event=None):
-        try:
-            if self.is_listbox_visible:
-                print('deberia mostrar')
-                dropdown_window = tk.Toplevel(self.master)
-                #self.listbox.grid(row=1, column=0, padx=0, pady=0)
-                #self.listbox.lift()
-                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry_height + 20)
-                #self.listbox.lift()
-                x, y, _, _ = self.entry.bbox("insert")
-                x_on_screen = self.entry.winfo_rootx()
-                y_on_screen = self.entry.winfo_rooty()
-                dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.entry_height}")
-                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry.winfo_height() + 2)
-                # Populate the dropdown window with the Listbox widget
-                self.listbox.pack(in_=dropdown_window)
-            else:
-                print('deberia ocultar')
-                #self.listbox.grid_remove()
-                #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
-                self.listbox.place_forget()
-        except Exception as e:
-            # Manejar otras excepciones genéricas
-            print(f"¡Error! Ocurrió una excepción: {e}")
-        self.is_listbox_visible = not self.is_listbox_visible'''
+    def set(self, value):
+        self.selected_value.set(value)
         
 
 class ItemCombobox(tk.Label):
@@ -1814,7 +1817,7 @@ class ItemCombobox(tk.Label):
 
     def on_click(self, event):
         if self.Function is not None:
-            self.Function(self.json_list) is None
+            self.Function(self.json_list)
             
     def on_hover(self, event):
         self.config(background='#2EA7FF')
@@ -1829,6 +1832,110 @@ class ItemCombobox(tk.Label):
         self.json_list = n_list
         return
 
+
+
+class updown_menu(ctk.CTkLabel):
+    def __init__(self, *args,
+                 width: int = 100,
+                 height: int = 20,
+                 command: Callable = None,
+                 json_list: dict = None,
+                 text: str = 'Menú',
+                 Otros: Optional[any] = None,
+                 BaseColor: str = 'transparent',
+                 HoverColor: str = '#D2D2D2',
+                 ClickColor: str = '#2EA7FF',
+                 C_textHover: str = '#000000',
+                 C_textBase: str = '#FFFFFF',
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        #*Variables
+        self.command = command
+        self.width = width
+        self.height = height
+        self.text = text
+        self.show = False
+        self.json_list = json_list
+        self.otros = Otros
+        self.BaseColor = BaseColor
+        self.HoverColor = HoverColor
+        self.ClickColor = ClickColor
+        self.C_textHover = C_textHover
+        self.C_textBase = C_textBase
+        #*Configuración
+        self.configure(text = self.text, width = self.width, height = self.height, justify='left')
+        self.bind('<Button-1>', self.on_click)
+        self.bind("<Enter>", self.on_hover)
+        self.bind("<Leave>", self.on_leave)
+    #*Funciones
+    def on_hover(self, event):
+        self.configure(bg_color=self.HoverColor, text_color=self.C_textHover)
+
+    def on_leave(self, event):
+        self.configure(bg_color=self.BaseColor, text_color=self.C_textBase)
+
+    def on_click(self, event):
+        self.configure(bg_color=self.ClickColor)
+        self.show = not self.show
+        if self.show == True:
+            print('debe mostrar el menú ')
+            x_on_screen = self.winfo_rootx()
+            y_on_screen = self.winfo_rooty() + self.winfo_height()
+            self.dropdown_window = ctk.CTkToplevel(self.master)
+            self.dropdown_window.overrideredirect(True)
+            self.listbox = FlatList(self.dropdown_window, json_list=self.json_list, Item=Item_menu, width=120, Otros=self.otros)
+            self.listbox.grid(row=0, column=0, padx=0, pady=0)
+            self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen}")
+        elif self.show == False:
+            if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
+                self.dropdown_window.destroy()
+
+
+class Item_menu(ctk.CTkLabel):
+    def __init__(self, *args,
+                 width: int = 100,
+                 command: Callable = None,
+                 json_list: dict = None,
+                 Otros: Optional[any] = None,
+                 BaseColor: str = 'transparent',
+                 HoverColor: str = '#2EA7FF',
+                 ClickColor: str = '#D2D2D2',
+                 C_textHover: str = '#000000',
+                 C_textBase: str = '#FFFFFF',
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        #*Variables        
+        self.command = command
+        self.json_list = json_list
+        self.otros = Otros
+        self.BaseColor = BaseColor
+        self.HoverColor = HoverColor
+        self.ClickColor = ClickColor
+        self.C_textHover = C_textHover
+        self.C_textBase = C_textBase
+        #*Configuración        
+        self.configure(text = self.json_list, anchor="w")
+
+        self.bind('<Button-1>', self.on_click)
+        self.bind("<Enter>", self.on_hover)
+        self.bind("<Leave>", self.on_leave)
+
+    def on_hover(self, event):
+        self.configure(bg_color=self.HoverColor, text_color=self.C_textHover)
+
+    def on_leave(self, event):
+        self.configure(bg_color=self.BaseColor, text_color=self.C_textBase)
+
+    def on_click(self, event):
+        print('clicked')
+
+    def get_itemData(self):
+        return
+    
+    def update_row(self, n_list):
+        self.json_list = n_list
+        return 
+    
 def Angle_between_vectors(vector1, vector2):
     # Calculate the angle in radians
     angle_radians = np.arccos(np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2)))

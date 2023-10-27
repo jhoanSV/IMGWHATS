@@ -7,6 +7,7 @@ from Vcss import DraggableLabel, InputNumber, List_of_fonts, Icon_button, Custom
 from typing import Union, Callable
 from typing import Optional
 import os
+import openpyxl
 
 class ImageContainer(ctk.CTkCanvas):
     def __init__(self, *args,
@@ -95,7 +96,13 @@ class ItemElement(ctk.CTkFrame):
         self.images = images
         self.json_list = json_list
         self.Hook = Otros['Hook']
-        self.smallImage = ctk.CTkImage(Image.open('caminar.jpg'), size=(30,30))
+        self.smallImage = ctk.CTkImage(Image.new('RGBA', (30,30), '#FFFFFF'))
+        if self.json_list['Type' ] == 'image':
+            self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+        elif self.json_list['Type' ] == 'text':
+            self.smallImage = ctk.CTkImage(Image.open('Default/Text_Icon.png'), size=(30,30))
+        elif self.json_list['Type'] == 'folder':
+            self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
         self.smallMove = ctk.CTkImage(light_image=Image.open("Default/bars_dark.png"), dark_image=Image.open("Default/bars_dark.png"), size=(30, 30))
         self.back_one_elements, self.advance_one_elements = self.Hook[0],  self.Hook[1]
 
@@ -195,48 +202,48 @@ class property_image_bar(ctk.CTkFrame):
         self.Id = self.json_list['Id']
         # *Barra de propiedades de formatos imagenes
         
-        self.tools_image_frame = ctk.CTkFrame(self)
-        self.tools_image_frame.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
+        #self.tools_image_frame = ctk.CTkFrame(self)
+        #self.tools_image_frame.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
-        self.label_x_position = ctk.CTkLabel(self.tools_image_frame, text= "X:")
+        self.label_x_position = ctk.CTkLabel(self, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
-        self.Input_x_position = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook = self.Update_image_move_x)
+        self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_x)
         self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
         self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
 
-        self.label_y_position = ctk.CTkLabel(self.tools_image_frame, text= "Y:")
+        self.label_y_position = ctk.CTkLabel(self, text= "Y:")
         self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
 
-        self.Input_y_position = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook = self.Update_image_move_y)
+        self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_y)
         self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
         self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
 
-        self.label_width = ctk.CTkLabel(self.tools_image_frame, text= "W:")
+        self.label_width = ctk.CTkLabel(self, text= "W:")
         self.label_width.grid(row=0, column=4, padx=5, pady=5)
 
-        self.Input_width = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook= self.Update_image_size_x)
+        self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_x)
         self.Input_width.set(self.json_list['Width'])
         self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
 
-        self.label_heid = ctk.CTkLabel(self.tools_image_frame, text= "H:")
+        self.label_heid = ctk.CTkLabel(self, text= "H:")
         self.label_heid.grid(row=0, column=6, padx=5, pady=5)
 
-        self.Input_heid = InputNumber(self.tools_image_frame, width=50, step_size=1, Hook= self.Update_image_size_y)
+        self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_y)
         self.Input_heid.set(self.json_list['Height'])
         self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
-        self.label_rotate = ctk.CTkLabel(self.tools_image_frame, text= "Girar:")
+        self.label_rotate = ctk.CTkLabel(self, text= "Girar:")
         self.label_rotate.grid(row=0, column=8, padx=5, pady=5)
 
-        self.Input_rotate = InputNumber(self.tools_image_frame, width=50, step_size=1, ciclic= True, max=360, Hook = self.Update_rotate)
+        self.Input_rotate = InputNumber(self, width=50, step_size=1, ciclic= True, max=360, Hook = self.Update_rotate)
         self.Input_rotate.set(self.json_list['Rotate'])
         self.Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
 
-        checkbox_xCentro = ctk.CTkCheckBox(self.tools_image_frame, text= "xCentro:")
+        checkbox_xCentro = ctk.CTkCheckBox(self, text= "xCentro:")
         checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
 
-        checkbox_yCentro = ctk.CTkCheckBox(self.tools_image_frame, text= "yCentro:")
+        checkbox_yCentro = ctk.CTkCheckBox(self, text= "yCentro:")
         checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
 
         self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.tag_uper )
@@ -374,6 +381,7 @@ class property_text_bar(ctk.CTkFrame):
             self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
             self.Input_width.set(self.json_list['boxWidth'])
             self.Input_heid.set(self.json_list['boxHeight'])
+            self.Cb_Font_text.set(self.json_list['fontType'])
 
     def Update_text_move_x(self, value):
         if self.json_list['Type'] == 'text':
@@ -399,3 +407,59 @@ class property_text_bar(ctk.CTkFrame):
 
     def Change_font(self, text):
         self.change_text(self.Id, 'font', text)
+
+
+class Vincular_excel(ctk.CTkToplevel):
+    def __init__(self, 
+                 master,
+                 path: str = '',
+                 principal: int = 0,
+                 *args,
+                 **kwargs):
+        
+        super().__init__(master, *args, **kwargs)
+        #*configuración
+
+        #*Variables
+        self.path = path
+        self.principal = principal
+        #*Cuerpo
+        self.Contenedor_buscar = ctk.CTkFrame(self)
+        self.Contenedor_buscar.grid(row=0, column=0, padx=0, pady=0)
+
+        self.L_direccion = ctk.CTkLabel(self.Contenedor_buscar, text= 'Dirección')
+        self.L_direccion.grid(row=0, column=0, padx=0, pady=0)
+
+        self.I_direccion = ctk.CTkEntry(self.Contenedor_buscar, fg_color='transparent')
+        self.I_direccion.grid(row=0, column=1 , padx=0, pady=0)
+
+        self.B_BuscarDireccion = ctk.CTkButton(self.Contenedor_buscar, text="Seleccionar", command=self.Get_columnLabels)
+        self.B_BuscarDireccion.grid(row=0, column=2 , padx=0, pady=0)
+
+
+        self.Contenedor_botones = ctk.CTkFrame(self)
+        self.Contenedor_botones.grid(row=1, column=0, padx=0, pady=0)
+
+        self.B_Cancelar = ctk.CTkButton(self.Contenedor_botones, text="Cancelar", fg_color='#FF3F4A')
+        self.B_Cancelar.grid(row=0, column=0, padx=0, pady=0)
+
+        self.B_Vincular = ctk.CTkButton(self.Contenedor_botones, text="Vincular")
+        self.B_Vincular.grid(row=0, column=1, padx=0, pady=0)
+
+    def Get_columnLabels(self):
+        try:
+            filetypes = [("Excel Files", "*.xlsx;*.xlsm;*.xltx;*.xltm")]
+            self.filename = filedialog.askopenfilename(title='Seleccionar hoja de calculo', filetypes=filetypes)
+            self.I_direccion.delete(0, "end")
+            self.I_direccion.insert(0, self.filename)
+            wb = openpyxl.load_workbook(self.filename)
+            data = [item.value for item in wb.active[1] if item.value is not None]
+            print(data)
+            return data
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+
+
+
+        
