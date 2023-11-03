@@ -306,6 +306,7 @@ class Send(ctk.CTkFrame):
         while Guardado == False:
             self.name_proj = tkinter.simpledialog.askstring("Guardar", "Ingrese un nombre para el proyecto:")
 
+            #*Si se le asigna nombre continua codigo, si se da a cancelar solo sale de la funcion
             if self.name_proj:
 
                 with open('./proyectos.json', 'r') as json_file:
@@ -313,13 +314,14 @@ class Send(ctk.CTkFrame):
                 names = list(projects_json.keys())
 
                 #* Condicional para validar proyecto ya guardado
-                proyecto_encontrado = False  # Variable para rastrear si se encontró el proyecto
+                proyecto_encontrado = False  # Variable para rastrear si se encontró una coincidencia
 
                 for name in names:
                     temp_name = name.lower()
                     if self.name_proj.lower() == temp_name:
+                        proyecto_encontrado = True # Coincidencia encontrada
                         preguntaGuardado = tkinter.messagebox.askquestion("Precaución", "El proyecto " + self.name_proj +
-                            " ya existe" + "¿Desea reemplazar el proyecto existente?")
+                            " ya existe" + "¿Desea reemplazar el proyecto existente?")                        
 
                         if preguntaGuardado == "yes":
                             #* Borra el que ya existe primero, luego guarda el nuevo
@@ -329,9 +331,6 @@ class Send(ctk.CTkFrame):
                             with open("./proyectos.json", "w") as json_file:
                                 json.dump(projects_json, json_file, indent=4)
                             Guardado = True
-                            proyecto_encontrado = True
-                        else:
-                            break  #* Sal del bucle si no se desea reemplazar
                     else:
                         continue
 
