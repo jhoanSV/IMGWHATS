@@ -1,5 +1,10 @@
 {
-    "proyecto1": [
+    "proyecto1": {
+        "link": { "Type":"Excel",
+                     "Path": "",
+                     "Sheet":"",
+                     "Cell": 0},
+        "Project": [
         {
             "Id": 0,
             "Type": "Background",
@@ -63,5 +68,5 @@
             "active": false,
             "tags": 3
         }
-    ]
+    ]}
 }

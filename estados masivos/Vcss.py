@@ -270,7 +270,12 @@ class FlatList(ctk.CTkScrollableFrame):
 
     def Update_list(self, new_list):
         self.json_list = new_list
-        
+        # buelve a crear la lista de keys
+        if (type(self.json_list) == dict):
+            self.Key_List = list(self.json_list.keys())
+            self.si_list = False
+        else:
+            self.Key_List = self.json_list
         # Elimina las filas que ya no están presentes en la nueva lista
         for i in range(len(self.json_list), len(self.frames)):
             self.frames[i].destroy()
@@ -283,6 +288,7 @@ class FlatList(ctk.CTkScrollableFrame):
             else:
                 key = self.Key_List[i]
             value = self.json_list[key]
+
             if i < len(self.frames):
                 self.frames[i].update_row(value)
             else:
@@ -558,16 +564,20 @@ class ImageContainer(tk.Frame):
         self.objects = []
 
         for Item in  self.json_list:
+            
             if Item['Type'] == 'Background':
-                self.size_background = Item['Width'], Item['Height']
+                '''self.size_background = Item['Width'], Item['Height']
                 self.background_color = Item['BackgroundColor']
                 self.on_x = (self.width - Item['Width'])/2
                 self.on_y = (self.height - Item['Height'])/2
                 self.background_image = Image.new('RGBA',self.size_background, self.background_color)
                 self.Bg_image = ImageTk.PhotoImage(self.background_image)
                 self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image, tags= 't0')
+                self.Change_point_relative_to([self.on_x, self.on_y])'''
+                self.on_x = (self.width - Item['Width'])/2
+                self.on_y = (self.height - Item['Height'])/2
+                self.background_continer = Background_obj(self.canvas, self.on_x, self.on_y, Item['Width'], Item['Height'], Item['BackgroundColor'])
                 self.Change_point_relative_to([self.on_x, self.on_y])
-           
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
@@ -671,6 +681,59 @@ class ImageContainer(tk.Frame):
     def change_text(self, Id, Type, Text):
         for text in self.text_objects:
             text.change_text(Id, Type, Text)
+
+    
+
+class Background_obj:
+    def __init__(self,
+                 canvas, 
+                 x, 
+                 y, 
+                 Width,
+                 Height,
+                 Color: str = '#FFFFFF',
+                 active: bool = False):
+        super().__init__()
+        #*Variables
+        self.canvas = canvas
+        self.x = x
+        self.y = y
+        self.Width = Width
+        self.Height = Height
+        self.color = Color
+        self.size_background = self.Width, self.Height
+        #*Body
+        self.background_image = Image.new('RGBA',self.size_background, self.color)
+        self.Bg_image = ImageTk.PhotoImage(self.background_image)
+        self.background_continer = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.Bg_image, tags= 't0')
+        #self.Change_point_relative_to([self.x, self.y])
+
+    def change_size(self, event, size, value):
+        if size == 'Width':
+            self.Width = value
+        elif size == 'Height':
+            self.Height = value
+
+        self.x = (self.canvas.winfo_width() - self.Width)/2
+        self.y = (self.canvas.winfo_height() - self.Height)/2
+        self.size_background = self.Width, self.Height
+        self.background_image = Image.new('RGBA', self.size_background, self.color)
+        self.Bg_image = ImageTk.PhotoImage(self.background_image)
+        self.canvas.itemconfig(self.background_continer, image=self.Bg_image)
+        self.canvas.coords(self.background_continer, self.x, self.y)
+        #self.Change_point_relative_to([self.x, self.y])
+
+    def Change_color(self, event):
+        return
+    
+    def get(self):
+        return {"Id": 0,
+                "Type": "Background",
+                "Width": self.Width,
+                "Height": self.Height,
+                "BackgroundColor": "#FFFFFF",
+                "active": True,
+                "tags": 0}
 
 class ObjectOnCanvas:
     def __init__(self,
@@ -1678,13 +1741,16 @@ class Icon_button(tk.Label):
         
         self.icon_image = Image.open(self.Icon)
         self.icon_image = self.icon_image.resize((15, 15), Image.ANTIALIAS)
-        '''# Recolor the icon with the specified icon_color
-        if self.icon_color:
+        # Recolor the icon with the specified icon_color
+        '''if self.icon_color:
             self.icon_image = self.recolor_image(self.icon_color)'''
-
         self.icon_image = ImageTk.PhotoImage(self.icon_image)
         
         super().__init__(*args, **kwargs);
+        #prueba
+        #self.icon_image = ctk.CTkImage(Image.open(self.Icon), size=(30,30))
+        #self.configure(image=self.icon_image)
+        #prueba
         self.config(bg = self.initial_color, image=self.icon_image)
         self.bind("<Enter>", self.on_hover)
         self.bind("<Leave>", self.on_leave)
@@ -1883,13 +1949,16 @@ class updown_menu(ctk.CTkLabel):
             y_on_screen = self.winfo_rooty() + self.winfo_height()
             self.dropdown_window = ctk.CTkToplevel(self.master)
             self.dropdown_window.overrideredirect(True)
-            self.listbox = FlatList(self.dropdown_window, json_list=self.json_list, Item=Item_menu, width=120, Otros=self.otros)
+            self.listbox = FlatList(self.dropdown_window, json_list=self.json_list, Item=Item_menu, width=120, Otros=self.otros + [self.close])
             self.listbox.grid(row=0, column=0, padx=0, pady=0)
             self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen}")
         elif self.show == False:
             if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
                 self.dropdown_window.destroy()
 
+    def close(self):
+        if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
+                self.dropdown_window.destroy()
 
 class Item_menu(ctk.CTkLabel):
     def __init__(self, *args,
@@ -1927,7 +1996,9 @@ class Item_menu(ctk.CTkLabel):
         self.configure(bg_color=self.BaseColor, text_color=self.C_textBase)
 
     def on_click(self, event):
-        print('clicked')
+        self.otros['Hook'][int(self.otros['Project_name'])]()
+        self.otros['Hook'][-1]()
+        #print('clicked')
 
     def get_itemData(self):
         return

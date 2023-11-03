@@ -1,9 +1,10 @@
+import json
 import tkinter as tk
 from tkinter import filedialog, ttk, colorchooser
 #from tkinter.ttk import Combobox
 import customtkinter as ctk
 from PIL import ImageTk, Image
-from Vcss import DraggableLabel, InputNumber, List_of_fonts, Icon_button, CustomComboBox
+from Vcss import DraggableLabel, InputNumber, List_of_fonts, Icon_button, CustomComboBox, FlatList
 from typing import Union, Callable
 from typing import Optional
 import os
@@ -172,14 +173,13 @@ class ItemElement(ctk.CTkFrame):
         self.json_list = n_list
         self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
         self.Name_Label.configure(text= "Type: " + self.json_list['Type'])
-        '''if self.json_list['Type'] == 'image':
-            self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
-            self.Name_Label.configure(text= "Type: " + self.json_list['Type'])
-            # *default value
-        elif self.json_list['Type'] == 'Background':
-            self.Name_Label.configure("Type: " + self.json_list['Type'])
-        elif self.json_list['Type'] == 'text':
-            self.Name_Label.configure("Type: " + self.json_list['Type'])'''
+        if self.json_list['Type' ] == 'image':
+            self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+        elif self.json_list['Type' ] == 'text':
+            self.smallImage = ctk.CTkImage(Image.open('Default/Text_Icon.png'), size=(30,30))
+        elif self.json_list['Type'] == 'folder':
+            self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+        self.frameImage.configure(image= self.smallImage)
 
 class property_image_bar(ctk.CTkFrame):
     def __init__(self, master, *args,
@@ -304,6 +304,7 @@ class property_text_bar(ctk.CTkFrame):
                  **kwargs):
         
         super().__init__(master, *args, **kwargs)
+        #*Variables
         self.master = master
         self.json_list = json_list
         self.Hook = Hook
@@ -315,7 +316,7 @@ class property_text_bar(ctk.CTkFrame):
         self.change_text = self.Hook[4]
         self.Fonts_list = List_of_fonts('C:\Windows\Fonts')
         #print(self.Fonts_list)
-
+        #*Body
         self.label_x_position = ctk.CTkLabel(self, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
@@ -408,6 +409,53 @@ class property_text_bar(ctk.CTkFrame):
     def Change_font(self, text):
         self.change_text(self.Id, 'font', text)
 
+class property_background_bar(ctk.CTkFrame):
+    def __init__(self, master, *args,
+                 width: int = 100,
+                 command: Callable = None,
+                 json_list: dict = None,
+                 Hook: Optional[any] = None,
+                 **kwargs):
+        
+        super().__init__(master, *args, **kwargs)
+        #*Variables
+        self.json_list = json_list
+        #*Body
+        self.label_width = ctk.CTkLabel(self, text= "W:")
+        self.label_width.grid(row=0, column=0, padx=5, pady=5)
+
+        self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_Width)
+        self.Input_width.set(self.json_list['Width'])
+        self.Input_width.grid(row=0, column=1, padx=5, pady=5)
+
+        self.label_heid = ctk.CTkLabel(self, text= "H:")
+        self.label_heid.grid(row=0, column=2, padx=5, pady=5)
+
+        self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_Height)
+        self.Input_heid.set(self.json_list['Height'])
+        self.Input_heid.grid(row=0, column=3, padx=5, pady=5)
+
+        self.Bt_left_text = Icon_button(self, Icon_image = './Default/change_orientation.png', Function= self.To_vertical)
+        self.Bt_left_text.grid(row=0, column=4, padx=5, pady=5)
+
+        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color)
+        self.Bt_color_choose.grid(row=0, column=5, padx=5, pady=5)
+
+    def Update_Width(self,event):
+        return
+    
+    def Update_Height(self,event):
+        return
+    
+    def To_vertical(self,event):
+        return
+    
+    def To_horizontal(self,event):
+        return
+    
+    def choose_color(self,event):
+        return
+
 
 class Vincular_excel(ctk.CTkToplevel):
     def __init__(self, 
@@ -423,7 +471,8 @@ class Vincular_excel(ctk.CTkToplevel):
         #*Variables
         self.path = path
         self.principal = principal
-        #*Cuerpo
+        self.data = {}
+        #*Body
         self.Contenedor_buscar = ctk.CTkFrame(self)
         self.Contenedor_buscar.grid(row=0, column=0, padx=0, pady=0)
 
@@ -436,9 +485,11 @@ class Vincular_excel(ctk.CTkToplevel):
         self.B_BuscarDireccion = ctk.CTkButton(self.Contenedor_buscar, text="Seleccionar", command=self.Get_columnLabels)
         self.B_BuscarDireccion.grid(row=0, column=2 , padx=0, pady=0)
 
+        self.tabla_vinculada = FlatList(self, json_list= self.data, Item= Item_table, width=200, Otros=[self.shoose_principal])
+        self.tabla_vinculada.grid(row=2, column=0, padx=0, pady=0)
 
         self.Contenedor_botones = ctk.CTkFrame(self)
-        self.Contenedor_botones.grid(row=1, column=0, padx=0, pady=0)
+        self.Contenedor_botones.grid(row=3, column=0, padx=0, pady=0)
 
         self.B_Cancelar = ctk.CTkButton(self.Contenedor_botones, text="Cancelar", fg_color='#FF3F4A')
         self.B_Cancelar.grid(row=0, column=0, padx=0, pady=0)
@@ -447,19 +498,71 @@ class Vincular_excel(ctk.CTkToplevel):
         self.B_Vincular.grid(row=0, column=1, padx=0, pady=0)
 
     def Get_columnLabels(self):
-        try:
-            filetypes = [("Excel Files", "*.xlsx;*.xlsm;*.xltx;*.xltm")]
-            self.filename = filedialog.askopenfilename(title='Seleccionar hoja de calculo', filetypes=filetypes)
-            self.I_direccion.delete(0, "end")
-            self.I_direccion.insert(0, self.filename)
-            wb = openpyxl.load_workbook(self.filename)
-            data = [item.value for item in wb.active[1] if item.value is not None]
-            print(data)
-            return data
-        except Exception as e:
-            print(f"Error: {e}")
-            return []
+        filetypes = [("Excel Files", "*.xlsx;*.xlsm;*.xltx;*.xltm")]
+        self.filename = filedialog.askopenfilename(title='Seleccionar hoja de calculo', filetypes=filetypes)
+        self.I_direccion.delete(0, "end")
+        self.I_direccion.insert(0, self.filename)
+        self.wb = openpyxl.load_workbook(self.filename)
 
+        # Get the list of sheet names
+        sheet_names = self.wb.sheetnames
+        #print(sheet_names)
+        self.select_sheets = ctk.CTkFrame(self)
+        self.select_sheets.grid(row=1, column=0, padx=0, pady=0)
+        self.label_sheets =ctk.CTkLabel(self.select_sheets, text='Hojas')
+        self.label_sheets.grid(row=1, column=0, padx=0, pady=0)
+        self.combobox_sheets = ctk.CTkComboBox(self.select_sheets, values=sheet_names, command=self.get_data_sheet)
+        self.combobox_sheets.grid(row=1, column=1, padx=0, pady=0)
+    
+    def get_data_sheet(self, sheet):
+        self.data = {name: 0 for name in [item.value for item in self.wb[sheet][1] if item.value is not None]}
+        self.tabla_vinculada.Update_list(self.data)
+        return self.data
 
-
+    def shoose_principal(self, key, val):
+        for k in self.data.keys():
+            if k == key:
+                self.data[k] = val
+            else:
+                self.data[k] = 0
+        self.tabla_vinculada.Update_list(self.data)
+        #print(self.data)
         
+    def Vincular(self):
+        return
+
+class Item_table(ctk.CTkFrame):
+    def __init__(self, 
+                 master,
+                 json_list: list = [],
+                 Cell_type: Optional[dict] = {},
+                 Otros: Optional[any]= None,
+                 *args,
+                 **kwargs):
+        
+        super().__init__(master, *args, **kwargs)
+        #*variables
+        self.json_list = json_list
+        self.Cell_type = Cell_type
+        self.check = tk.IntVar()
+        self.check.set(0)
+        self.Column_name = Otros['Project_name']
+        self.Hook = Otros['Hook']
+        self.Change = self.Hook[0]
+        #*Body
+        self.label = ctk.CTkLabel(self, text= self.Column_name)
+        self.label.grid(row=0, column=0, padx=0, pady=0, sticky= "nsew")
+
+        self.checkbox = ctk.CTkCheckBox(self, text= '', variable= self.check, onvalue=1, offvalue=0, command=self.Change_checkbox)
+        self.checkbox.grid(row=0, column=1, padx=0, pady=0, sticky= "e")
+
+    def get_itemData(self):
+        return
+
+    def update_row(self, n_list):
+        self.json_list = n_list
+        self.check.set(self.json_list)
+        self.checkbox.configure(variable=self.check)
+
+    def Change_checkbox(self):
+        self.Change(self.Column_name, self.checkbox.get())
