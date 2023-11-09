@@ -566,23 +566,16 @@ class ImageContainer(tk.Frame):
         for Item in  self.json_list:
             
             if Item['Type'] == 'Background':
-                '''self.size_background = Item['Width'], Item['Height']
-                self.background_color = Item['BackgroundColor']
                 self.on_x = (self.width - Item['Width'])/2
                 self.on_y = (self.height - Item['Height'])/2
-                self.background_image = Image.new('RGBA',self.size_background, self.background_color)
-                self.Bg_image = ImageTk.PhotoImage(self.background_image)
-                self.background_continer = self.canvas.create_image(self.on_x,self.on_y, anchor="nw", image=self.Bg_image, tags= 't0')
-                self.Change_point_relative_to([self.on_x, self.on_y])'''
-                self.on_x = (self.width - Item['Width'])/2
-                self.on_y = (self.height - Item['Height'])/2
-                self.background_continer = Background_obj(self.canvas, self.on_x, self.on_y, Item['Width'], Item['Height'], Item['BackgroundColor'])
+                print(self.on_x, self.on_y)
+                self.background_continer = Background_obj(self.canvas, json_data = Item, Hook = [self.function])
                 self.Change_point_relative_to([self.on_x, self.on_y])
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
                 y = Item['y_position']
-                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'])
+                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'], json_data= Item)
                 self.image_objects.append(obj)
                 self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
             
@@ -682,38 +675,41 @@ class ImageContainer(tk.Frame):
         for text in self.text_objects:
             text.change_text(Id, Type, Text)
 
-    
+    def change_size_Bg(self, size, value):
+        self.background_continer.change_size(size, value)
+
+    def bg_color(self):
+        self.background_continer.Change_bg_color()
 
 class Background_obj:
     def __init__(self,
                  canvas, 
-                 x, 
-                 y, 
-                 Width,
-                 Height,
-                 Color: str = '#FFFFFF',
+                 json_data: dict = {},
+                 Hook: Optional[any] = None,
                  active: bool = False):
         super().__init__()
         #*Variables
         self.canvas = canvas
-        self.x = x
-        self.y = y
-        self.Width = Width
-        self.Height = Height
-        self.color = Color
+        self.json_data = json_data
+        self.x = (self.canvas.winfo_width() - self.json_data['Width'])/2
+        self.y = (self.canvas.winfo_height() - self.json_data['Height'])/2
+        self.Width = self.json_data['Width']
+        self.Height = self.json_data['Height']
+        self.color = self.json_data['BackgroundColor']
+        self.Hook = Hook
         self.size_background = self.Width, self.Height
+        print('x y y inicial', self.x, self.y)
         #*Body
         self.background_image = Image.new('RGBA',self.size_background, self.color)
         self.Bg_image = ImageTk.PhotoImage(self.background_image)
         self.background_continer = self.canvas.create_image(self.x,self.y, anchor="nw", image=self.Bg_image, tags= 't0')
         #self.Change_point_relative_to([self.x, self.y])
 
-    def change_size(self, event, size, value):
+    def change_size(self, size, value):
         if size == 'Width':
             self.Width = value
         elif size == 'Height':
             self.Height = value
-
         self.x = (self.canvas.winfo_width() - self.Width)/2
         self.y = (self.canvas.winfo_height() - self.Height)/2
         self.size_background = self.Width, self.Height
@@ -721,9 +717,19 @@ class Background_obj:
         self.Bg_image = ImageTk.PhotoImage(self.background_image)
         self.canvas.itemconfig(self.background_continer, image=self.Bg_image)
         self.canvas.coords(self.background_continer, self.x, self.y)
-        #self.Change_point_relative_to([self.x, self.y])
+        self.Hook[0](self.get())
+        self.json_data = self.get()
 
-    def Change_color(self, event):
+    def Change_bg_color(self):
+        color_code = tk.colorchooser.askcolor(title ="Choose color")
+        self.json_data['BackgroundColor'] = color_code[1]
+        self.color = self.json_data['BackgroundColor']
+        self.size_background = self.Width, self.Height
+        self.background_image = Image.new('RGBA', self.size_background, self.color)
+        self.Bg_image = ImageTk.PhotoImage(self.background_image)
+        self.canvas.itemconfig(self.background_continer, image=self.Bg_image)
+        self.Hook[0](self.get())
+        self.json_data = self.get()
         return
     
     def get(self):
@@ -743,12 +749,15 @@ class ObjectOnCanvas:
                  picture,
                  function: Optional[callable] = any,
                  Id: Optional[int] = None,
-                 active: bool = False):
+                 active: bool = False,
+                 json_data: Optional[dict]= None):
         
         self.canvas = canvas
-        self.x = x
-        self.y = y
-        self.id = Id
+        self.json_data = json_data
+        self.x = self.json_data['x_position']
+        self.y = self.json_data['y_position']
+        self.id = self.json_data['Id']
+        self.name = self.json_data['Name']
         self.picture = Image.open(picture)
         self.image = ImageTk.PhotoImage(self.picture)
         self.Width = self.image.width()
@@ -1113,14 +1122,17 @@ class ObjectOnCanvas:
 
     def get(self):
         return {"Id": self.id,
-                "Type": 'image',
+                "Type": "image",
+                "Name": self.name,
                 "Width": self.Width,
                 "Height": self.Height,
                 "Rotate": self.angle,
                 "x_position": self.x,
                 "y_position": self.y,
-                "xCenter": False,
-                "yCenter": False}
+                "active": True,
+                "tags": 1}
+
+                
         
 
     def Change_cursor(self, event, C_cursor):
@@ -1436,7 +1448,6 @@ class TextBox:
             #self.cursor[1] += 1
             self.canvas.itemconfig(self.text_lines[-1], text=last_text)
             self.cursor = [self.text_lines[-1], len(last_text)-1]
-            print(self.cursor)
         elif self.editing == False:
             last_text = self.canvas.itemcget(self.cursor[0], 'text')
             last_text = last_text[:self.cursor[1]] + last_text[self.cursor[1] + 1:]
@@ -1709,7 +1720,7 @@ class TextBox:
         self.canvas.coords(self.Pli, self.x - 2,self.y + round((self.Height/2))-2)
         #Punto lateral derecho
         self.canvas.coords(self.Pld, self.x + self.Width - 2,self.y + round((self.Height/2))-2)
-        print(value)
+        #print(value)
         self.Function(self.get())
 
     def Change_color_font(self, Id):
@@ -1834,12 +1845,6 @@ class CustomComboBox(tk.Frame):
         x_on_screen = self.entry.winfo_rootx() + x
         y_on_screen = self.entry.winfo_rooty() + y + self.entry_height
         print(x_on_screen, y_on_screen)
-        '''if hasattr(self, 'dropdown_window') and self.dropdown_window.winfo_exists():
-            #self.dropdown.place(x=x_on_screen, y=y_on_screen)
-            self.dropdown_window.overrideredirect(True)
-            self.dropdown_window.geometry(f"+{x_on_screen}+{y_on_screen + self.height}")
-            #self.dropdown_window.geometry("+%d+%d" % (x_on_screen, y_on_screen))
-        else:'''
         if self.is_listbox_visible == True:
             self.dropdown_window = tk.Toplevel(self.master)
             self.dropdown_window.overrideredirect(True)
@@ -1944,7 +1949,7 @@ class updown_menu(ctk.CTkLabel):
         self.configure(bg_color=self.ClickColor)
         self.show = not self.show
         if self.show == True:
-            print('debe mostrar el menú ')
+            #print('debe mostrar el menú ')
             x_on_screen = self.winfo_rootx()
             y_on_screen = self.winfo_rooty() + self.winfo_height()
             self.dropdown_window = ctk.CTkToplevel(self.master)

@@ -285,15 +285,15 @@ class property_image_bar(ctk.CTkFrame):
             self.tags_uper(self.Id)
     
     def update_image_data(self, updated_data):
+        self.json_list = updated_data
         if self.json_list['Type'] == 'image':
-            self.json_list = updated_data
             self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
             self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
             self.Input_width.set(self.json_list['Width'])
             self.Input_heid.set(self.json_list['Height'])
             self.Input_rotate.set(self.json_list['Rotate'])
             self.Id = self.json_list['Id']
-        #print('se actualizo la data')
+        #print(self.json_list)
 
 class property_text_bar(ctk.CTkFrame):
     def __init__(self, master, *args,
@@ -420,6 +420,7 @@ class property_background_bar(ctk.CTkFrame):
         super().__init__(master, *args, **kwargs)
         #*Variables
         self.json_list = json_list
+        self.Hook = Hook
         #*Body
         self.label_width = ctk.CTkLabel(self, text= "W:")
         self.label_width.grid(row=0, column=0, padx=5, pady=5)
@@ -435,43 +436,56 @@ class property_background_bar(ctk.CTkFrame):
         self.Input_heid.set(self.json_list['Height'])
         self.Input_heid.grid(row=0, column=3, padx=5, pady=5)
 
-        self.Bt_left_text = Icon_button(self, Icon_image = './Default/change_orientation.png', Function= self.To_vertical)
+        self.Bt_left_text = Icon_button(self, Icon_image = './Default/change_orientation.png', Function= self.Change_orientation)
         self.Bt_left_text.grid(row=0, column=4, padx=5, pady=5)
 
         self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color)
         self.Bt_color_choose.grid(row=0, column=5, padx=5, pady=5)
 
-    def Update_Width(self,event):
+    def Update_Width(self, value):
+        self.json_list['Width'] = value
+        self.Hook[0]('Width', int(self.json_list['Width']))
+        self.Input_width.set(self.json_list['Width'])
         return
     
-    def Update_Height(self,event):
+    def Update_Height(self, value):
+        self.json_list['Height'] = value
+        self.Hook[0]('Height', int(self.json_list['Height']))
+        self.Input_width.set(self.json_list['Height'])
         return
     
-    def To_vertical(self,event):
+    def Change_orientation(self):
+        New_h = self.json_list['Width']
+        New_w = self.json_list['Height']
+        self.Hook[0]('Width', New_w)
+        self.Hook[0]('Height', New_h)
         return
     
-    def To_horizontal(self,event):
+    def choose_color(self):
+        self.Hook[2]()
         return
     
-    def choose_color(self,event):
-        return
+    def Update_bg_data(self, data):
+        self.json_list = data
+        self.Input_width.set(self.json_list['Width'])
+        self.Input_heid.set(self.json_list['Height'])
 
 
 class Vincular_excel(ctk.CTkToplevel):
     def __init__(self, 
                  master,
-                 path: str = '',
-                 principal: int = 0,
+                 F_vincular: Optional[callable] = None,
+                 data_link: dict = {},
                  *args,
                  **kwargs):
         
         super().__init__(master, *args, **kwargs)
         #*configuración
-
+        self.configure(title="Vincular")
         #*Variables
-        self.path = path
-        self.principal = principal
+        self.data_link = data_link
         self.data = {}
+        self.F_vincular = F_vincular
         #*Body
         self.Contenedor_buscar = ctk.CTkFrame(self)
         self.Contenedor_buscar.grid(row=0, column=0, padx=0, pady=0)
@@ -494,7 +508,7 @@ class Vincular_excel(ctk.CTkToplevel):
         self.B_Cancelar = ctk.CTkButton(self.Contenedor_botones, text="Cancelar", fg_color='#FF3F4A')
         self.B_Cancelar.grid(row=0, column=0, padx=0, pady=0)
 
-        self.B_Vincular = ctk.CTkButton(self.Contenedor_botones, text="Vincular")
+        self.B_Vincular = ctk.CTkButton(self.Contenedor_botones, text="Vincular", command= self.Vincular)
         self.B_Vincular.grid(row=0, column=1, padx=0, pady=0)
 
     def Get_columnLabels(self):
@@ -503,7 +517,7 @@ class Vincular_excel(ctk.CTkToplevel):
         self.I_direccion.delete(0, "end")
         self.I_direccion.insert(0, self.filename)
         self.wb = openpyxl.load_workbook(self.filename)
-
+        self.data_link['Path'] = self.filename
         # Get the list of sheet names
         sheet_names = self.wb.sheetnames
         #print(sheet_names)
@@ -517,6 +531,7 @@ class Vincular_excel(ctk.CTkToplevel):
     def get_data_sheet(self, sheet):
         self.data = {name: 0 for name in [item.value for item in self.wb[sheet][1] if item.value is not None]}
         self.tabla_vinculada.Update_list(self.data)
+        self.data_link['Sheet'] = sheet
         return self.data
 
     def shoose_principal(self, key, val):
@@ -526,10 +541,10 @@ class Vincular_excel(ctk.CTkToplevel):
             else:
                 self.data[k] = 0
         self.tabla_vinculada.Update_list(self.data)
-        #print(self.data)
+        self.data_link['Cell'] = key
         
     def Vincular(self):
-        return
+        self.F_vincular(self.data_link)
 
 class Item_table(ctk.CTkFrame):
     def __init__(self, 

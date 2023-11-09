@@ -24,6 +24,7 @@ class Perzonaliced_image_creator(ctk.CTk):
         self.project_name = project_name
         self.up_bar_data = up_bar_data
         self.project = {}
+        self.project_layers = []
         #*Body
         #carga el json
         with open('./projects.json', 'r') as json_file:
@@ -31,7 +32,10 @@ class Perzonaliced_image_creator(ctk.CTk):
         #Find the project using the name
         if self.project_name != '':
             #Get the list of layers of the project
-            self.project = self.image_properties_json[self.project_name]
+            self.project = image_properties_json[project_name]
+            self.project_layers = project['Project']
+            #Get the data for the Up_bar
+            self.up_bar_data = project['Project'][0]
             #Get the data for the Up_bar
             self.up_bar_data = self.project['Project'][0]
         
@@ -52,7 +56,7 @@ class Perzonaliced_image_creator(ctk.CTk):
         self.Menu_Export.grid(row=0, column=3 ,padx=0, pady=0)
         #?property bar
         print(self.project)
-        #self.Up_bar = property_image_bar(self, json_list= self.up_bar_data, Hook = [Relative_to, External_Move, Background_data, External_Rotate, tag_lower, tag_uper])
+        #self.Up_bar = property_image_bar(self, json_list= self.up_bar_data, Hook = [Relative_to, External_Move, self.project['Project'][0], External_Rotate, tag_lower, tag_uper])
         #self.Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
         #self.Up_bar_text = property_text_bar(self, json_list= self.up_bar_data, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font, change_text])
@@ -110,9 +114,10 @@ class Perzonaliced_image_creator(ctk.CTk):
             self.Up_bar_text.grid_forget()
             self.Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 
-#* PROGRAM
+#* PROGRAM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # *variables
 project_name = 'proyecto1'
+project_layers = []
 up_bar_data = {}
 project = {}
 #*Initialization
@@ -122,15 +127,22 @@ with open('./projects.json', 'r') as json_file:
         if project_name != '':
             #Get the list of layers of the project
             project = image_properties_json[project_name]
+            project_layers = project['Project']
             #Get the data for the Up_bar
             up_bar_data = project['Project'][0]
 # *JSON image properties
 '''with open('./projects.json', 'r') as json_file:
     image_properties_json = json.load(json_file)'''
 
+#*Functions
+def update_project(new_project):
+    new_project_id = new_project['Id']
+    for i in range(len(project_layers)):
+        if project_layers[i]['Id'] == new_project_id:
+            project['Project'][i] = new_project
 
 def llamar_vincular_excel():
-    Vincular_excel(app)
+    V_excel = Vincular_excel(app, F_vincular= vincular_a_excel, data_link=project['link'])
 
 
 def button_callback():
@@ -149,10 +161,12 @@ def to_image_bar(lista):
         Up_bar_background.grid_forget()
         Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
     elif up_bar_data['Type'] == 'Background':
-        Up_bar_background.update_text_data(up_bar_data)
+        Up_bar_background.Update_bg_data(up_bar_data)
         Up_bar.grid_forget()
         Up_bar_text.grid_forget()
         Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+    update_project(up_bar_data)
+    
     
 def New_image():
     '''Desplega el cuadro de busqueda para seleccionar imagenes de
@@ -165,9 +179,9 @@ def New_image():
         x, y = event.x, event.y
         Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
         add_image(app.filename, x, y)
-        activate_element(len(Actual_project)-1)
-        Image_Container.Update_list(Actual_project)
-        ElementList.Update_list(Actual_project)
+        activate_element(len(project)-1)
+        Image_Container.Update_list(project)
+        ElementList.Update_list(project)
 
     Image_Container.canvas.bind("<Button-1>", handle_click)
 
@@ -181,8 +195,8 @@ def New_folder():
     def handle_click(event):
         x, y = event.x, event.y
         Image_Container.canvas.unbind("<Button-1>")  # Unbind the event after capturing the coordinates
-        Actual_project.append({
-                        "Id": len(Actual_project),
+        project.append({
+                        "Id": len(project),
                         "Type": "Folder",
                         "Name": app.filename,
                         "Width": 150,
@@ -194,9 +208,10 @@ def New_folder():
                         "yCenter": False,
                         "active": True
                         })
-        activate_element(len(Actual_project)-1)
-        Image_Container.Update_list(Actual_project)
-        ElementList.Update_list(Actual_project)
+        activate_element(len(project)-1)
+        Image_Container.Update_list(project)
+        ElementList.Update_list(project)
+
 
     Image_Container.canvas.bind("<Button-1>", handle_click)
 
@@ -229,13 +244,13 @@ def change_text(Id, Type, Text):
 
 def back_one_elements(Id):
     try:
-        index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'] not in (0, 1))
+        index = next(i for i, element in enumerate(project_layers) if element['Id'] == Id and element['Id'] not in (0, 1))
         if index > 0:
-            Actual_project[index - 1], Actual_project[index] = Actual_project[index], Actual_project[index - 1]
-            Actual_project[index - 1]['tags'], Actual_project[index]['tags'] = Actual_project[index]['tags'], Actual_project[index - 1]['tags']
+            project_layers[index - 1], project_layers[index] = project_layers[index], project_layers[index - 1]
+            project_layers[index - 1]['tags'], project_layers[index]['tags'] = project_layers[index]['tags'], project_layers[index - 1]['tags']
             Image_Container.advance_one_element(index-1)
-            ElementList.Update_list(Actual_project)
-            #print(Actual_project)
+            ElementList.Update_list(project_layers)
+            project['Project'] = project_layers
         else:
             print("Cannot move the element further back.")
     except StopIteration:
@@ -243,18 +258,19 @@ def back_one_elements(Id):
 
 def advance_one_elements(Id):
     try:
-        index = next(i for i, element in enumerate(Actual_project) if element['Id'] == Id and element['Id'] not in (0, len(Actual_project)-1))
+        index = next(i for i, element in enumerate(project_layers) if element['Id'] == Id and element['Id'] not in (0, len(project_layers)-1))
         if index > 0:
-            Actual_project[index], Actual_project[index + 1] = Actual_project[index + 1], Actual_project[index]
-            Actual_project[index]['tags'], Actual_project[index + 1]['tags'] = Actual_project[index + 1]['tags'], Actual_project[index]['tags']
+            project_layers[index], project_layers[index + 1] = project_layers[index + 1], project_layers[index]
+            project_layers[index]['tags'], project_layers[index + 1]['tags'] = project_layers[index + 1]['tags'], project_layers[index]['tags']
             Image_Container.advance_one_element(index)
-            ElementList.Update_list(Actual_project)
+            ElementList.Update_list(project_layers)
+            project['Project'] = project_layers
         else:
             print("Cannot move the element further back.")
     except StopIteration:
         print(f"Element with Id {Id} not found in Actual_project.")
 
-def save_As(project):
+def save_As():
     Guardado = False
     while Guardado == False:
         name_proj = tk.simpledialog.askstring("Guardar", "Ingrese un nombre para el proyecto:")
@@ -266,6 +282,7 @@ def save_As(project):
                 projects_json = json.load(json_file)
             names = list(projects_json.keys())
             #* Condicional para validar proyecto ya guardado
+            proyecto_encontrado = False
             for name in names:
                 temp_name = name.lower()
                 if name_proj.lower() == temp_name:
@@ -278,7 +295,7 @@ def save_As(project):
                         del projects_json[name]  # Elimina la clave existente
                         projects_json[name] = project  # Agrega el nuevo proyecto
 
-                        with open("./proyectos.json", "w") as json_file:
+                        with open("./projects.json", "w") as json_file:
                             json.dump(projects_json, json_file, indent=4)
                         Guardado = True
                 else:
@@ -288,25 +305,34 @@ def save_As(project):
             if not proyecto_encontrado:
                 projects_json[str(name_proj)] = project
 
-                with open("./proyectos.json", "w") as json_file:
+                with open("./projects.json", "w") as json_file:
                     json.dump(projects_json, json_file, indent=4)
                 Guardado = True
         else:
             return
 
 
-'''def save():
+def save():
     #Search the project
     with open('./projects.json', 'r') as json_file:
         projects_json = json.load(json_file)
     #Replace the project with the actual project
-    projects_json[project_name] = image_properties_json
+    projects_json[project_name] = project
     #save the project
-    with open("./proyectos.json", "w") as json_file:
+    with open("./projects.json", "w") as json_file:
         json.dump(projects_json, json_file, indent=4)
-    print('saved')'''
+    print('saved')
 
+def vincular_a_excel(Datos):
+    #Change the link to the given data 
+    project['link'] = Datos
 
+def Bg_change_size(size, value):
+    Image_Container.change_size_Bg(size, value)
+    
+
+def Bg_change_color():
+    Image_Container.bg_color()
 
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
@@ -314,38 +340,14 @@ app.geometry("400x150")
 
 
 # *Barra de propiedades de formatos imagenes
-list_property_bar = {"Id": 2,
-                    "Type": "image",
-                    "Width": 0,
-                    "Height": 0,
-                    "Rotate": 0,
-                    "x_position": 0,
-                    "y_position": 0,
-                    "xCenter": False,
-                    "yCenter": False}
-
-Actual_project = image_properties_json['proyecto1']['Project']
 
 Relative_to = [0,0]
-
-Background_data = {"Id": 0,
-                    "Type": "Background",
-                    "Name": "caminar.jpg",
-                    "Width": 300,
-                    "Height": 400,
-                    "Rotate": 0,
-                    "x_position": 0,
-                    "y_position": 0,
-                    "xCenter": True,
-                    "yCenter": True,
-                    "BackgroundColor": "#FFFFFF",
-                    "active": False}
 
 #*Tool bar
 Tool_bar = ctk.CTkFrame(app)
 Tool_bar.grid(row=0, column=0 ,padx=0, pady=0, sticky="nsew")
 
-Menu_file = updown_menu(Tool_bar, json_list=['Guardar', 'Guardar como'], text= 'Archivo', Otros= [save_As, save_As])
+Menu_file = updown_menu(Tool_bar, json_list=['Guardar', 'Guardar como'], text= 'Archivo', Otros= [save, save_As])
 Menu_file.grid(row=0, column=0 ,padx=0, pady=0)
 
 Menu_add = updown_menu(Tool_bar, json_list=['Image', 'Folder', 'Text'], text= 'Importar', Otros= [New_image, New_folder])
@@ -357,26 +359,24 @@ Menu_link.grid(row=0, column=2 ,padx=0, pady=0)
 Menu_Export = updown_menu(Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[llamar_vincular_excel])
 Menu_Export.grid(row=0, column=3 ,padx=0, pady=0)
 #*property bar
-Up_bar = property_image_bar(app, json_list= up_bar_data, Hook = [Relative_to, External_Move, up_bar_data, External_Rotate, tag_lower, tag_uper])
-Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
+Up_bar = property_image_bar(app, json_list= up_bar_data, Hook = [Relative_to, External_Move, project['Project'][0], External_Rotate, tag_lower, tag_uper])
+#Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
 Up_bar_text = property_text_bar(app, json_list= up_bar_data, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font, change_text])
-Up_bar_text.grid(row=2, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+#Up_bar_text.grid(row=2, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 
-Up_bar_background = property_background_bar(app, json_list= up_bar_data, Hook=[])
+Up_bar_background = property_background_bar(app, json_list= up_bar_data, Hook=[Bg_change_size, to_image_bar, Bg_change_color])
 Up_bar_background.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 
 #*Container
-ElementList = FlatList(app, json_list=Actual_project, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
-ElementList.grid(row=3, column=1 ,padx=5, pady=5)
+Project_elements = ctk.CTkFrame(app)
+Project_elements.grid(row=2, column=0, sticky="nsew")
 
-Image_Container = ImageContainer(app, json_list=Actual_project, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
-Image_Container.grid(row=3, column=0 ,padx=5, pady=5)
+ElementList = FlatList(Project_elements, json_list=project_layers, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
+ElementList.grid(row=0, column=1 ,padx=5, pady=5)
 
-
-background_image = Image.new('RGB',size, 'white')
-
-
+Image_Container = ImageContainer(Project_elements, json_list=project_layers, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
+Image_Container.grid(row=0, column=0 ,padx=5, pady=5)
 
 def capture_click_coordinates(event,x, y):
     # Get the x and y coordinates of the click
@@ -384,8 +384,8 @@ def capture_click_coordinates(event,x, y):
     #return (x,y)
 
 def add_image(path, x , y):
-    Actual_project.append({
-                        "Id": len(Actual_project),
+    project_layers.append({
+                        "Id": len(project_layers),
                         "Type": "image",
                         "Name": path,
                         "Width": 150,
@@ -393,19 +393,18 @@ def add_image(path, x , y):
                         "Rotate": 0,
                         "x_position": x,
                         "y_position": y,
-                        "xCenter": False,
-                        "yCenter": False,
                         "active": True,
-                        "tags": len(Actual_project)
+                        "tags": len(project_layers)
                         })
+    project['Project'] = project_layers
 
 def activate_element(Id):
-    for element in Actual_project:
+    for element in project_layers:
         if element['Id'] == Id:
             element['active'] = True
         elif element['Id'] != Id:
             element['active'] = False
-
+    project['Project'] = project_layers
 
 
 def comparing_elemts(List1, List2):
