@@ -201,9 +201,6 @@ class property_image_bar(ctk.CTkFrame):
         self.tags_uper = self.Hook[5]
         self.Id = self.json_list['Id']
         # *Barra de propiedades de formatos imagenes
-        
-        #self.tools_image_frame = ctk.CTkFrame(self)
-        #self.tools_image_frame.grid(row=0, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
         self.label_x_position = ctk.CTkLabel(self, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
@@ -295,6 +292,9 @@ class property_image_bar(ctk.CTkFrame):
             self.Id = self.json_list['Id']
         #print(self.json_list)
 
+    def Change_relative_to(self, value):
+        self.relative_x, self.relative_y = value[0], value[1]
+
 class property_text_bar(ctk.CTkFrame):
     def __init__(self, master, *args,
                  width: int = 100,
@@ -315,7 +315,7 @@ class property_text_bar(ctk.CTkFrame):
         self.Change_color_font = self.Hook[3]
         self.change_text = self.Hook[4]
         self.Fonts_list = List_of_fonts('C:\Windows\Fonts')
-        #print(self.Fonts_list)
+        print(self.Fonts_list)
         #*Body
         self.label_x_position = ctk.CTkLabel(self, text= "X:")
         self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
@@ -408,6 +408,9 @@ class property_text_bar(ctk.CTkFrame):
 
     def Change_font(self, text):
         self.change_text(self.Id, 'font', text)
+
+    def Change_relative_to(self, value):
+        self.relative_x, self.relative_y = value[0], value[1]
 
 class property_background_bar(ctk.CTkFrame):
     def __init__(self, master, *args,

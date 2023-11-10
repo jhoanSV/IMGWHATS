@@ -569,7 +569,7 @@ class ImageContainer(tk.Frame):
                 self.on_x = (self.width - Item['Width'])/2
                 self.on_y = (self.height - Item['Height'])/2
                 print(self.on_x, self.on_y)
-                self.background_continer = Background_obj(self.canvas, json_data = Item, Hook = [self.function])
+                self.background_continer = Background_obj(self.canvas, json_data = Item, Hook = [self.function, self.Change_point_relative_to])
                 self.Change_point_relative_to([self.on_x, self.on_y])
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
@@ -578,11 +578,10 @@ class ImageContainer(tk.Frame):
                 obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'], json_data= Item)
                 self.image_objects.append(obj)
                 self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
-            
             elif Item['Type'] == 'text':
                 x = Item['x_position']
                 y = Item['y_position']
-                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function)
+                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function, json_data= Item)
                 self.text_objects.append(text)
                 #self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
 
@@ -718,6 +717,7 @@ class Background_obj:
         self.canvas.itemconfig(self.background_continer, image=self.Bg_image)
         self.canvas.coords(self.background_continer, self.x, self.y)
         self.Hook[0](self.get())
+        self.Hook[1]([self.x, self.y])
         self.json_data = self.get()
 
     def Change_bg_color(self):
@@ -737,7 +737,7 @@ class Background_obj:
                 "Type": "Background",
                 "Width": self.Width,
                 "Height": self.Height,
-                "BackgroundColor": "#FFFFFF",
+                "BackgroundColor": self.color,
                 "active": True,
                 "tags": 0}
 
@@ -1281,7 +1281,8 @@ class TextBox:
                 font_size = 15,
                 font_style = 'roman',
                 Id: Optional[int] = None,
-                Function: Optional[callable] = None):
+                Function: Optional[callable] = None,
+                json_data: Optional[dict] = None):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -1301,6 +1302,7 @@ class TextBox:
         self.Function = Function
         self.text_showed = self.text.split("\n")
         self.cursor = [0, 0]
+        self.jon_data = json_data
 
         self.custom_font = tk.font.Font(family=self.font, size=self.font_size, slant=self.font_style)
         self.text_lines=[]
@@ -1632,6 +1634,7 @@ class TextBox:
             #self.canvas.itemconfig(self.canvas_text, font=(self.font, self.font_size, self.font_style))
             for line in self.text_lines:
                 self.canvas.itemconfig(line, font=(self.font, self.font_size, self.font_style))
+            self.Function(self.get())
 
     def size_of_text(self, text):
         bounds = self.canvas.bbox(text)  # returns a tuple like (x1, y1, x2, y2)
@@ -1665,7 +1668,7 @@ class TextBox:
                 "y_position": self.y,
                 "xCenter": False,
                 "yCenter": False,
-                "align" : self.font_style,
+                "align" : self.aling,
                 "bold" : False,
                 "italic" : False,
                 "fontSize" : self.font_size,

@@ -26,7 +26,7 @@
                 "Name": "caminar.jpg",
                 "Width": 300,
                 "Height": 300,
-                "Rotate": 90,
+                "Rotate": 0,
                 "x_position": 0,
                 "y_position": 0,
                 "active": false,

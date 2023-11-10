@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 from tkinter import filedialog
 from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer, updown_menu
 from Components import ItemElement, property_image_bar, property_text_bar, Vincular_excel, property_background_bar
+import numpy as np
 
 size = width, height = 3000, 3000
 
@@ -120,6 +121,7 @@ project_name = 'proyecto1'
 project_layers = []
 up_bar_data = {}
 project = {}
+Relative_to = [0,0]
 #*Initialization
 with open('./projects.json', 'r') as json_file:
         image_properties_json = json.load(json_file)
@@ -216,8 +218,11 @@ def New_folder():
     Image_Container.canvas.bind("<Button-1>", handle_click)
 
 def Change_relative_to(New_relative_to):
+    global Relative_to 
     Relative_to = New_relative_to
-    #print(Relative_to)
+    Up_bar.Change_relative_to(Relative_to)
+    Up_bar_text.Change_relative_to(Relative_to)
+    print(Relative_to)
 
 def External_Move(Id, value, axis):
     Image_Container.External_Move(Id, value, axis)
@@ -334,14 +339,67 @@ def Bg_change_size(size, value):
 def Bg_change_color():
     Image_Container.bg_color()
 
+#? Functions to export the image #################################
+#! This function is the most important to change the image's properties
+def properties(image):
+    i = Image.open(image['Name'])
+    #resize the image
+    resized_image = i.resize((image['Width'], image['Height']))
+    #Rotate the image
+    image_rotated = resized_image.rotate(image['Rotate'], expand=True)
+    # Load the PNG image and convert it to RGBA
+    png_image = image_rotated.convert('RGBA')
+    # Create a new RGBA image with the same size as the PNG image
+    new_image = Image.new('RGBA', png_image.size, (0, 0, 0, 0))
+    # Paste the PNG image on the new RGBA image with the alpha channel as the mask
+    new_image.paste(png_image, (0, 0), mask=png_image.split()[3])
+    return new_image
+
+# *This function compute the size of the font to the text fits into the box
+def TextBoxSize(width, height, text, font):
+    windowsPath = font
+    for size in range(1, np.maximum(width, height)):
+        arial = ImageFont.FreeTypeFont(windowsPath, size=size)
+        x_min, y_min, x_max, y_max = arial.getbbox(text)
+        w = x_max - x_min
+        h = y_max - y_min
+        if w > width or h > height:
+            break
+    return [size, w, h]
+
+def exportar_unico():
+    save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg")))
+    if save_path:
+        print('salvaria como', save_path)
+        for Item in project['Project']:
+            if Item['Type'] == 'Background':
+                background_image = Image.new('RGB',(Item['Width'], Item['Height']), Item['BackgroundColor'])
+            elif Item['Type'] == 'image':
+                image1 = properties(Item)
+                # * Compute the position of the image
+                x = Item['x_position']- Relative_to[0]
+                y = Item['y_position']- Relative_to[1]
+                # * Paste the new RGBA image with the PNG image on top of the background image
+                background_image.paste(image1, (int(x),int(y)), image1)
+            elif Item['Type'] == 'text':
+                # *put the text into the image
+                fontType = 'C:\\Windows\\Fonts\\' + Item['fontType'] + '.ttf'
+                print(fontType)
+
+                fontColor = tuple(map(int, Item['color'].strip('()').split(',')))
+                fontSizeBox = TextBoxSize(Item['boxWidth'], Item['boxHeight'], Item['text'], fontType)
+                font = ImageFont.truetype(fontType, fontSizeBox[0])
+                draw = ImageDraw.Draw(background_image)
+
+                draw.multiline_text((Item['x_position']- Relative_to[0], Item['y_position'] - Relative_to[1]), Item['text'], font=font, fill=fontColor, align=Item['align'])
+        
+        background_image.save(save_path)
+
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
 app.geometry("400x150")
 
 
-# *Barra de propiedades de formatos imagenes
-
-Relative_to = [0,0]
 
 #*Tool bar
 Tool_bar = ctk.CTkFrame(app)
@@ -356,7 +414,7 @@ Menu_add.grid(row=0, column=1 ,padx=0, pady=0)
 Menu_link = updown_menu(Tool_bar, json_list=['Vincular a excel'], text= 'Vincular', Otros=[llamar_vincular_excel])
 Menu_link.grid(row=0, column=2 ,padx=0, pady=0)
 
-Menu_Export = updown_menu(Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[llamar_vincular_excel])
+Menu_Export = updown_menu(Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[exportar_unico])
 Menu_Export.grid(row=0, column=3 ,padx=0, pady=0)
 #*property bar
 Up_bar = property_image_bar(app, json_list= up_bar_data, Hook = [Relative_to, External_Move, project['Project'][0], External_Rotate, tag_lower, tag_uper])
