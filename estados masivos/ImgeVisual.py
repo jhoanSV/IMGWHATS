@@ -7,6 +7,8 @@ from tkinter import filedialog
 from Vcss import  BoxNumber, InputNumber, FlatList, DraggableLabel, ImageContainer, updown_menu
 from Components import ItemElement, property_image_bar, property_text_bar, Vincular_excel, property_background_bar
 import numpy as np
+import openpyxl
+import os
 
 size = width, height = 3000, 3000
 
@@ -144,7 +146,7 @@ def update_project(new_project):
             project['Project'][i] = new_project
 
 def llamar_vincular_excel():
-    V_excel = Vincular_excel(app, F_vincular= vincular_a_excel, data_link=project['link'])
+    V_excel = Vincular_excel(app, F_vincular= vincular_a_excel, data_link=project['Link'])
 
 
 def button_callback():
@@ -330,7 +332,7 @@ def save():
 
 def vincular_a_excel(Datos):
     #Change the link to the given data 
-    project['link'] = Datos
+    project['Link'] = Datos
 
 def Bg_change_size(size, value):
     Image_Container.change_size_Bg(size, value)
@@ -341,12 +343,12 @@ def Bg_change_color():
 
 #? Functions to export the image #################################
 #! This function is the most important to change the image's properties
-def properties(image):
-    i = Image.open(image['Name'])
+def properties(image, property):
+    i = Image.open(image)
     #resize the image
-    resized_image = i.resize((image['Width'], image['Height']))
+    resized_image = i.resize((property['Width'], property['Height']))
     #Rotate the image
-    image_rotated = resized_image.rotate(image['Rotate'], expand=True)
+    image_rotated = resized_image.rotate(property['Rotate'], expand=True)
     # Load the PNG image and convert it to RGBA
     png_image = image_rotated.convert('RGBA')
     # Create a new RGBA image with the same size as the PNG image
@@ -375,7 +377,7 @@ def exportar_unico():
             if Item['Type'] == 'Background':
                 background_image = Image.new('RGB',(Item['Width'], Item['Height']), Item['BackgroundColor'])
             elif Item['Type'] == 'image':
-                image1 = properties(Item)
+                image1 = properties(Item['Name'], Item)
                 # * Compute the position of the image
                 x = Item['x_position']- Relative_to[0]
                 y = Item['y_position']- Relative_to[1]
@@ -383,7 +385,7 @@ def exportar_unico():
                 background_image.paste(image1, (int(x),int(y)), image1)
             elif Item['Type'] == 'text':
                 # *put the text into the image
-                fontType = 'C:\\Windows\\Fonts\\' + Item['fontType'] + '.ttf'
+                fontType = 'C:\\Windows\\Fonts\\' + 'Arial' + '.ttf'
                 print(fontType)
 
                 fontColor = tuple(map(int, Item['color'].strip('()').split(',')))
@@ -394,6 +396,74 @@ def exportar_unico():
                 draw.multiline_text((Item['x_position']- Relative_to[0], Item['y_position'] - Relative_to[1]), Item['text'], font=font, fill=fontColor, align=Item['align'])
         
         background_image.save(save_path)
+
+def search_file(folder, filename):
+    for f in os.listdir(folder):
+        if f.startswith(filename):
+            return os.path.join(folder, f)
+    return None
+
+def Exportar_personalizado():
+    if project['Link']['Type'] == '':
+        print('No esta vinculado a datos')
+    elif project['Link']['Type'] == 'Excel':
+        save_path = filedialog.askdirectory()
+        # get the data from the excel's sheet
+        Data = project['Link']
+        wb = openpyxl.load_workbook(Data['Path'])
+        sheet = wb[Data['Sheet']]
+        data = []
+        Cell = Data['Cell']
+        Cell_number = 0
+        indices = []
+        i=0
+
+        for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True)):
+            data.append(row)
+            indices.append(i)
+
+        #print(data)
+        for name in {name: 0 for name in [item.value for item in sheet[1] if item.value is not None]}:
+            temp_name = name.lower()
+            if Cell.lower() == temp_name:
+                Cell_number = i
+                break
+            i+=1
+        print(Cell_number)
+        if save_path:
+            for New_image in data:
+
+                for Item in project['Project']:
+                    if Item['Type'] == 'Background':
+                        background_image = Image.new('RGB',(Item['Width'], Item['Height']), Item['BackgroundColor'])
+                    elif Item['Type'] == 'image':
+                        image1 = properties(Item['Name'], Item)
+                        # * Compute the position of the image
+                        x = Item['x_position']- Relative_to[0]
+                        y = Item['y_position']- Relative_to[1]
+                        # * Paste the new RGBA image with the PNG image on top of the background image
+                        background_image.paste(image1, (int(x),int(y)), image1)
+                    elif Item['Type'] == 'text':
+                        # *put the text into the image
+                        fontType = 'C:\\Windows\\Fonts\\' + 'Arial' + '.ttf'
+                        #print(fontType)
+
+                        fontColor = tuple(map(int, Item['color'].strip('()').split(',')))
+                        fontSizeBox = TextBoxSize(Item['boxWidth'], Item['boxHeight'], Item['text'], fontType)
+                        font = ImageFont.truetype(fontType, fontSizeBox[0])
+                        draw = ImageDraw.Draw(background_image)
+
+                        draw.multiline_text((Item['x_position']- Relative_to[0], Item['y_position'] - Relative_to[1]), Item['text'], font=font, fill=fontColor, align=Item['align'])
+                    elif Item['Type'] == 'Folder':
+                        for row in data:
+                            fil = search_file(os.path.dirname(Item['Name']),row[Cell_number])
+                            image1 = properties(fil,Item)
+                            # * Compute the position of the image
+                            x = Item['x_position']- Relative_to[0]
+                            y = Item['y_position']- Relative_to[1]
+                            # * Paste the new RGBA image with the PNG image on top of the background image
+                            background_image.paste(image1, (int(x),int(y)), image1)
+                background_image.save(save_path + '/' + str(New_image[0]) + '.jpg')
 
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
@@ -414,7 +484,7 @@ Menu_add.grid(row=0, column=1 ,padx=0, pady=0)
 Menu_link = updown_menu(Tool_bar, json_list=['Vincular a excel'], text= 'Vincular', Otros=[llamar_vincular_excel])
 Menu_link.grid(row=0, column=2 ,padx=0, pady=0)
 
-Menu_Export = updown_menu(Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[exportar_unico])
+Menu_Export = updown_menu(Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[exportar_unico, Exportar_personalizado])
 Menu_Export.grid(row=0, column=3 ,padx=0, pady=0)
 #*property bar
 Up_bar = property_image_bar(app, json_list= up_bar_data, Hook = [Relative_to, External_Move, project['Project'][0], External_Rotate, tag_lower, tag_uper])

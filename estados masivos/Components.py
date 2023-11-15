@@ -98,8 +98,10 @@ class ItemElement(ctk.CTkFrame):
         self.json_list = json_list
         self.Hook = Otros['Hook']
         self.smallImage = ctk.CTkImage(Image.new('RGBA', (30,30), '#FFFFFF'))
+        self.Name = ''
         if self.json_list['Type' ] == 'image':
             self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+            self.Name = os.path.basename(self.json_list['Name'])
         elif self.json_list['Type' ] == 'text':
             self.smallImage = ctk.CTkImage(Image.open('Default/Text_Icon.png'), size=(30,30))
         elif self.json_list['Type'] == 'folder':
@@ -132,7 +134,7 @@ class ItemElement(ctk.CTkFrame):
         self.frameInfomation = ctk.CTkFrame(self.FrameButons)
         self.frameInfomation.grid(row=0, column=2, padx=1, pady=1, sticky='ew')
         
-        self.Name_image = ctk.CTkLabel(self.frameInfomation, text= "Name: " + os.path.basename(self.json_list['Name']))
+        self.Name_image = ctk.CTkLabel(self.frameInfomation, text= "Name: " + self.Name)
         self.Name_image.grid(row=0, column=0, padx=0, pady=0)
 
         self.Name_Label = ctk.CTkLabel(self.frameInfomation, text= "Type: " + self.json_list['Type'])
@@ -171,14 +173,16 @@ class ItemElement(ctk.CTkFrame):
     
     def update_row(self, n_list):
         self.json_list = n_list
-        self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
         self.Name_Label.configure(text= "Type: " + self.json_list['Type'])
         if self.json_list['Type' ] == 'image':
             self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+            self.Name_image.configure(text= "Name: " + os.path.basename(self.json_list['Name']))
         elif self.json_list['Type' ] == 'text':
             self.smallImage = ctk.CTkImage(Image.open('Default/Text_Icon.png'), size=(30,30))
+            self.Name_image.configure(text= "Name: ")
         elif self.json_list['Type'] == 'folder':
             self.smallImage = ctk.CTkImage(Image.open(self.json_list['Name']), size=(30,30))
+            self.Name_image.configure(text= "Name: ")
         self.frameImage.configure(image= self.smallImage)
 
 class property_image_bar(ctk.CTkFrame):
@@ -201,50 +205,95 @@ class property_image_bar(ctk.CTkFrame):
         self.tags_uper = self.Hook[5]
         self.Id = self.json_list['Id']
         # *Barra de propiedades de formatos imagenes
+        if self.json_list['Type'] == 'image':
+            self.label_x_position = ctk.CTkLabel(self, text= "X:")
+            self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
-        self.label_x_position = ctk.CTkLabel(self, text= "X:")
-        self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
+            self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_x)
+            self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
+            self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
 
-        self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_x)
-        self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
-        self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
+            self.label_y_position = ctk.CTkLabel(self, text= "Y:")
+            self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
 
-        self.label_y_position = ctk.CTkLabel(self, text= "Y:")
-        self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
+            self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_y)
+            self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
+            self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
 
-        self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_y)
-        self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
-        self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
+            self.label_width = ctk.CTkLabel(self, text= "W:")
+            self.label_width.grid(row=0, column=4, padx=5, pady=5)
 
-        self.label_width = ctk.CTkLabel(self, text= "W:")
-        self.label_width.grid(row=0, column=4, padx=5, pady=5)
+            self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_x)
+            self.Input_width.set(self.json_list['Width'])
+            self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
 
-        self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_x)
-        self.Input_width.set(self.json_list['Width'])
-        self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
+            self.label_heid = ctk.CTkLabel(self, text= "H:")
+            self.label_heid.grid(row=0, column=6, padx=5, pady=5)
 
-        self.label_heid = ctk.CTkLabel(self, text= "H:")
-        self.label_heid.grid(row=0, column=6, padx=5, pady=5)
+            self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_y)
+            self.Input_heid.set(self.json_list['Height'])
+            self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
-        self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_y)
-        self.Input_heid.set(self.json_list['Height'])
-        self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
+            self.label_rotate = ctk.CTkLabel(self, text= "Girar:")
+            self.label_rotate.grid(row=0, column=8, padx=5, pady=5)
 
-        self.label_rotate = ctk.CTkLabel(self, text= "Girar:")
-        self.label_rotate.grid(row=0, column=8, padx=5, pady=5)
+            self.Input_rotate = InputNumber(self, width=50, step_size=1, ciclic= True, max=360, Hook = self.Update_rotate)
+            self.Input_rotate.set(self.json_list['Rotate'])
+            self.Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
 
-        self.Input_rotate = InputNumber(self, width=50, step_size=1, ciclic= True, max=360, Hook = self.Update_rotate)
-        self.Input_rotate.set(self.json_list['Rotate'])
-        self.Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
+            checkbox_xCentro = ctk.CTkCheckBox(self, text= "xCentro:")
+            checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
 
-        checkbox_xCentro = ctk.CTkCheckBox(self, text= "xCentro:")
-        checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
+            checkbox_yCentro = ctk.CTkCheckBox(self, text= "yCentro:")
+            checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
 
-        checkbox_yCentro = ctk.CTkCheckBox(self, text= "yCentro:")
-        checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
+            self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.tag_uper )
+            self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
 
-        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.tag_uper )
-        self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
+        else:
+            self.label_x_position = ctk.CTkLabel(self, text= "X:")
+            self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
+
+            self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_x)
+            self.Input_x_position.set(0 - self.relative_x)
+            self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
+
+            self.label_y_position = ctk.CTkLabel(self, text= "Y:")
+            self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
+
+            self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook = self.Update_image_move_y)
+            self.Input_y_position.set(0 - self.relative_y)
+            self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
+
+            self.label_width = ctk.CTkLabel(self, text= "W:")
+            self.label_width.grid(row=0, column=4, padx=5, pady=5)
+
+            self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_x)
+            self.Input_width.set(0)
+            self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
+
+            self.label_heid = ctk.CTkLabel(self, text= "H:")
+            self.label_heid.grid(row=0, column=6, padx=5, pady=5)
+
+            self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_image_size_y)
+            self.Input_heid.set(0)
+            self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
+
+            self.label_rotate = ctk.CTkLabel(self, text= "Girar:")
+            self.label_rotate.grid(row=0, column=8, padx=5, pady=5)
+
+            self.Input_rotate = InputNumber(self, width=50, step_size=1, ciclic= True, max=360, Hook = self.Update_rotate)
+            self.Input_rotate.set(0)
+            self.Input_rotate.grid(row=0, column=9 ,padx=5, pady=5)
+
+            checkbox_xCentro = ctk.CTkCheckBox(self, text= "xCentro:")
+            checkbox_xCentro.grid(row=0, column=11, padx=5, pady=5)
+
+            checkbox_yCentro = ctk.CTkCheckBox(self, text= "yCentro:")
+            checkbox_yCentro.grid(row=0, column=12, padx=5, pady=5)
+
+            self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.tag_uper )
+            self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
 
     def Update_image_move_x(self, value):
         if self.json_list['Type'] == 'image':
@@ -290,7 +339,6 @@ class property_image_bar(ctk.CTkFrame):
             self.Input_heid.set(self.json_list['Height'])
             self.Input_rotate.set(self.json_list['Rotate'])
             self.Id = self.json_list['Id']
-        #print(self.json_list)
 
     def Change_relative_to(self, value):
         self.relative_x, self.relative_y = value[0], value[1]
@@ -315,53 +363,101 @@ class property_text_bar(ctk.CTkFrame):
         self.Change_color_font = self.Hook[3]
         self.change_text = self.Hook[4]
         self.Fonts_list = List_of_fonts('C:\Windows\Fonts')
-        print(self.Fonts_list)
+        #print(self.Fonts_list)
         #*Body
-        self.label_x_position = ctk.CTkLabel(self, text= "X:")
-        self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
+        if self.json_list['Type'] == 'text':
+            self.label_x_position = ctk.CTkLabel(self, text= "X:")
+            self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
 
-        self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_x)
-        self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
-        self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
+            self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_x)
+            self.Input_x_position.set(self.json_list['x_position'] - self.relative_x)
+            self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
 
-        self.label_y_position = ctk.CTkLabel(self, text= "Y:")
-        self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
+            self.label_y_position = ctk.CTkLabel(self, text= "Y:")
+            self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
 
-        self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_y)
-        self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
-        self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
+            self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_y)
+            self.Input_y_position.set(self.json_list['y_position'] - self.relative_y)
+            self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
 
-        self.label_width = ctk.CTkLabel(self, text= "W:")
-        self.label_width.grid(row=0, column=4, padx=5, pady=5)
+            self.label_width = ctk.CTkLabel(self, text= "W:")
+            self.label_width.grid(row=0, column=4, padx=5, pady=5)
 
-        self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_x)
-        self.Input_width.set(self.json_list['Width'])
-        self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
+            self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_x)
+            self.Input_width.set(self.json_list['Width'])
+            self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
 
-        self.label_heid = ctk.CTkLabel(self, text= "H:")
-        self.label_heid.grid(row=0, column=6, padx=5, pady=5)
+            self.label_heid = ctk.CTkLabel(self, text= "H:")
+            self.label_heid.grid(row=0, column=6, padx=5, pady=5)
 
-        self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_y)
-        self.Input_heid.set(self.json_list['Height'])
-        self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
+            self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_y)
+            self.Input_heid.set(self.json_list['Height'])
+            self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
 
-        self.Cb_Font_text = CustomComboBox(self, values=self.Fonts_list, Function= self.Change_font)
-        self.Cb_Font_text.grid(row=0, column=8, padx=5, pady=5)
-        
-        self.Cb_Font_size = ctk.CTkComboBox(self, values=['8','9','10','11','12','14','16','18','20','22','24','26','28','36','48','72'])
-        self.Cb_Font_size.grid(row=0, column=9, padx=5, pady=5)
+            self.Cb_Font_text = CustomComboBox(self, values=self.Fonts_list, Function= self.Change_font)
+            self.Cb_Font_text.grid(row=0, column=8, padx=5, pady=5)
+            
+            self.Cb_Font_size = ctk.CTkComboBox(self, values=['8','9','10','11','12','14','16','18','20','22','24','26','28','36','48','72'])
+            self.Cb_Font_size.grid(row=0, column=9, padx=5, pady=5)
 
-        self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color )
-        self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
+            self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color )
+            self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
 
-        self.Bt_left_text = Icon_button(self, Icon_image = './Default/left_text.png', Function= self.anchor_left)
-        self.Bt_left_text.grid(row=0, column=11, padx=5, pady=5)
+            self.Bt_left_text = Icon_button(self, Icon_image = './Default/left_text.png', Function= self.anchor_left)
+            self.Bt_left_text.grid(row=0, column=11, padx=5, pady=5)
 
-        self.Bt_center_text = Icon_button(self, Icon_image = './Default/center_text.png', Function= self.anchor_center)
-        self.Bt_center_text.grid(row=0, column=12, padx=5, pady=5)
+            self.Bt_center_text = Icon_button(self, Icon_image = './Default/center_text.png', Function= self.anchor_center)
+            self.Bt_center_text.grid(row=0, column=12, padx=5, pady=5)
 
-        self.Bt_right_text = Icon_button(self, Icon_image = './Default/right_text.png', Function= self.anchor_right)
-        self.Bt_right_text.grid(row=0, column=13, padx=5, pady=5)
+            self.Bt_right_text = Icon_button(self, Icon_image = './Default/right_text.png', Function= self.anchor_right)
+            self.Bt_right_text.grid(row=0, column=13, padx=5, pady=5)
+
+        else:
+            self.label_x_position = ctk.CTkLabel(self, text= "X:")
+            self.label_x_position.grid(row=0, column=0, padx=5, pady=5)
+
+            self.Input_x_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_x)
+            self.Input_x_position.set(0 - self.relative_x)
+            self.Input_x_position.grid(row=0, column=1 , padx=5, pady=5)
+
+            self.label_y_position = ctk.CTkLabel(self, text= "Y:")
+            self.label_y_position.grid(row=0, column=2, padx=5, pady=5)
+
+            self.Input_y_position = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_move_y)
+            self.Input_y_position.set(0 - self.relative_y)
+            self.Input_y_position.grid(row=0, column=3 , padx=5, pady=5)
+
+            self.label_width = ctk.CTkLabel(self, text= "W:")
+            self.label_width.grid(row=0, column=4, padx=5, pady=5)
+
+            self.Input_width = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_x)
+            self.Input_width.set(0)
+            self.Input_width.grid(row=0, column=5 , padx=5, pady=5)
+
+            self.label_heid = ctk.CTkLabel(self, text= "H:")
+            self.label_heid.grid(row=0, column=6, padx=5, pady=5)
+
+            self.Input_heid = InputNumber(self, width=50, step_size=1, Hook= self.Update_text_size_y)
+            self.Input_heid.set(0)
+            self.Input_heid.grid(row=0, column=7 , padx=5, pady=5)
+
+            self.Cb_Font_text = CustomComboBox(self, values=self.Fonts_list, Function= self.Change_font)
+            self.Cb_Font_text.grid(row=0, column=8, padx=5, pady=5)
+            
+            self.Cb_Font_size = ctk.CTkComboBox(self, values=['8','9','10','11','12','14','16','18','20','22','24','26','28','36','48','72'])
+            self.Cb_Font_size.grid(row=0, column=9, padx=5, pady=5)
+
+            self.Bt_color_choose = Icon_button(self, Icon_image = './Default/color_font.png', Function= self.choose_color )
+            self.Bt_color_choose.grid(row=0, column=10, padx=5, pady=5)
+
+            self.Bt_left_text = Icon_button(self, Icon_image = './Default/left_text.png', Function= self.anchor_left)
+            self.Bt_left_text.grid(row=0, column=11, padx=5, pady=5)
+
+            self.Bt_center_text = Icon_button(self, Icon_image = './Default/center_text.png', Function= self.anchor_center)
+            self.Bt_center_text.grid(row=0, column=12, padx=5, pady=5)
+
+            self.Bt_right_text = Icon_button(self, Icon_image = './Default/right_text.png', Function= self.anchor_right)
+            self.Bt_right_text.grid(row=0, column=13, padx=5, pady=5)
 
     def anchor_left(self):
         self.Change_anchor_text(self.Id, 'left')
@@ -520,6 +616,7 @@ class Vincular_excel(ctk.CTkToplevel):
         self.I_direccion.delete(0, "end")
         self.I_direccion.insert(0, self.filename)
         self.wb = openpyxl.load_workbook(self.filename)
+        self.data_link['Type'] = 'Excel'
         self.data_link['Path'] = self.filename
         # Get the list of sheet names
         sheet_names = self.wb.sheetnames
