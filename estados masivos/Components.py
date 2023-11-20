@@ -124,9 +124,10 @@ class ItemElement(ctk.CTkFrame):
         self.FrameButons.grid(row=0, column=0)
         
         # * frame scheme Input
-        
+
         self.frameMove = ctk.CTkLabel(self.FrameButons, image=self.smallMove, width=30, text="")
         self.frameMove.grid(row=0, column=0, padx=1, pady=1)
+        self.frameMove.bind("<Button-1>", self.activate_element)
 
         self.frameImage = ctk.CTkLabel(self.FrameButons, image=self.smallImage, width=30, text="")
         self.frameImage.grid(row=0, column=1, padx=1, pady=1)
@@ -148,6 +149,9 @@ class ItemElement(ctk.CTkFrame):
 
         self.Bt_change_order = Icon_button(self.frameChangeOrder, Icon_image = './Default/down-arrow.png', Function= self.tag_uper)
         self.Bt_change_order.grid(row=1, column=0, padx=0, pady=0)
+
+    def activate_element(self, event):
+        self.Hook[2](self.json_list['Id'])
 
     def tag_uper(self):
         if self.json_list['Type'] != 'Background':

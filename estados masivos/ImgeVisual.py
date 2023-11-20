@@ -58,15 +58,15 @@ class Perzonaliced_image_creator(ctk.CTk):
         self.Menu_Export = updown_menu(self.Tool_bar, json_list=['Unico','Personalizado'], text= 'Exportar', Otros=[llamar_vincular_excel])
         self.Menu_Export.grid(row=0, column=3 ,padx=0, pady=0)
         #?property bar
-        print(self.project)
+        #print(self.project)
         #self.Up_bar = property_image_bar(self, json_list= self.up_bar_data, Hook = [Relative_to, External_Move, self.project['Project'][0], External_Rotate, tag_lower, tag_uper])
         #self.Up_bar.grid(row=1, column=0, padx=0, pady=(10, 0), sticky="nsew")
 
         #self.Up_bar_text = property_text_bar(self, json_list= self.up_bar_data, Hook=[Relative_to, Change_anchor_text, External_Move, Change_color_font, change_text])
         #self.Up_bar_text.grid(row=2, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 
-        #self.Up_bar_background = property_background_bar(self, json_list= self.up_bar_data, Hook=[])
-        #self.Up_bar_background.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+        self.Up_bar_background = property_background_bar(self, json_list= self.up_bar_data, Hook=[])
+        self.Up_bar_background.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
         
         #self.ElementList = FlatList(self, json_list=self.project, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
         #self.ElementList.grid(row=3, column=1 ,padx=5, pady=5)
@@ -168,7 +168,7 @@ def to_image_bar(lista):
         Up_bar_background.Update_bg_data(up_bar_data)
         Up_bar.grid_forget()
         Up_bar_text.grid_forget()
-        Up_bar_text.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
+        Up_bar_background.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
     update_project(up_bar_data)
     
     
@@ -407,7 +407,8 @@ def Exportar_personalizado():
     if project['Link']['Type'] == '':
         print('No esta vinculado a datos')
     elif project['Link']['Type'] == 'Excel':
-        save_path = filedialog.askdirectory()
+        save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=(("PNG files", "*.png"), ("JPEG files", "*.jpg")))
+        #save_path = filedialog.askdirectory()
         # get the data from the excel's sheet
         Data = project['Link']
         wb = openpyxl.load_workbook(Data['Path'])
@@ -416,7 +417,7 @@ def Exportar_personalizado():
         Cell = Data['Cell']
         Cell_number = 0
         indices = []
-        i=0
+        j=0
 
         for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True)):
             data.append(row)
@@ -426,12 +427,11 @@ def Exportar_personalizado():
         for name in {name: 0 for name in [item.value for item in sheet[1] if item.value is not None]}:
             temp_name = name.lower()
             if Cell.lower() == temp_name:
-                Cell_number = i
+                Cell_number = j
                 break
-            i+=1
-        print(Cell_number)
+            j+=1
         if save_path:
-            for New_image in data:
+            for row in data:
 
                 for Item in project['Project']:
                     if Item['Type'] == 'Background':
@@ -447,7 +447,6 @@ def Exportar_personalizado():
                         # *put the text into the image
                         fontType = 'C:\\Windows\\Fonts\\' + 'Arial' + '.ttf'
                         #print(fontType)
-
                         fontColor = tuple(map(int, Item['color'].strip('()').split(',')))
                         fontSizeBox = TextBoxSize(Item['boxWidth'], Item['boxHeight'], Item['text'], fontType)
                         font = ImageFont.truetype(fontType, fontSizeBox[0])
@@ -455,15 +454,26 @@ def Exportar_personalizado():
 
                         draw.multiline_text((Item['x_position']- Relative_to[0], Item['y_position'] - Relative_to[1]), Item['text'], font=font, fill=fontColor, align=Item['align'])
                     elif Item['Type'] == 'Folder':
-                        for row in data:
-                            fil = search_file(os.path.dirname(Item['Name']),row[Cell_number])
-                            image1 = properties(fil,Item)
-                            # * Compute the position of the image
-                            x = Item['x_position']- Relative_to[0]
-                            y = Item['y_position']- Relative_to[1]
-                            # * Paste the new RGBA image with the PNG image on top of the background image
-                            background_image.paste(image1, (int(x),int(y)), image1)
-                background_image.save(save_path + '/' + str(New_image[0]) + '.jpg')
+                        #for row in data:
+                        fil = search_file(os.path.dirname(Item['Name']),row[Cell_number])
+                        image1 = properties(fil,Item)
+                        # * Compute the position of the image
+                        x = Item['x_position']- Relative_to[0]
+                        y = Item['y_position']- Relative_to[1]
+                        # * Paste the new RGBA image with the PNG image on top of the background image
+                        background_image.paste(image1, (int(x),int(y)), image1)
+                #+ '/' + str(New_image[Cell_number]) + str(os.path.splitext(save_path)[1])
+                #print(os.path.dirname(save_path)+ '/' + str(row[Cell_number])+ str(os.path.splitext(save_path)[1]))
+                background_image.save(os.path.dirname(save_path)+ '/' + str(row[Cell_number])+ str(os.path.splitext(save_path)[1]))
+
+def activate_element(Id):
+    for element in project_layers:
+        if element['Id'] == Id:
+            element['active'] = True
+        elif element['Id'] != Id:
+            element['active'] = False
+    Image_Container.activate_element(Id)
+    project['Project'] = project_layers
 
 app = ctk.CTk()
 app.title("Imagenes personalizadas")
@@ -500,7 +510,7 @@ Up_bar_background.grid(row=1, column=0 ,padx=0, pady=(10, 0), sticky="nsew")
 Project_elements = ctk.CTkFrame(app)
 Project_elements.grid(row=2, column=0, sticky="nsew")
 
-ElementList = FlatList(Project_elements, json_list=project_layers, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements])
+ElementList = FlatList(Project_elements, json_list=project_layers, Item = ItemElement, width=200, Otros=[back_one_elements, advance_one_elements, activate_element])
 ElementList.grid(row=0, column=1 ,padx=5, pady=5)
 
 Image_Container = ImageContainer(Project_elements, json_list=project_layers, width= 1000, function = to_image_bar, Hook = [Change_relative_to, to_image_bar])
@@ -526,20 +536,13 @@ def add_image(path, x , y):
                         })
     project['Project'] = project_layers
 
-def activate_element(Id):
-    for element in project_layers:
-        if element['Id'] == Id:
-            element['active'] = True
-        elif element['Id'] != Id:
-            element['active'] = False
-    project['Project'] = project_layers
+
 
 
 def comparing_elemts(List1, List2):
     symmetric_diff = list(set(List1) ^ set(List2))
 
     print("Symmetric Difference:", symmetric_diff)
-
 
 app.mainloop()
 

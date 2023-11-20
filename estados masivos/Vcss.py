@@ -533,6 +533,22 @@ class DraggableLabel(ctk.CTkFrame):
         bg_screenshot = ImageTk.PhotoImage(screenshot)
         return bg_screenshot
         
+class AutoScrollbar(tk.ttk.Scrollbar):
+    ''' A scrollbar that hides itself if it's not needed.
+        Works only if you use the grid geometry manager '''
+    def set(self, lo, hi):
+        if float(lo) <= 0.0 and float(hi) >= 1.0:
+            self.grid_remove()
+        else:
+            self.grid()
+            tk.ttk.Scrollbar.set(self, lo, hi)
+
+    def pack(self, **kw):
+        raise tk.TclError('Cannot use pack with this widget')
+
+    def place(self, **kw):
+        raise tk.TclError('Cannot use place with this widget')
+    
 
 class ImageContainer(tk.Frame):
     def __init__(self, *args,
@@ -555,10 +571,25 @@ class ImageContainer(tk.Frame):
         self.configure(width=self.width, height=self.height,)
         self.function = Hook[1]
         self.Change_point_relative_to = Hook[0]
+        self.imscale = 1.0
+        self.delta = 0.75
         #num_items = len(self.json_list)
 
-        self.canvas = tk.Canvas(self, width = self.width, height = self.height, bg='#D9D9D9')
-        self.canvas.pack()
+        # Vertical and horizontal scrollbars for canvas
+        self.vbar = AutoScrollbar(self, orient='vertical')
+        self.hbar = AutoScrollbar(self, orient='horizontal')
+        self.vbar.grid(row=0, column=1, sticky='ns')
+        self.hbar.grid(row=1, column=0, sticky='we')
+
+        self.canvas = tk.Canvas(self, width = self.width, height = self.height, bg='#D9D9D9', highlightthickness=0,
+                                xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
+        self.vbar.configure(command=self.scroll_y)  # bind scrollbars to the canvas
+        self.hbar.configure(command=self.scroll_x)
+        self.canvas.grid(row=0, column=0, sticky='nswe')
+        #self.canvas.pack()
+        self.canvas.update()  # wait till canvas is created
+
+        self.canvas.bind('<MouseWheel>', self.wheel)
         self.image_objects = []
         self.text_objects = []
         self.objects = []
@@ -569,21 +600,52 @@ class ImageContainer(tk.Frame):
                 self.on_x = (self.width - Item['Width'])/2
                 self.on_y = (self.height - Item['Height'])/2
                 print(self.on_x, self.on_y)
-                self.background_continer = Background_obj(self.canvas, json_data = Item, Hook = [self.function, self.Change_point_relative_to])
+                self.background_continer = Background_obj(self.canvas, json_data = Item, Hook = [self.function, self.Change_point_relative_to, self.New_rel])
                 self.Change_point_relative_to([self.on_x, self.on_y])
             elif Item['Type'] == 'image':
                 self.picture = Image.open(Item['Name'])
                 x = Item['x_position']
                 y = Item['y_position']
-                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'], json_data= Item)
+                obj = ObjectOnCanvas(self.canvas, x, y, Item['Name'], function = self.function, Id = Item['Id'], json_data= Item, Hook= [self.on_x, self.on_y])
                 self.image_objects.append(obj)
                 self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
             elif Item['Type'] == 'text':
                 x = Item['x_position']
                 y = Item['y_position']
-                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function, json_data= Item)
+                text = TextBox(self.canvas, x, y, Item['text'], Item['boxWidth'], Item['boxHeight'], Id = Item['Id'], Function = self.function, json_data= Item, Hook=[self.on_x, self.on_y])
                 self.text_objects.append(text)
                 #self.objects.append({"Id": Item['Id'], "Type": "image", "Name": Item['Name'], 'objeto': obj})
+    
+    def scroll_y(self, *args, **kwargs):
+        ''' Scroll canvas vertically and redraw the image '''
+        self.canvas.yview(*args, **kwargs)  # scroll vertically
+        print('scroll y')
+        #self.show_image()  # redraw the image
+
+    def scroll_x(self, *args, **kwargs):
+        ''' Scroll canvas horizontally and redraw the image '''
+        self.canvas.xview(*args, **kwargs)  # scroll horizontally
+        print('scroll x')
+        #self.show_image()  # redraw the image
+    def wheel(self, event):
+        print('holi, esta scroleando')
+        ''' Zoom with mouse wheel '''
+        scale = 1.0
+        # Respond to Linux (event.num) or Windows (event.delta) wheel event
+        if event.num == 5 or event.delta == -120:
+            scale        *= self.delta
+            self.imscale *= self.delta
+        if event.num == 4 or event.delta == 120:
+            scale        /= self.delta
+            self.imscale /= self.delta
+        self.background_continer.zoom(self.imscale)
+        for image in self.image_objects:
+            image.zoom(self.imscale, self.rel_x, self.rel_y)
+        for text in self.text_objects:
+            text.zoom(self.imscale, self.rel_x, self.rel_y)
+
+    def New_rel(self, rel_x, rel_y):
+        self.rel_x, self.rel_y = rel_x, rel_y
 
     def update_image_size(self, *args):
         zoom_level = self.zoom_var.get()
@@ -680,6 +742,11 @@ class ImageContainer(tk.Frame):
     def bg_color(self):
         self.background_continer.Change_bg_color()
 
+    def activate_element(self, Id):
+        self.background_continer.activate_element(Id)
+        for obj in self.image_objects:
+            obj.activate_element(Id)
+
 class Background_obj:
     def __init__(self,
                  canvas, 
@@ -697,7 +764,7 @@ class Background_obj:
         self.color = self.json_data['BackgroundColor']
         self.Hook = Hook
         self.size_background = self.Width, self.Height
-        print('x y y inicial', self.x, self.y)
+        #print('x y y inicial', self.x, self.y)
         #*Body
         self.background_image = Image.new('RGBA',self.size_background, self.color)
         self.Bg_image = ImageTk.PhotoImage(self.background_image)
@@ -720,6 +787,16 @@ class Background_obj:
         self.Hook[1]([self.x, self.y])
         self.json_data = self.get()
 
+    def zoom(self, scale):
+        x = (self.canvas.winfo_width() - int(self.Width * scale))/2
+        y = (self.canvas.winfo_height() - int(self.Height * scale))/2
+        size_background = int(self.Width * scale), int(self.Height * scale)
+        self.background_image = Image.new('RGBA', size_background, self.color)
+        self.Bg_image = ImageTk.PhotoImage(self.background_image)
+        self.canvas.itemconfig(self.background_continer, image=self.Bg_image)
+        self.canvas.coords(self.background_continer, x, y)
+        self.Hook[2](x, y)
+
     def Change_bg_color(self):
         color_code = tk.colorchooser.askcolor(title ="Choose color")
         self.json_data['BackgroundColor'] = color_code[1]
@@ -741,6 +818,12 @@ class Background_obj:
                 "active": True,
                 "tags": 0}
 
+    def activate_element(self, Id):
+        if self.json_data['Id'] == Id:
+            self.Hook[0](self.get())
+            print('entro aqui')
+
+
 class ObjectOnCanvas:
     def __init__(self,
                  canvas, 
@@ -750,7 +833,8 @@ class ObjectOnCanvas:
                  function: Optional[callable] = any,
                  Id: Optional[int] = None,
                  active: bool = False,
-                 json_data: Optional[dict]= None):
+                 json_data: Optional[dict]= None,
+                 Hook: Optional[any] = None):
         
         self.canvas = canvas
         self.json_data = json_data
@@ -766,6 +850,10 @@ class ObjectOnCanvas:
         self.angle = 0
         self.function = function
         self.active = active
+        self.Hook = Hook
+        self.rel_x = Hook[0]
+        self.rel_y = Hook[1]
+        self.scale = 1
 
         super().__init__()
         # *principal image
@@ -875,6 +963,85 @@ class ObjectOnCanvas:
         self.Cp = self.canvas.create_image(self.x + round((self.Width/2))-2, self.y + round((self.Height/2))-2 , anchor="nw", image=self.square_point)
         self.canvas.itemconfigure(self.Cp, state='hidden')
 
+    def zoom(self, scale, rel_x, rel_y):
+        self.rel_x = rel_x
+        self.rel_y = rel_y
+        self.scale = scale
+        New_size= int(self.Width * scale), int(self.Height * scale)
+        resized_image = self.picture.resize(New_size, Image.ANTIALIAS)
+        self.image = ImageTk.PhotoImage(resized_image)
+        self.canvas.itemconfig(self.canvas_obj, image=self.image)
+        self.Move()
+        #* Move the image
+        '''#Principal image
+        #self.canvas.coords(self.canvas_obj, round(self.x - (rel_x * scale)), round(self.y - (rel_y * scale)))
+        self.canvas.coords(self.canvas_obj, round(rel_x + (self.x - self.Hook[0])*scale), round(rel_y + (self.y - self.Hook[1])*scale))
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, round(rel_x + (self.x - self.Hook[0]) * scale), round(rel_y + (self.y - self.Hook[1])*scale))
+        #Punto superior central
+        self.canvas.coords(self.Psc, round(rel_x + (self.x - self.Hook[0]) * scale + ((self.Width * scale)/2)-2), round(rel_y + (self.y - self.Hook[1])*scale))
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, round(rel_x + (self.x - self.Hook[0]) * scale + (self.Width * scale)- 4), round(rel_y + (self.y - self.Hook[1])*scale))
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, round(rel_x + (self.x - self.Hook[0]) * scale), round(rel_y + (self.y - self.Hook[1]) * scale + self.Height * scale - 4))
+        #Punto inferior central
+        self.canvas.coords(self.Pic, round(rel_x + (self.x - self.Hook[0]) * scale + ((self.Width * scale)/2)-2), round(rel_y + (self.y - self.Hook[1]) * scale + self.Height * scale - 4))
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, round(rel_x + (self.x - self.Hook[0]) * scale + (self.Width * scale) - 4 ), round(rel_y + (self.y - self.Hook[1]) * scale + self.Height * scale - 4))
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, round(rel_x + (self.x - self.Hook[0]) * scale), round(rel_y + (self.y - self.Hook[1]) * scale + (self.Height * scale) /2 - 4))
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, round(rel_x + (self.x - self.Hook[0]) * scale + self.Width * scale - 4), round(rel_y + (self.y - self.Hook[1]) * scale + (self.Height * scale) /2 - 4))
+        #Centered point
+        self.canvas.coords(self.Cp, round(rel_x + (self.x - self.Hook[0]) * scale + (self.Width * scale)/2 - 2), round(rel_y + (self.y - self.Hook[1]) * scale + self.Height * scale - 4))
+        
+        #? Move the reference points to rotate the image
+        #Rotar superior izquierdo
+        self.canvas.coords(self.Rsi, round(rel_x + (self.x - self.Hook[0]) * scale - 8), round(rel_y + (self.y - self.Hook[1])*scale - 8))
+        #Rotar superior derecho
+        self.canvas.coords(self.Rsd, round(rel_x + (self.x - self.Hook[0]) * scale + (self.Width * scale) - 8), round(rel_y + (self.y - self.Hook[1])*scale))
+        #Rotar inferior izquierdo
+        self.canvas.coords(self.Rii, round(rel_x + (self.x - self.Hook[0]) * scale - 8), round(rel_y + (self.y - self.Hook[1]) * scale + (self.Height * scale) - 8))
+        #Rotar inferior derecho
+        self.canvas.coords(self.Rid, round(rel_x + (self.x - self.Hook[0]) * scale + (self.Width * scale) - 8), round(rel_y + (self.y - self.Hook[1]) * scale + (self.Height * scale) - 8))
+        #self.canvas.coords(self.canvas_obj, self.x, self.y)'''
+
+    def Move(self):
+        #* Move the image
+        #? Principal image
+        self.canvas.coords(self.canvas_obj, round(self.rel_x + (self.x - self.Hook[0])* self.scale), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto superior central
+        self.canvas.coords(self.Psc, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + ((self.Width * self.scale)/2)-2), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale)- 4), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto inferior central
+        self.canvas.coords(self.Pic, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + ((self.Width * self.scale)/2)-2), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 4 ), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) /2 - 4))
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + self.Width * self.scale - 4), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) /2 - 4))
+        #Centered point
+        self.canvas.coords(self.Cp, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale)/2 - 2), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        
+        #? Move the reference points to rotate the image
+        #Rotar superior izquierdo
+        self.canvas.coords(self.Rsi, round(self.rel_x + (self.x - self.Hook[0]) * self.scale - 8), round(self.rel_y + (self.y - self.Hook[1])* self.scale - 8))
+        #Rotar superior derecho
+        self.canvas.coords(self.Rsd, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 8), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Rotar inferior izquierdo
+        self.canvas.coords(self.Rii, round(self.rel_x + (self.x - self.Hook[0]) * self.scale - 8), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) - 8))
+        #Rotar inferior derecho
+        self.canvas.coords(self.Rid, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 8), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) - 8))
+        #self.canvas.coords(self.canvas_obj, self.x, self.y)
+
     def activate(self):
         if self.active == False:
             self.canvas.itemconfigure(self.Psi, state='hidden')
@@ -890,18 +1057,7 @@ class ObjectOnCanvas:
             self.canvas.itemconfigure(self.Rii, state='hidden')
             self.canvas.itemconfigure(self.Rid, state='hidden')
         elif self.active == True:
-            self.canvas.itemconfigure(self.Psi, state='normal')
-            self.canvas.itemconfigure(self.Psc, state='normal')
-            self.canvas.itemconfigure(self.Psd, state='normal')
-            self.canvas.itemconfigure(self.Pii, state='normal')
-            self.canvas.itemconfigure(self.Pic, state='normal')
-            self.canvas.itemconfigure(self.Pid, state='normal')
-            self.canvas.itemconfigure(self.Pli, state='normal')
-            self.canvas.itemconfigure(self.Pld, state='normal')
-            self.canvas.itemconfigure(self.Rsi, state='normal')
-            self.canvas.itemconfigure(self.Rsd, state='normal')
-            self.canvas.itemconfigure(self.Rii, state='normal')
-            self.canvas.itemconfigure(self.Rid, state='normal')
+            self.Show_points(state_resize = 'normal', state_rotate= 'hidden')
 
     def start_drag(self, event):
         self.drag_data["x"] = event.x
@@ -1132,9 +1288,6 @@ class ObjectOnCanvas:
                 "active": True,
                 "tags": 1}
 
-                
-        
-
     def Change_cursor(self, event, C_cursor):
         # Cambiar el cursor del mouse a un cursor personalizado (por ejemplo, 'hand2')
         self.canvas.config(cursor=C_cursor)
@@ -1268,6 +1421,14 @@ class ObjectOnCanvas:
             #print("angle = ", self.angle)
             self.function(self.get())
                 
+    def activate_element(self, Id):
+        if self.json_data['Id'] == Id:
+            self.active = True
+            self.function(self.get())
+        else:
+            self.active = False
+        #print(self.json_data['Id'], Id, self.active)
+        self.activate()
 
 class TextBox:
     def __init__(self,
@@ -1282,7 +1443,8 @@ class TextBox:
                 font_style = 'roman',
                 Id: Optional[int] = None,
                 Function: Optional[callable] = None,
-                json_data: Optional[dict] = None):
+                json_data: Optional[dict] = None,
+                Hook: Optional[any]= None):
         self.canvas = canvas
         self.x = x
         self.y = y
@@ -1303,6 +1465,10 @@ class TextBox:
         self.text_showed = self.text.split("\n")
         self.cursor = [0, 0]
         self.jon_data = json_data
+        self.Hook = Hook
+        self.scale = 1
+        self.rel_x = self.Hook[0]
+        self.rel_y = self.Hook[1]
 
         self.custom_font = tk.font.Font(family=self.font, size=self.font_size, slant=self.font_style)
         self.text_lines=[]
@@ -1735,6 +1901,55 @@ class TextBox:
             for line in self.text_lines:
                 self.canvas.itemconfig(line, fill=color_code[1])
 
+    def zoom(self, scale, rel_x, rel_y):
+        self.rel_x = rel_x
+        self.rel_y = rel_y
+        self.scale = scale
+        self.Move()
+
+    def Move(self):
+        i=0
+        for line in self.text_lines:
+            if self.aling == 'left':
+                new_x = round(self.rel_x + (self.x - self.Hook[0]) * self.scale)
+            elif self.aling == 'center':
+                new_x = round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale - self.size_of_text(line)[0])/2)
+            elif self.aling == 'right':
+                new_x = round(self.rel_x + (self.x - self.Hook[0]) * self.scale + self.Width * self.scale - self.size_of_text(line)[0])
+            self.canvas.coords(line, new_x, round(self.rel_y + (self.y - self.Hook[1])* self.scale) + i * self.custom_font.metrics("linespace"))
+            i=i+1
+        #?Move the text container
+        self.canvas.coords(self.text_container, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1])* self.scale), round(self.rel_x + (self.x - self.Hook[0]) * self.scale + self.Width * self.scale), round(self.rel_y + (self.y - self.Hook[1])* self.scale + self.Height * self.scale))
+        #? Move the reference points to resize the image
+        #Punto superior izquierdo
+        self.canvas.coords(self.Psi, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto superior central
+        self.canvas.coords(self.Psc, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + ((self.Width * self.scale)/2)-2), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto superior derecho
+        self.canvas.coords(self.Psd, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale)- 4), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Punto inferior izquierdo
+        self.canvas.coords(self.Pii, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto inferior central
+        self.canvas.coords(self.Pic, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + ((self.Width * self.scale)/2)-2), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto inferior derecho
+        self.canvas.coords(self.Pid, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 4 ), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        #Punto lateral izquierdo
+        self.canvas.coords(self.Pli, round(self.rel_x + (self.x - self.Hook[0]) * self.scale), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) /2 - 4))
+        #Punto lateral derecho
+        self.canvas.coords(self.Pld, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + self.Width * self.scale - 4), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) /2 - 4))
+        #Centered point
+        #self.canvas.coords(self.Cp, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale)/2 - 2), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + self.Height * self.scale - 4))
+        
+        '''#? Move the reference points to rotate the image
+        #Rotar superior izquierdo
+        self.canvas.coords(self.Rsi, round(self.rel_x + (self.x - self.Hook[0]) * self.scale - 8), round(self.rel_y + (self.y - self.Hook[1])* self.scale - 8))
+        #Rotar superior derecho
+        self.canvas.coords(self.Rsd, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 8), round(self.rel_y + (self.y - self.Hook[1])* self.scale))
+        #Rotar inferior izquierdo
+        self.canvas.coords(self.Rii, round(self.rel_x + (self.x - self.Hook[0]) * self.scale - 8), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) - 8))
+        #Rotar inferior derecho
+        self.canvas.coords(self.Rid, round(self.rel_x + (self.x - self.Hook[0]) * self.scale + (self.Width * self.scale) - 8), round(self.rel_y + (self.y - self.Hook[1]) * self.scale + (self.Height * self.scale) - 8))'''
+        #self.canvas.coords(self.canvas_obj, self.x, self.y)
 
 class Icon_button(tk.Label):
     def __init__(self, *args,
@@ -1744,6 +1959,7 @@ class Icon_button(tk.Label):
                  hover_color = '#F2F2F2',
                  initial_color = '#FFFFFF',
                  icon_color='#000000',  # Default icon color is black
+                 resize = (15,15),
                  **kwargs):
         
         self.Icon = Icon_image
@@ -1754,7 +1970,7 @@ class Icon_button(tk.Label):
         self.icon_color = icon_color
         
         self.icon_image = Image.open(self.Icon)
-        self.icon_image = self.icon_image.resize((15, 15), Image.ANTIALIAS)
+        self.icon_image = self.icon_image.resize(resize, Image.ANTIALIAS)
         # Recolor the icon with the specified icon_color
         '''if self.icon_color:
             self.icon_image = self.recolor_image(self.icon_color)'''
@@ -1765,7 +1981,9 @@ class Icon_button(tk.Label):
         #self.icon_image = ctk.CTkImage(Image.open(self.Icon), size=(30,30))
         #self.configure(image=self.icon_image)
         #prueba
+        #self.config(bg = self.initial_color, image=self.icon_image)
         self.config(bg = self.initial_color, image=self.icon_image)
+
         self.bind("<Enter>", self.on_hover)
         self.bind("<Leave>", self.on_leave)
         self.bind("<Button-1>", self.on_press)
@@ -1816,21 +2034,6 @@ class CustomComboBox(tk.Frame):
         # Button to open the dropdown
         self.dropdown_button = Icon_button(self, Icon_image='./Default/down-arrow.png', Function= self.toggle_dropdown)
         self.dropdown_button.grid(row=0, column=1, padx=0, pady=0)
-        # Listbox to display the dropdown items (hidden initially)
-        #self.dropdown_window = tk.Toplevel(self.master)
-        
-        #self.listbox = FlatList(self.master, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
-        #self.listbox = FlatList(self.dropdown_window, json_list=self.values, Item = ItemCombobox, width= 120 ,Otros = self.on_select)
-        #self.dropdown_window = tk.Toplevel(self.master)
-        #self.listbox.grid(row=1, column=0, padx=0, pady=0)
-        #self.listbox.grid_remove()
-        # Usar place en lugar de grid para posicionar el listbox
-        #self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.entry_height + 20)
-        #self.listbox.place_forget()
-        #self.toggle_dropdown
-
-        # Bind events
-        '''self.listbox.bind('<<ListboxSelect>>', self.on_select)'''
         self.entry.bind("<FocusIn>", self.toggle_dropdown)
         self.entry.bind("<FocusOut>", self.toggle_dropdown)
     def toggle_dropdown(self, event=None):
