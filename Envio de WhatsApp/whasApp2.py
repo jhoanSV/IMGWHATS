@@ -73,7 +73,8 @@ class Send_Wapp:
         self.errados = 0
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan
-        chrome_service = ChromeService(ChromeDriverManager().install())
+        #chrome_service = ChromeService(ChromeDriverManager().install())
+        chrome_service = ChromeService(executable_path=r'C:\Users\pc\AppData\Local\Programs\Python\Python311\Lib\site-packages\selenium\webdriver\chrome\chromedriver.exe')
         chrome_service.creation_flags = CREATE_NO_WINDOW
         driver = webdriver.Chrome(options=self.options, service=chrome_service)
         driver.get(self.whatsapp_web_url)
@@ -93,11 +94,17 @@ class Send_Wapp:
         print(self.indices)        
         
         for indice in self.indices:
-            #enviado = False
+            #enviado = False            
+           #new_chat_btn = '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()-1]'
+            new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()-1]/div'
+            text_box = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]'
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
-            chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
-            text = self.msj            
-            try:
+            #chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
+            chat_element_path1 = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div'            
+            chat_element_path2 = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]/div[2]'
+            arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
+            text = self.msj
+            try:                
                 # Todo: Here we change the text with the name of the store
                 #?text = message.replace("@NOMBRE", contacto['Ferreteria']).replace("@NFactura", contacto['Nfactura'])
                 # Todo: The next loop begins selecting each key/var, and if it exists in the message, change it
@@ -105,35 +112,50 @@ class Send_Wapp:
                     #text = text.replace(key, str(contacto[i]))
                     text = text.replace(key, str(self.excel_data[indice][i]))
                 lineas = text.split("\n")
-                #print("Vista previa del mensaje: ")
-                #print(text)
                                 
                 # ?Search for the chat by phone number
                 #search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div/div[2]/div/div[1]')))#'//div[@class="_2_1wd"]//div[@contenteditable="true"][@data-tab="3"]')))
-                search_btn = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()-1]')))
+                search_btn = wait.until(EC.presence_of_element_located((By.XPATH, new_chat_btn)))
                 search_btn.click()
-                search_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[1]/div/div[2]/div/div[1]')))        
+                search_input = wait.until(EC.presence_of_element_located((By.XPATH, text_box)))
                                                                                     
                 #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
                 #search_input.clear()
                 search_input.send_keys('+57'+str(self.excel_data[indice][self.colCelular]))
+                el_texto = '//*[@id="app"]//span[contains(text(), "No se encontraron resultados para '+'\'+57'+str(self.excel_data[indice][self.colCelular])+"'\")]"
+                
                 time.sleep(3)
 
-                #? Click on the chat to open it
-                chat_element = wait.until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
-                chat_element.click()               
-
+                try:
+                    # Espera a que aparezca el span con el texto específico
+                    span_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, el_texto)))
+                    # Realiza acciones después de encontrar el span
+                    print("Se encontró el span:", span_element.text)
+                    self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
+                    arrow_back = WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, arrow_back_but)))
+                    arrow_back.click()
+                    self.errados += 1
+                    continue
+                except Exception as e:
+                    try:                        
+                        #? Click on the chat contact added to open it
+                        chat_element = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, chat_element_path1)))
+                        chat_element.click()
+                    except Exception as e:
+                        #? Click on the chat contact no added to open it
+                        chat_element = WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.XPATH, chat_element_path2)))
+                        chat_element.click()
                 time.sleep(5)
-            except Exception as e:                
+            except Exception as e:
                 print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' al seleccionar contacto')
-                #print(e)
-                #set_errors((contacto))                
+                print('Aparentemente demoró en encontrar el contacto')
+                #set_errors((contacto))
                 #self.Add_error(contacto.append(self.colDestino))
                 #? Envia a Send() un diccionario con contacto y su índice en excel_data
                 #self.Add_error({str(contacto[self.colDestino]):indice})
                 self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                 #? oprime una flecha para cancelar el proceso de ingreso de número
-                arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/header/div/div[1]/div/span')))
+                arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, arrow_back_but)))
                 arrow_back.click()
                 self.errados += 1
                 continue
@@ -170,10 +192,10 @@ class Send_Wapp:
                     self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
                     continue
             elif self.image_path.endswith('.jpg') or self.image_path.endswith('.png'):
-                try:
+                try:                    
                     #*esta es la parte para enviar la imagen
                     attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
-                    attachment_button.click()
+                    attachment_button.click()                    
                     time.sleep(1)
 
                     #*selecciona la imagen
@@ -182,7 +204,9 @@ class Send_Wapp:
                     time.sleep(6)
 
                     #*escribe el mensaje
-                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]//div[@role="textbox"]')))                    
+                    #message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]//div[@role="textbox"]')))
+                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span//div[@role="textbox"]')))
+                                                                                         
                     
                     if (len(lineas) > 1):
                         for l, lines in enumerate(lineas):
@@ -217,9 +241,9 @@ class Send_Wapp:
                     attach_image_option.send_keys(self.image_path)
                     time.sleep(7)
 
-                    #To write the message that it will send with the image                    
-                    #message_input = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')
-                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')))
+                    #To write the message that it will send with the image                                        
+                    #message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]//div[@role="textbox"]')))
+                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span//div[@role="textbox"]')))
                     if (len(lineas) > 1):
                         for l, lines in enumerate(lineas):
                             message_input.send_keys(lineas[l].rstrip())
@@ -273,6 +297,7 @@ class Send_Wapp:
                     continue
         
         #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        input("cerrar sesion")
 
         close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
         close_button.click()
