@@ -2,8 +2,6 @@ import json
 import time
 import tkinter as tk
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -39,7 +37,9 @@ class Send_Wapp:
         #* Constantes de funcionalidad
         # Todo: URL of WhatsApp Web
         self.whatsapp_web_url = "https://web.whatsapp.com/"
+        self.brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
         self.options = webdriver.ChromeOptions()
+        self.options.binary_location = self.brave_path
         # Todo: Configure Chrome driver option
         self.options.add_experimental_option('excludeSwitches', ['enable-logging'])
         super().__init__()
@@ -73,10 +73,11 @@ class Send_Wapp:
         self.errados = 0
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan
-        #chrome_service = ChromeService(ChromeDriverManager().install())
-        chrome_service = ChromeService(executable_path=r'C:\Users\pc\AppData\Local\Programs\Python\Python311\Lib\site-packages\selenium\webdriver\chrome\chromedriver.exe')
-        chrome_service.creation_flags = CREATE_NO_WINDOW
+        chrome_service = ChromeService(ChromeDriverManager().install())
+        #chrome_service = ChromeService(executable_path=r'C:\Users\pc\AppData\Local\Programs\Python\Python311\Lib\site-packages\selenium\webdriver\chrome\chromedriver.exe')
+        #chrome_service.creation_flags = CREATE_NO_WINDOW
         driver = webdriver.Chrome(options=self.options, service=chrome_service)
+        
         driver.get(self.whatsapp_web_url)
         '''print("Scan the QR code and press enter")
         input()'''
