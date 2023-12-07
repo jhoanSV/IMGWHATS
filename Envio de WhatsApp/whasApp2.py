@@ -4,6 +4,7 @@ import tkinter as tk
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -71,6 +72,8 @@ class Send_Wapp:
         
         self.enviados = 0
         self.errados = 0
+        wait_time = 120
+        poll_frequency = 2
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan
         chrome_service = ChromeService(ChromeDriverManager().install())
@@ -91,8 +94,6 @@ class Send_Wapp:
         wait.until(EC.title_contains("WhatsApp"))
         self.excel_data = self.read_excel_file()
         if re is not None: self.indices = re #si "re" no es None, o se le envió un valor, toma el lugar de self.indices
-        print(self.excel_data)
-        print(self.indices)        
         
         for indice in self.indices:
             #enviado = False            
@@ -100,9 +101,7 @@ class Send_Wapp:
             new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()-1]/div'
             text_box = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]'
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
-            #chat_element_path = '//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div'
-            chat_element_path1 = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]/div/div/div/div[2]/div'            
-            chat_element_path2 = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]/div[2]'
+            chat_element_path = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]//div[@role="button"]'
             arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
             text = self.msj
             try:                
@@ -129,36 +128,26 @@ class Send_Wapp:
 
                 try:
                     # Espera a que aparezca el span con el texto específico
-                    span_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, el_texto)))
+                    span_element = WebDriverWait(driver, 7).until(EC.presence_of_element_located((By.XPATH, el_texto)))
                     # Realiza acciones después de encontrar el span
                     print("Se encontró el span:", span_element.text)
                     self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
+                    #? oprime una flecha para cancelar el proceso de ingreso de número
                     arrow_back = WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, arrow_back_but)))
                     arrow_back.click()
                     self.errados += 1
                     continue
                 except Exception as e:
-                    try:                        
-                        #? Click on the chat contact added to open it
-                        chat_element = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, chat_element_path1)))
-                        chat_element.click()
-                    except Exception as e:
+                    try:
                         #? Click on the chat contact no added to open it
-                        chat_element = WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.XPATH, chat_element_path2)))
+                        chat_element = WebDriverWait(driver, wait_time, poll_frequency).until(EC.presence_of_element_located((By.XPATH, chat_element_path)))
                         chat_element.click()
+                    except TimeoutException:
+                        print("Elemento no encontrado después de {} segundos".format(wait_time))
                 time.sleep(5)
             except Exception as e:
-                print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' al seleccionar contacto')
-                print('Aparentemente demoró en encontrar el contacto')
-                #set_errors((contacto))
-                #self.Add_error(contacto.append(self.colDestino))
-                #? Envia a Send() un diccionario con contacto y su índice en excel_data
-                #self.Add_error({str(contacto[self.colDestino]):indice})
-                self.Add_error({indice:str(self.excel_data[indice][self.colDestino])})
-                #? oprime una flecha para cancelar el proceso de ingreso de número
-                arrow_back = wait.until(EC.presence_of_element_located((By.XPATH, arrow_back_but)))
-                arrow_back.click()
-                self.errados += 1
+                #print('Ocurrio un error con '+ str(self.excel_data[indice][self.colDestino]) + ' al seleccionar contacto')
+                print(e)
                 continue
             
             if self.image_path == '':
@@ -298,23 +287,25 @@ class Send_Wapp:
                     continue
         
         #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        input("cerrar sesion")
 
-        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/div')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
+        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()]/div')))
         close_button.click()
 
         try:
-            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[9]/div')))
-        except:
-            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()]/span/div/ul/li[(last()-1)]/div')))
-        close_button.click()
-        time.sleep(1)
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div[2]/div[3]/header//div[contains(text(), "Cerrar sesión")]')))
+            close_button.click()
+            time.sleep(1)
 
-        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))#'//*[@id="main"]/footer/div[1]/div/div/div[2]/button')))
-        driver.implicitly_wait(3)
-        close_button.click()
-        time.sleep(7)
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))
+            driver.implicitly_wait(3)
+            close_button.click()
+            time.sleep(7)
+        except:
+            print("No se puedo cerrar sesión zotcio")
+        
 
         # Close the browser
         driver.quit()
         self.show_end(self.enviados, self.errados)
+        
+        
