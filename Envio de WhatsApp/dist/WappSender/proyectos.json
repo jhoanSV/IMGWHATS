@@ -28,5 +28,33 @@
         },
         "colCelular": 3,
         "colDestino": 1
+    },
+    "Testeo": {
+        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
+        "msj": "@msj",
+        "recurso": "",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@Celular": 2,
+            "@Nfactura": 3,
+            "@msj": 4
+        },
+        "colCelular": 2,
+        "colDestino": 1
+    },
+    "Parrafoprueba": {
+        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
+        "msj": "Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo \n\nSigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo.\n\n\u00a1\u00a1\u00a1@Ferreteria!!!",
+        "recurso": "C:/Users/pc/Desktop/infosierra.png",
+        "variables": {
+            "@Cod": 0,
+            "@Ferreteria": 1,
+            "@Celular": 2,
+            "@Nfactura": 3,
+            "@msj": 4
+        },
+        "colCelular": 2,
+        "colDestino": 1
     }
 }

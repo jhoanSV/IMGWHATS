@@ -7,12 +7,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service as BraveService
 from subprocess import CREATE_NO_WINDOW
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 import openpyxl
 import random
 import os
+import shutil
 from typing import Optional
 
 class Send_Wapp:
@@ -37,7 +40,7 @@ class Send_Wapp:
 
         #* Constantes de funcionalidad
         # Todo: URL of WhatsApp Web
-        self.whatsapp_web_url = "https://web.whatsapp.com/"
+        self.whatsapp_web_url = "https://web.whatsapp.com/"        
         self.brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
         self.options = webdriver.ChromeOptions()
         self.options.binary_location = self.brave_path
@@ -74,21 +77,22 @@ class Send_Wapp:
         self.errados = 0
         wait_time = 120
         poll_frequency = 2
+        
+        #service.creation_flags = CREATE_NO_WINDOW#*Para que no muestre ventana de cmd
+        tk.messagebox.showinfo(message="Se está comprobando la compatibilidad de su versión de Chrome. Este proceso puede tardar unos segundos")
+        service = BraveService(ChromeDriverManager().install())
+        service.creation_flags = CREATE_NO_WINDOW#*Para que no muestre ventana de cmd
         # Todo: Initialize Chrome driver with options
         # Open WhatsApp Web and wait for QR code scan
-        chrome_service = ChromeService(ChromeDriverManager().install())
-        #chrome_service = ChromeService(executable_path=r'C:\Users\pc\AppData\Local\Programs\Python\Python311\Lib\site-packages\selenium\webdriver\chrome\chromedriver.exe')
-        #chrome_service.creation_flags = CREATE_NO_WINDOW
-        driver = webdriver.Chrome(options=self.options, service=chrome_service)
+        driver = webdriver.Chrome(service=service, options=self.options)
         
         driver.get(self.whatsapp_web_url)
-        '''print("Scan the QR code and press enter")
-        input()'''
+                
         # Espera hasta que la variable cambie
         #WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div')))
         WebDriverWait(driver, 120).until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]')))
-        time.sleep(6)        
-        
+        time.sleep(6)
+
         # Todo: Wait for the WhatsApp Web interface to load
         wait = WebDriverWait(driver, 10)
         wait.until(EC.title_contains("WhatsApp"))
@@ -96,13 +100,14 @@ class Send_Wapp:
         if re is not None: self.indices = re #si "re" no es None, o se le envió un valor, toma el lugar de self.indices
         
         for indice in self.indices:
-            #enviado = False            
-           #new_chat_btn = '//*[@id="app"]/div/div/div[4]/header/div[2]/div/span/div[last()-1]'
-            new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()-1]/div'
+            #enviado = False
+           #new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()-1]/div'
+            new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header//span[@data-icon="new-chat-outline"]'
             text_box = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]'
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
             chat_element_path = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]//div[@role="button"]'
-            arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
+           #arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
+            arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header//span[@data-icon="back"]'
             text = self.msj
             try:                
                 # Todo: Here we change the text with the name of the store
@@ -288,15 +293,16 @@ class Send_Wapp:
         
         #para cerrar la sesion del whatapp %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()]/div')))
-        close_button.click()
 
         try:
-            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/div[2]/div[3]/header//div[contains(text(), "Cerrar sesión")]')))
+            #close_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()]/div')))
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span//span[@data-icon="menu"]')))
+            close_button.click()
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[3]/header//div[contains(text(), "Cerrar sesión")]')))
             close_button.click()
             time.sleep(1)
 
-            close_button = wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))
+            close_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/span[2]/div/div/div/div/div/div/div[3]/div/button[2]')))
             driver.implicitly_wait(3)
             close_button.click()
             time.sleep(7)
