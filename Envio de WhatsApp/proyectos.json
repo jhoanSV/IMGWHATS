@@ -56,5 +56,17 @@
         },
         "colCelular": 2,
         "colDestino": 1
+    },
+    "prueba-08-01-2025": {
+        "rutaXl": "C:/Users/pc/Documents/pruebaWhatsApp.xlsx",
+        "msj": "Hola @Ferreteria, esta es una prueba de envio de mensajes",
+        "recurso": "C:/Users/pc/Documents/LogPredeterminado.png",
+        "variables": {
+            "@Ferreteria": 0,
+            "@Responsable": 1,
+            "@Celular": 2
+        },
+        "colCelular": 2,
+        "colDestino": 0
     }
 }

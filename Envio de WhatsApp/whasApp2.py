@@ -101,12 +101,20 @@ class Send_Wapp:
         
         for indice in self.indices:
             #enviado = False
-           #new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header/div[2]/div/span/div[last()-1]/div'
-            new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header//span[@data-icon="new-chat-outline"]'
-            text_box = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]'
+            #This button is to find the searcher of the cell numbers
+            new_chat_btn = '//*[@id="side"]/div[1]/div/div[2]/button/div[2]/span'
+            #new_chat_btn = '//*[@id="app"]/div/div[2]/div[3]/header//span[@data-icon="new-chat-outline"]'
+            #This is to whrite the cellnumber
+            text_box = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div/p'
+            #text_box = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[1]/div[2]/div[2]/div/div[1]'
             #//*[@id="app"]/div/div/div[3]/div[1]/span/div/span/div/div[2]/div/div/div/div[1]/div
-            chat_element_path = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]//div[@role="button"]'
-           #arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
+            #This path is to select the chat
+            #//*[@id="pane-side"]/div/div/div/div[6]/div/div/div
+            #//*[@id="pane-side"]/div/div/div/div[1]/div/div/div
+            chat_element_path = '//*[@id="pane-side"]/div/div/div/div[1]/div/div/div'
+            #chat_element_path = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/div[2]//div[@role="button"]'
+            #arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header/div/div[1]/div'
+            #Button to star again a new search
             arrow_back_but = '//*[@id="app"]/div/div[2]/div[2]/div[1]/span/div/span/div/header//span[@data-icon="back"]'
             text = self.msj
             try:                
@@ -189,7 +197,9 @@ class Send_Wapp:
             elif self.image_path.endswith('.jpg') or self.image_path.endswith('.png'):
                 try:                    
                     #*esta es la parte para enviar la imagen
-                    attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
+                    #//*[@id="main"]/footer/div[1]/div/span/div/div[1]/div/button
+                    #attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//span[@data-icon="attach-menu-plus"]')))
+                    attachment_button = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span/div/div[1]/div/button')))
                     attachment_button.click()                    
                     time.sleep(1)
 
@@ -200,8 +210,12 @@ class Send_Wapp:
 
                     #*escribe el mensaje
                     #message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[3]/div[2]/span/div/span/div/div/div[2]/div/div[1]//div[@role="textbox"]')))
-                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span//div[@role="textbox"]')))
-                                                                                         
+                    #//*[@id="app"]/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p
+                    #//*[@id="app"]/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]
+                    #//*[@id="app"]/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div/p
+                    #//*[@id="app"]/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div/p/span
+                    #message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[2]/div[2]/div[2]/span/div/span//div[@role="textbox"]')))
+                    message_input = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div/p/span')))                                           
                     
                     if (len(lineas) > 1):
                         for l, lines in enumerate(lineas):
