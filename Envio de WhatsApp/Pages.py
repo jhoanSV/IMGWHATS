@@ -261,10 +261,12 @@ class Send(ctk.CTkFrame):
         self.Open_btn.configure(text="Enviando...")
         el_msj = self.entry_msj.get("0.0", "end")
 
-        self.obj_enviar.update_vars(msj=el_msj, image_path=self.entry_media.get(), 
-            variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
-            colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], la_funcion= self.Add_error,
-            la_funcion2= self.show_end)
+        self.obj_enviar.update_vars(msj=el_msj, 
+                                    image_path=self.entry_media.get(), 
+                                    variables=self.data_proj["variables"], colCelular=self.data_proj["colCelular"],
+                                    colDestino=self.data_proj["colDestino"], file_path=self.data_proj["rutaXl"], 
+                                    la_funcion= self.Add_error,
+                                    la_funcion2= self.show_end)
         
         if self.cb_var.get() == "Enviar a todos":
             #lista = None

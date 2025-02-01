@@ -57,14 +57,28 @@
         "colCelular": 2,
         "colDestino": 1
     },
-    "prueba-08-01-2025": {
-        "rutaXl": "C:/Users/pc/Documents/pruebaWhatsApp.xlsx",
-        "msj": "Hola @Ferreteria, esta es una prueba de envio de mensajes",
-        "recurso": "C:/Users/pc/Documents/LogPredeterminado.png",
+    "InicioActividades2025": {
+        "rutaXl": "C:/Users/pc/Documents/Pomocionales/LISTADO_DE_CLIENTES.xlsx",
+        "msj": "\u00a1Hola @Ferreteria!\nEsperamos que hayas iniciado el a\u00f1o con \u00e9xito.\nTe contamos que Comercializadora Sivar ya est\u00e1 de regreso. Con tecnolog\u00eda y los mejores productos.\nRealiza tus pedidos de forma f\u00e1cil y r\u00e1pida en www.sivar.com.co y mant\u00e9n tu ferreter\u00eda siempre surtida. \n\u00a1Estamos aqu\u00ed para ayudarte!\nEquipo Comercializadora Sivar\n",
+        "recurso": "C:/Users/pc/Documents/Pomocionales/Inicio_de_actividades.mp4",
+        "variables": {
+            "@Nit": 0,
+            "@Ferreteria": 1,
+            "@Contacto": 2,
+            "@Telefono": 3
+        },
+        "colCelular": 3,
+        "colDestino": 0
+    },
+    "POS": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/CLIENTES RESTREPO.xlsx",
+        "msj": "\u00bfAun pagando por facturaci\u00f3n electr\u00f3nica, @Contacto? \u00a1Es momento de ahorrar!\nPresentamos *Sivar POS*, el sistema exclusivo para ferreter\u00edas que no solo facilita tus ventas, sino que tambi\u00e9n *te incluye facturaci\u00f3n electr\u00f3nica gratuita hasta por $20.000.000 al mes.*\n\nDise\u00f1ado especialmente para ferreter\u00edas.\nManejo sencillo de inventarios, clientes y ventas.\n\u00a1Sin costos ocultos ni complicaciones!\n\nDeja atr\u00e1s los costos innecesarios y mejora la eficiencia en *@Ferreteria* con nuestro sistema exclusivo.\n*Cont\u00e1ctanos ahora, agenda tu cita para m\u00e1s informaci\u00f3n* y lleva tu ferreter\u00eda un paso hacia el futuro con Sivar POS. \u00a1No esperes m\u00e1s!\n",
+        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/POS.jpg",
         "variables": {
             "@Ferreteria": 0,
-            "@Responsable": 1,
-            "@Celular": 2
+            "@Contacto": 1,
+            "@Telefono": 2,
+            "@Barrio": 3
         },
         "colCelular": 2,
         "colDestino": 0
