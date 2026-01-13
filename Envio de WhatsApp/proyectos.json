@@ -1,86 +1,53 @@
 {
-    "Pedidos ruta": {
-        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/Numero_mensaje_whatsapp.xlsx",
-        "msj": "\u00a1Hola @Ferreteria!\u00a1Quer\u00eda recordarte que tu pedido n\u00famero @Nfactura est\u00e1 en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo\u00a0que\u00a0necesites.",
+    "ENVIO RUTAS": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/PEDIDOS EN RUTA.xlsx",
+        "msj": "\u00a1Hola @Ferreteria!\u00a1Quer\u00eda recordarte que tu pedido n\u00famero @NDePedido est\u00e1 en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo\u00a0que\u00a0necesites.",
         "recurso": "",
         "variables": {
-            "@Cod": 0,
+            "@CodCliente": 0,
             "@Ferreteria": 1,
-            "@responsable": 2,
-            "@Celular": 3,
-            "@Valor factura": 4,
-            "@Nfactura": 5
+            "@colaborador": 2,
+            "@Telefono": 3,
+            "@Valor": 4,
+            "@Latitud": 5,
+            "@Longitud": 6,
+            "@NDePedido": 7,
+            "@Geolocalizacion": 8,
+            "@Nombre": 9
         },
         "colCelular": 3,
         "colDestino": 1
     },
-    "Tip semanal": {
-        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/Numero_mensaje_whatsapp.xlsx",
-        "msj": "\u00a1Hola! Es hora de nuestro tip semanal. Esta semana, vamos a hablar sobre la importancia de tener con tu numero de negocio WhatsApp Business ya que es esencial para tu negocio. Podr\u00e1s mantener una comunicaci\u00f3n m\u00e1s eficiente con tus clientes, brindar respuestas r\u00e1pidas, mostrar tu cat\u00e1logo de productos y mucho m\u00e1s. \u00a1Es una manera efectiva de hacer crecer tu negocio! Si necesitas ayuda para configurarlo, no dudes en contactarnos.\u00a1No te lo pierdas! Ferredistribuciones Sierra, tus Aliados estrat\u00e9gicos.",
-        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/Envio de WhatsApp/TIP SEMANA 3.mp4",
+    "rutas": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/PEDIDOS EN RUTA.xlsx",
+        "msj": "\u00a1Hola @Ferreteria!\u00a1Quer\u00eda recordarte que tu pedido n\u00famero @NDePedido est\u00e1 en ruta! Nos esforzamos por brindarte la mejor experiencia de compra y queremos que sepas que valoramos tu confianza en nosotros. Si tienes alguna pregunta o necesitas cualquier tipo de asistencia, no dudes en ponerte en contacto. Estaremos encantados de ayudarte en todo lo\u00a0que\u00a0necesites.",
+        "recurso": "",
         "variables": {
-            "@Cod": 0,
+            "@CodCliente": 0,
             "@Ferreteria": 1,
-            "@responsable": 2,
-            "@Celular": 3,
-            "@Valor factura": 4,
-            "@Nfactura": 5
+            "@colaborador": 2,
+            "@Telefono": 3,
+            "@Valor": 4,
+            "@Latitud": 5,
+            "@Longitud": 6,
+            "@NDePedido": 7,
+            "@Geolocalizacion": 8,
+            "@Nombre": 9
         },
         "colCelular": 3,
         "colDestino": 1
     },
-    "Testeo": {
-        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
-        "msj": "@msj",
-        "recurso": "",
-        "variables": {
-            "@Cod": 0,
-            "@Ferreteria": 1,
-            "@Celular": 2,
-            "@Nfactura": 3,
-            "@msj": 4
-        },
-        "colCelular": 2,
-        "colDestino": 1
-    },
-    "Parrafoprueba": {
-        "rutaXl": "C:/Users/pc/Desktop/ExcelPrueba.xlsx",
-        "msj": "Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo Mensaje largo \n\nSigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo Sigue mensaje largo.\n\n\u00a1\u00a1\u00a1@Ferreteria!!!",
-        "recurso": "C:/Users/pc/Desktop/infosierra.png",
-        "variables": {
-            "@Cod": 0,
-            "@Ferreteria": 1,
-            "@Celular": 2,
-            "@Nfactura": 3,
-            "@msj": 4
-        },
-        "colCelular": 2,
-        "colDestino": 1
-    },
-    "InicioActividades2025": {
-        "rutaXl": "C:/Users/pc/Documents/Pomocionales/LISTADO_DE_CLIENTES.xlsx",
-        "msj": "\u00a1Hola @Ferreteria!\nEsperamos que hayas iniciado el a\u00f1o con \u00e9xito.\nTe contamos que Comercializadora Sivar ya est\u00e1 de regreso. Con tecnolog\u00eda y los mejores productos.\nRealiza tus pedidos de forma f\u00e1cil y r\u00e1pida en www.sivar.com.co y mant\u00e9n tu ferreter\u00eda siempre surtida. \n\u00a1Estamos aqu\u00ed para ayudarte!\nEquipo Comercializadora Sivar\n",
-        "recurso": "C:/Users/pc/Documents/Pomocionales/Inicio_de_actividades.mp4",
+    "estudiantil": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/CLIENTES BD HASTA EL 7-10-25.xlsx",
+        "msj": "@Ferreteria \u00a1Atenci\u00f3n ferretero! Este es el momento de surtir tu ferreter\u00eda en electr\u00f3nica y el\u00e9ctricos. No dejes pasar las mejores referencias y precios Encu\u00e9ntralas en www.sivar.com.co\nSi necesitas ayuda para ingresar o hacer tu pedido, escr\u00edbenos por este medio \u00a1Estamos para ayudarte!\n",
+        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/NUEVO CATALOGO ESTUDIANTIL.png",
         "variables": {
             "@Nit": 0,
             "@Ferreteria": 1,
-            "@Contacto": 2,
+            "@Nombre": 2,
             "@Telefono": 3
         },
         "colCelular": 3,
-        "colDestino": 0
-    },
-    "POS": {
-        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/CLIENTES RESTREPO.xlsx",
-        "msj": "\u00bfAun pagando por facturaci\u00f3n electr\u00f3nica, @Contacto? \u00a1Es momento de ahorrar!\nPresentamos *Sivar POS*, el sistema exclusivo para ferreter\u00edas que no solo facilita tus ventas, sino que tambi\u00e9n *te incluye facturaci\u00f3n electr\u00f3nica gratuita hasta por $20.000.000 al mes.*\n\nDise\u00f1ado especialmente para ferreter\u00edas.\nManejo sencillo de inventarios, clientes y ventas.\n\u00a1Sin costos ocultos ni complicaciones!\n\nDeja atr\u00e1s los costos innecesarios y mejora la eficiencia en *@Ferreteria* con nuestro sistema exclusivo.\n*Cont\u00e1ctanos ahora, agenda tu cita para m\u00e1s informaci\u00f3n* y lleva tu ferreter\u00eda un paso hacia el futuro con Sivar POS. \u00a1No esperes m\u00e1s!\n",
-        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/POS.jpg",
-        "variables": {
-            "@Ferreteria": 0,
-            "@Contacto": 1,
-            "@Telefono": 2,
-            "@Barrio": 3
-        },
-        "colCelular": 2,
-        "colDestino": 0
+        "colDestino": 1
     }
 }
