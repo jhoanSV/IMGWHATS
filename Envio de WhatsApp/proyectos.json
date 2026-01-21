@@ -49,5 +49,19 @@
         },
         "colCelular": 3,
         "colDestino": 1
+    },
+    "volvimos": {
+        "rutaXl": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/CLIENTES BD HASTA EL 2-12-25.xlsx",
+        "msj": "@Ferreteria, Regresamos para seguir construyendo juntos. Nuestro equipo ya est\u00e1 listo para atenderte\nMonta tus pedidos en www.sivar.com.co , o escr\u00edbeme si necesitas ayuda! ",
+        "recurso": "C:/Users/pc/Dropbox/Instalador sierra/envio whatsapp/2026 DE VUELTA.mp4",
+        "variables": {
+            "@Cod": 0,
+            "@Nit": 1,
+            "@Ferreteria": 2,
+            "@Contacto": 3,
+            "@Telefono": 4
+        },
+        "colCelular": 4,
+        "colDestino": 2
     }
 }

@@ -7,7 +7,6 @@ class colorsitos:
     def __init__(self) -> None:
         pass
 
-
 class view(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -77,6 +76,7 @@ class view(ctk.CTk):
                 self.main_tabV.pack_configure(padx=0, pady=0)
             except Exception as e:
                 #*crea un label para avisar del error
+                print(e)
                 error = 'Ha ocurrido un error'
                 self.warn_file = ctk.CTkLabel(self.proyectos.frame_der,text=error,text_color="black",font=('', 20))
                 self.warn_file.place(relx=0.9, rely=0.8, anchor='se')
